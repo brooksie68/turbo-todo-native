@@ -17,6 +17,9 @@ type Props = {
   onAddSubtask: () => void;
   onDelete: () => void;
   onSetStatus: (status: string | null) => void;
+  onAddImage?: () => void;
+  onAddUrl?: () => void;
+  imageCount?: number;
 };
 
 export default function ItemOptionsMenu({
@@ -28,6 +31,9 @@ export default function ItemOptionsMenu({
   onAddSubtask,
   onDelete,
   onSetStatus,
+  onAddImage,
+  onAddUrl,
+  imageCount = 0,
 }: Props) {
   const insets = useSafeAreaInsets();
   const canAddChild = depth < 2;
@@ -64,6 +70,18 @@ export default function ItemOptionsMenu({
         {canAddChild && !todo.is_complete && (
           <TouchableOpacity style={styles.item} onPress={() => handle(onAddSubtask)}>
             <Text style={styles.itemText}>Add subtask</Text>
+          </TouchableOpacity>
+        )}
+
+        {depth === 1 && onAddImage && imageCount < 5 && (
+          <TouchableOpacity style={styles.item} onPress={() => handle(onAddImage)}>
+            <Text style={styles.itemText}>Add image</Text>
+          </TouchableOpacity>
+        )}
+
+        {depth === 1 && onAddUrl && (
+          <TouchableOpacity style={styles.item} onPress={() => handle(onAddUrl)}>
+            <Text style={styles.itemText}>Add URL</Text>
           </TouchableOpacity>
         )}
 

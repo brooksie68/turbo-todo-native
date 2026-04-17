@@ -8,13 +8,18 @@ import {
   Modal,
   Alert,
   StyleSheet,
+  ToastAndroid,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase/client';
 import type { Todo, List } from '../lib/types';
+import { addImages, getImages, MAX_IMAGES } from '../lib/imageStore';
+import { addLink } from '../lib/linkStore';
 import TodoItem from './TodoItem';
 import AddEditModal from './AddEditModal';
+import AddLinkModal from './AddLinkModal';
 import ToolbarOptionsMenu from './ToolbarOptionsMenu';
 import ItemOptionsMenu from './ItemOptionsMenu';
 import {
@@ -81,6 +86,13 @@ export default function TodoList() {
   const [itemMenuTodo, setItemMenuTodo] = useState<Todo | null>(null);
   const [itemMenuDepth, setItemMenuDepth] = useState(0);
   const [insertPosition, setInsertPosition] = useState<'top' | 'bottom'>('bottom');
+
+  // Image / link state
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkTargetTodo, setLinkTargetTodo] = useState<Todo | null>(null);
+  const [imageRefreshToken, setImageRefreshToken] = useState(0);
+  const [linkRefreshToken, setLinkRefreshToken] = useState(0);
+  const [itemMenuImageCount, setItemMenuImageCount] = useState(0);
 
   const fetchTodos = useCallback(async (listId: number, showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -251,9 +263,55 @@ export default function TodoList() {
     }
   }
 
+  // --- Image / link handlers ---
+
+  async function handleAddImage(todo: Todo) {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Allow photo access to add images.');
+      return;
+    }
+    const existing = await getImages(todo.id);
+    const slots = MAX_IMAGES - existing.length;
+    if (slots <= 0) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsMultipleSelection: true,
+      quality: 0.8,
+      selectionLimit: slots,
+    });
+    if (result.canceled) return;
+
+    const uris = result.assets.map(a => a.uri);
+    await addImages(todo.id, uris);
+    setImageRefreshToken(t => t + 1);
+
+    if (uris.length < result.assets.length) {
+      ToastAndroid.show(`Only ${slots} slot${slots === 1 ? '' : 's'} remaining — added ${uris.length}`, ToastAndroid.SHORT);
+    }
+  }
+
+  function handleAddUrl(todo: Todo) {
+    setLinkTargetTodo(todo);
+    setShowLinkModal(true);
+  }
+
+  async function handleSaveLink(url: string, name: string) {
+    setShowLinkModal(false);
+    if (!linkTargetTodo || !userId) return;
+    const existing = await import('../lib/linkStore').then(m => m.getLinks(linkTargetTodo.id));
+    const sort_order = existing.length;
+    await addLink(userId, linkTargetTodo.id, url, name || null, sort_order);
+    setLinkRefreshToken(t => t + 1);
+    setLinkTargetTodo(null);
+  }
+
   // --- Menu handlers ---
 
-  function handleLongPress(todo: Todo, depth: number) {
+  async function handleLongPress(todo: Todo, depth: number) {
+    const images = await getImages(todo.id);
+    setItemMenuImageCount(images.length);
     setItemMenuTodo(todo);
     setItemMenuDepth(depth);
   }
@@ -419,6 +477,16 @@ export default function TodoList() {
         onAddSubtask={() => { if (itemMenuTodo) openAdd(itemMenuTodo.id); }}
         onDelete={handleItemDelete}
         onSetStatus={(status) => { if (itemMenuTodo) setStatus(itemMenuTodo.id, status); }}
+        onAddImage={() => { if (itemMenuTodo) handleAddImage(itemMenuTodo); }}
+        onAddUrl={() => { if (itemMenuTodo) handleAddUrl(itemMenuTodo); }}
+        imageCount={itemMenuImageCount}
+      />
+
+      {/* Add link modal */}
+      <AddLinkModal
+        visible={showLinkModal}
+        onClose={() => { setShowLinkModal(false); setLinkTargetTodo(null); }}
+        onSave={handleSaveLink}
       />
 
       {/* ── Todo list ── */}
@@ -442,6 +510,8 @@ export default function TodoList() {
                 onToggleComplete={toggleComplete}
                 onLongPress={handleLongPress}
                 onAddSubtask={id => openAdd(id)}
+                imageRefreshToken={imageRefreshToken}
+                linkRefreshToken={linkRefreshToken}
               />
             ))}
           </View>

@@ -1,6 +1,18 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Linking,
+  StyleSheet,
+} from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconOptions, IconAddBottom, IconBolt, IconPriorityHigh } from './Icons';
+import { IconOptions, IconAddBottom, IconBolt, IconPriorityHigh, IconClose } from './Icons';
+import { getImages, deleteImage, type TaskImage } from '../lib/imageStore';
+import { getLinks, deleteLink, type TaskLink } from '../lib/linkStore';
+import ImageViewer from './ImageViewer';
 
 const INDENT_PX = 20;
 const MAX_DEPTH = 3;
@@ -13,6 +25,9 @@ type Props = {
   onToggleComplete: (id: number, current: boolean) => void;
   onLongPress: (todo: Todo, depth: number) => void;
   onAddSubtask: (parentId: number) => void;
+  // signals from parent to refresh images/links after add
+  imageRefreshToken?: number;
+  linkRefreshToken?: number;
 };
 
 export default function TodoItem({
@@ -23,13 +38,41 @@ export default function TodoItem({
   onToggleComplete,
   onLongPress,
   onAddSubtask,
+  imageRefreshToken,
+  linkRefreshToken,
 }: Props) {
   const hasChildren = (todo.children?.length ?? 0) > 0;
   const isCollapsed = collapsedIds.has(todo.id);
   const visibleChildren = todo.children ?? [];
   const canAddChild = depth < MAX_DEPTH - 1;
+  const showMedia = depth === 1;
 
-  // Priority drives text color on incomplete items (matches web app)
+  const [images, setImages] = useState<TaskImage[]>([]);
+  const [links, setLinks] = useState<TaskLink[]>([]);
+  const [viewerUri, setViewerUri] = useState<string | null>(null);
+
+  const loadImages = useCallback(async () => {
+    if (!showMedia) return;
+    setImages(await getImages(todo.id));
+  }, [todo.id, showMedia]);
+
+  const loadLinks = useCallback(async () => {
+    if (!showMedia) return;
+    setLinks(await getLinks(todo.id));
+  }, [todo.id, showMedia]);
+
+  useEffect(() => { loadImages(); }, [loadImages, imageRefreshToken]);
+  useEffect(() => { loadLinks(); }, [loadLinks, linkRefreshToken]);
+
+  async function handleDeleteImage(id: string) {
+    setImages(await deleteImage(todo.id, id));
+  }
+
+  async function handleDeleteLink(id: number) {
+    await deleteLink(id);
+    loadLinks();
+  }
+
   function getLabelColor() {
     if (todo.is_complete) return '#aaa';
     if (todo.status === 'top-priority') return '#b52a1a';
@@ -40,11 +83,12 @@ export default function TodoItem({
 
   const labelColor = getLabelColor();
   const fontSize = depth === 0 ? 16 : depth === 1 ? 15 : 14;
+  const indentLeft = 12 + depth * INDENT_PX;
 
   return (
     <View>
       <TouchableOpacity
-        style={[styles.row, { paddingLeft: 12 + depth * INDENT_PX }]}
+        style={[styles.row, { paddingLeft: indentLeft }]}
         activeOpacity={0.7}
         onPress={() => { if (hasChildren) onToggleCollapse(todo.id); }}
         onLongPress={() => onLongPress(todo, depth)}
@@ -60,12 +104,8 @@ export default function TodoItem({
         </TouchableOpacity>
 
         {/* Priority icon */}
-        {todo.status === 'top-priority' && (
-          <IconPriorityHigh size={16} color="#b52a1a" />
-        )}
-        {todo.status === 'elevated' && (
-          <IconBolt size={16} color="#c96a00" />
-        )}
+        {todo.status === 'top-priority' && <IconPriorityHigh size={16} color="#b52a1a" />}
+        {todo.status === 'elevated' && <IconBolt size={16} color="#c96a00" />}
 
         {/* Label */}
         <Text
@@ -79,7 +119,7 @@ export default function TodoItem({
           {todo.task}
         </Text>
 
-        {/* Row actions: add-subtask + options */}
+        {/* Row actions */}
         <View style={styles.rowActions}>
           {canAddChild && !todo.is_complete && (
             <TouchableOpacity
@@ -102,10 +142,63 @@ export default function TodoItem({
 
       {/* Note */}
       {todo.note ? (
-        <Text style={[styles.note, { paddingLeft: 12 + 26 + depth * INDENT_PX }]}>
+        <Text style={[styles.note, { paddingLeft: indentLeft + 26 }]}>
           {todo.note}
         </Text>
       ) : null}
+
+      {/* Image strip — depth 1 only */}
+      {showMedia && images.length > 0 && (
+        <View style={[styles.imageStrip, { paddingLeft: indentLeft + 26 }]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
+            {images.map(img => (
+              <View key={img.id} style={styles.thumbWrap}>
+                <TouchableOpacity onPress={() => setViewerUri(img.localPath)}>
+                  <Image source={{ uri: img.localPath }} style={styles.thumb} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.thumbDelete}
+                  onPress={() => handleDeleteImage(img.id)}
+                  hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                >
+                  <IconClose size={12} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Link strip — depth 1 only */}
+      {showMedia && links.length > 0 && (
+        <View style={[styles.linkStrip, { paddingLeft: indentLeft + 26 }]}>
+          {links.map(link => (
+            <View key={link.id} style={styles.linkRow}>
+              <TouchableOpacity
+                style={styles.linkBtn}
+                onPress={() => Linking.openURL(link.url)}
+              >
+                <Text style={styles.linkText} numberOfLines={1}>
+                  {link.name || link.url}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleDeleteLink(link.id)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <IconClose size={14} color="#025f96" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Full-screen image viewer */}
+      <ImageViewer
+        visible={viewerUri !== null}
+        uri={viewerUri}
+        onClose={() => setViewerUri(null)}
+      />
 
       {/* Children */}
       {hasChildren && !isCollapsed && depth < MAX_DEPTH - 1 && (
@@ -132,7 +225,7 @@ export default function TodoItem({
       )}
 
       {/* Row separator */}
-      <View style={[styles.separator, { marginLeft: 12 + depth * INDENT_PX }]} />
+      <View style={[styles.separator, { marginLeft: indentLeft }]} />
     </View>
   );
 }
@@ -191,9 +284,54 @@ const styles = StyleSheet.create({
     paddingRight: 12,
     fontStyle: 'italic',
   },
+  imageStrip: {
+    paddingBottom: 6,
+    paddingRight: 12,
+  },
+  imageScroll: {
+    flexDirection: 'row',
+  },
+  thumbWrap: {
+    marginRight: 6,
+    position: 'relative',
+  },
+  thumb: {
+    width: 48,
+    height: 48,
+    borderRadius: 3,
+    backgroundColor: '#c7ba9b',
+  },
+  thumbDelete: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#025f96',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  linkStrip: {
+    paddingBottom: 6,
+    paddingRight: 12,
+    gap: 2,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  linkBtn: {
+    flex: 1,
+  },
+  linkText: {
+    fontSize: 13,
+    color: '#025f96',
+    textDecorationLine: 'underline',
+  },
   separator: {
     height: 1,
     backgroundColor: '#d9ccb4',
-    marginRight: 0,
   },
 });
