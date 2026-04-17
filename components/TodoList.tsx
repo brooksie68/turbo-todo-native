@@ -15,6 +15,8 @@ import { supabase } from '../lib/supabase/client';
 import type { Todo, List } from '../lib/types';
 import TodoItem from './TodoItem';
 import AddEditModal from './AddEditModal';
+import ToolbarOptionsMenu from './ToolbarOptionsMenu';
+import ItemOptionsMenu from './ItemOptionsMenu';
 import {
   IconLogo,
   IconSettings,
@@ -73,6 +75,11 @@ export default function TodoList() {
   const [modalInitialNote, setModalInitialNote] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addParentId, setAddParentId] = useState<number | null>(null);
+
+  // Menu state
+  const [showToolbarMenu, setShowToolbarMenu] = useState(false);
+  const [itemMenuTodo, setItemMenuTodo] = useState<Todo | null>(null);
+  const [itemMenuDepth, setItemMenuDepth] = useState(0);
   const [insertPosition, setInsertPosition] = useState<'top' | 'bottom'>('bottom');
 
   const fetchTodos = useCallback(async (listId: number, showLoading = true) => {
@@ -244,84 +251,39 @@ export default function TodoList() {
     }
   }
 
-  // --- Long press action menu ---
+  // --- Menu handlers ---
 
   function handleLongPress(todo: Todo, depth: number) {
-    const canAddChild = depth < 2;
-    Alert.alert(
-      todo.task,
-      undefined,
-      [
-        { text: 'Edit', onPress: () => openEdit(todo) },
-        ...(canAddChild ? [{ text: 'Add subtask', onPress: () => openAdd(todo.id) }] : []),
-        { text: 'Priority…', onPress: () => showPriorityMenu(todo.id) },
-        { text: 'Delete', style: 'destructive' as const, onPress: () => confirmDelete(todo.id, todo.task) },
-        { text: 'Cancel', style: 'cancel' as const },
-      ]
-    );
+    setItemMenuTodo(todo);
+    setItemMenuDepth(depth);
   }
 
-  function showPriorityMenu(id: number) {
-    Alert.alert('Set priority', undefined, [
-      { text: 'None', onPress: () => setStatus(id, null) },
-      { text: 'Elevated', onPress: () => setStatus(id, 'elevated') },
-      { text: 'Top priority', onPress: () => setStatus(id, 'top-priority') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  }
-
-  function confirmDelete(id: number, task: string) {
+  function handleItemDelete() {
+    if (!itemMenuTodo) return;
     Alert.alert(
       'Delete task?',
-      `"${task}" and any subtasks will be removed.`,
+      `"${itemMenuTodo.task}" and any subtasks will be removed.`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteTask(id) },
-      ]
+        { text: 'Delete', style: 'destructive', onPress: () => deleteTask(itemMenuTodo.id) },
+      ],
+      { cancelable: true }
     );
   }
 
-  function showOptionsMenu() {
-    Alert.alert(
-      'Options',
-      undefined,
-      [
-        { text: 'Sync', onPress: () => activeListId && fetchTodos(activeListId, false) },
-        { text: 'Clear all completed', onPress: confirmClearCompleted },
-        { text: 'Clear entire list', style: 'destructive', onPress: confirmClearAll },
-        { text: 'Sign out', onPress: () => supabase.auth.signOut() },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+  async function handleClearCompleted() {
+    if (!activeListId) return;
+    const flat = flattenTodos(todos);
+    const completedIds = flat.filter(t => t.is_complete).map(t => t.id);
+    if (completedIds.length === 0) return;
+    await supabase.from('todos').delete().in('id', completedIds);
+    fetchTodos(activeListId, false);
   }
 
-  function confirmClearCompleted() {
-    Alert.alert('Clear all completed?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear', style: 'destructive', onPress: async () => {
-          if (!activeListId) return;
-          const flat = flattenTodos(todos);
-          const completedIds = flat.filter(t => t.is_complete).map(t => t.id);
-          if (completedIds.length === 0) return;
-          await supabase.from('todos').delete().in('id', completedIds);
-          fetchTodos(activeListId, false);
-        }
-      },
-    ]);
-  }
-
-  function confirmClearAll() {
-    Alert.alert('Clear entire list?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear', style: 'destructive', onPress: async () => {
-          if (!activeListId) return;
-          await supabase.from('todos').delete().eq('list_id', activeListId);
-          fetchTodos(activeListId, false);
-        }
-      },
-    ]);
+  async function handleClearAll() {
+    if (!activeListId) return;
+    await supabase.from('todos').delete().eq('list_id', activeListId);
+    fetchTodos(activeListId, false);
   }
 
   function flattenTodos(nodes: Todo[]): Todo[] {
@@ -419,6 +381,46 @@ export default function TodoList() {
         onSave={handleModalSave}
       />
 
+      {/* Toolbar options menu */}
+      <ToolbarOptionsMenu
+        visible={showToolbarMenu}
+        onClose={() => setShowToolbarMenu(false)}
+        onSync={() => activeListId && fetchTodos(activeListId, false)}
+        onSort={criterion => {
+          if (!activeListId) return;
+          const incomplete = todos.filter(t => !t.is_complete);
+          const complete = todos.filter(t => t.is_complete);
+          const sorted = [...incomplete];
+          if (criterion === 'status') {
+            const rank = (s?: string | null) => s === 'top-priority' ? 0 : s === 'elevated' ? 1 : 2;
+            sorted.sort((a, b) => rank(a.status) - rank(b.status));
+          } else if (criterion === 'date') {
+            sorted.sort((a, b) => new Date(a.inserted_at).getTime() - new Date(b.inserted_at).getTime());
+          } else {
+            sorted.sort((a, b) => a.task.localeCompare(b.task, undefined, { sensitivity: 'base' }));
+          }
+          setTodos([...sorted, ...complete]);
+          Promise.all(sorted.map((t, idx) =>
+            supabase.from('todos').update({ sort_order: idx * 10 }).eq('id', t.id)
+          ));
+        }}
+        onClearCompleted={handleClearCompleted}
+        onClearAll={handleClearAll}
+        onSignOut={() => supabase.auth.signOut()}
+      />
+
+      {/* Item options menu */}
+      <ItemOptionsMenu
+        visible={itemMenuTodo !== null}
+        todo={itemMenuTodo}
+        depth={itemMenuDepth}
+        onClose={() => setItemMenuTodo(null)}
+        onEdit={() => { if (itemMenuTodo) openEdit(itemMenuTodo); }}
+        onAddSubtask={() => { if (itemMenuTodo) openAdd(itemMenuTodo.id); }}
+        onDelete={handleItemDelete}
+        onSetStatus={(status) => { if (itemMenuTodo) setStatus(itemMenuTodo.id, status); }}
+      />
+
       {/* ── Todo list ── */}
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -468,7 +470,7 @@ export default function TodoList() {
       <View style={[styles.toolbarOuter, { paddingBottom: insets.bottom }]}>
         <View style={styles.toolbarInner}>
           {/* Kebab — left:24, vertically centered */}
-          <TouchableOpacity style={styles.toolbarLeft} onPress={showOptionsMenu}>
+          <TouchableOpacity style={styles.toolbarLeft} onPress={() => setShowToolbarMenu(true)}>
             <IconOptions size={24} color="#025f96" />
           </TouchableOpacity>
 
