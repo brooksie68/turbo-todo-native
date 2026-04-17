@@ -508,7 +508,7 @@ export default function TodoList() {
                 collapsedIds={collapsedIds}
                 onToggleCollapse={toggleCollapse}
                 onToggleComplete={toggleComplete}
-                onLongPress={handleLongPress}
+                onOptions={handleLongPress}
                 onAddSubtask={id => openAdd(id)}
                 imageRefreshToken={imageRefreshToken}
                 linkRefreshToken={linkRefreshToken}
@@ -527,7 +527,7 @@ export default function TodoList() {
                   collapsedIds={collapsedIds}
                   onToggleCollapse={toggleCollapse}
                   onToggleComplete={toggleComplete}
-                  onLongPress={handleLongPress}
+                  onOptions={handleLongPress}
                   onAddSubtask={id => openAdd(id)}
                 />
               ))}

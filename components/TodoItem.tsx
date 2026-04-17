@@ -23,7 +23,7 @@ type Props = {
   collapsedIds: Set<number>;
   onToggleCollapse: (id: number) => void;
   onToggleComplete: (id: number, current: boolean) => void;
-  onLongPress: (todo: Todo, depth: number) => void;
+  onOptions: (todo: Todo, depth: number) => void;
   onAddSubtask: (parentId: number) => void;
   // signals from parent to refresh images/links after add
   imageRefreshToken?: number;
@@ -36,7 +36,7 @@ export default function TodoItem({
   collapsedIds,
   onToggleCollapse,
   onToggleComplete,
-  onLongPress,
+  onOptions,
   onAddSubtask,
   imageRefreshToken,
   linkRefreshToken,
@@ -91,8 +91,6 @@ export default function TodoItem({
         style={[styles.row, { paddingLeft: indentLeft }]}
         activeOpacity={0.7}
         onPress={() => { if (hasChildren) onToggleCollapse(todo.id); }}
-        onLongPress={() => onLongPress(todo, depth)}
-        delayLongPress={400}
       >
         {/* Checkbox */}
         <TouchableOpacity
@@ -131,7 +129,7 @@ export default function TodoItem({
             </TouchableOpacity>
           )}
           <TouchableOpacity
-            onPress={() => onLongPress(todo, depth)}
+            onPress={() => onOptions(todo, depth)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={styles.rowActionBtn}
           >
@@ -217,7 +215,7 @@ export default function TodoItem({
                 collapsedIds={collapsedIds}
                 onToggleCollapse={onToggleCollapse}
                 onToggleComplete={onToggleComplete}
-                onLongPress={onLongPress}
+                onOptions={onOptions}
                 onAddSubtask={onAddSubtask}
               />
             ))}
