@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { Todo } from '../lib/types';
+import { IconOptions, IconAddBottom, IconBolt, IconPriorityHigh } from './Icons';
 
 const INDENT_PX = 20;
 const MAX_DEPTH = 3;
@@ -28,19 +29,24 @@ export default function TodoItem({
   const visibleChildren = todo.children ?? [];
   const canAddChild = depth < MAX_DEPTH - 1;
 
-  const depthColors = ['#1a2a38', '#3a5068', '#5a7088'];
-  const textColor = todo.is_complete
-    ? '#aaa'
-    : depthColors[Math.min(depth, depthColors.length - 1)];
+  // Priority drives text color on incomplete items (matches web app)
+  function getLabelColor() {
+    if (todo.is_complete) return '#aaa';
+    if (todo.status === 'top-priority') return '#b52a1a';
+    if (todo.status === 'elevated') return '#c96a00';
+    const depthColors = ['#1a2a38', '#3a5068', '#5a7088'];
+    return depthColors[Math.min(depth, depthColors.length - 1)];
+  }
+
+  const labelColor = getLabelColor();
+  const fontSize = depth === 0 ? 16 : depth === 1 ? 15 : 14;
 
   return (
-    <View style={{ paddingLeft: depth * INDENT_PX }}>
+    <View>
       <TouchableOpacity
-        style={styles.row}
+        style={[styles.row, { paddingLeft: 12 + depth * INDENT_PX }]}
         activeOpacity={0.7}
-        onPress={() => {
-          if (hasChildren) onToggleCollapse(todo.id);
-        }}
+        onPress={() => { if (hasChildren) onToggleCollapse(todo.id); }}
         onLongPress={() => onLongPress(todo, depth)}
         delayLongPress={400}
       >
@@ -53,19 +59,19 @@ export default function TodoItem({
           {todo.is_complete && <Text style={styles.checkmark}>✓</Text>}
         </TouchableOpacity>
 
-        {/* Priority indicator */}
+        {/* Priority icon */}
         {todo.status === 'top-priority' && (
-          <Text style={[styles.priority, { color: '#b52a1a' }]}>!</Text>
+          <IconPriorityHigh size={16} color="#b52a1a" />
         )}
         {todo.status === 'elevated' && (
-          <Text style={[styles.priority, { color: '#c96a00' }]}>⚡</Text>
+          <IconBolt size={16} color="#c96a00" />
         )}
 
         {/* Label */}
         <Text
           style={[
             styles.label,
-            { color: textColor, fontSize: depth === 0 ? 16 : depth === 1 ? 15 : 14 },
+            { color: labelColor, fontSize },
             todo.is_complete && styles.labelDone,
           ]}
           numberOfLines={0}
@@ -73,26 +79,30 @@ export default function TodoItem({
           {todo.task}
         </Text>
 
-        {/* Add subtask button */}
-        {canAddChild && !todo.is_complete && (
+        {/* Row actions: add-subtask + options */}
+        <View style={styles.rowActions}>
+          {canAddChild && !todo.is_complete && (
+            <TouchableOpacity
+              onPress={() => onAddSubtask(todo.id)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.rowActionBtn}
+            >
+              <IconAddBottom size={16} color="#025f96" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
-            onPress={() => onAddSubtask(todo.id)}
+            onPress={() => onLongPress(todo, depth)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={styles.addSubtaskBtn}
+            style={styles.rowActionBtn}
           >
-            <Text style={styles.addSubtaskText}>+</Text>
+            <IconOptions size={16} color="#025f96" />
           </TouchableOpacity>
-        )}
-
-        {/* Expand/collapse indicator */}
-        {hasChildren && (
-          <Text style={styles.chevron}>{isCollapsed ? '›' : '⌄'}</Text>
-        )}
+        </View>
       </TouchableOpacity>
 
       {/* Note */}
       {todo.note ? (
-        <Text style={[styles.note, { paddingLeft: 28 + depth * INDENT_PX }]}>
+        <Text style={[styles.note, { paddingLeft: 12 + 26 + depth * INDENT_PX }]}>
           {todo.note}
         </Text>
       ) : null}
@@ -120,6 +130,9 @@ export default function TodoItem({
             ))}
         </View>
       )}
+
+      {/* Row separator */}
+      <View style={[styles.separator, { marginLeft: 12 + depth * INDENT_PX }]} />
     </View>
   );
 }
@@ -129,7 +142,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingRight: 12,
     gap: 8,
   },
   checkbox: {
@@ -153,11 +166,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 13,
   },
-  priority: {
-    fontSize: 14,
-    fontWeight: '700',
-    flexShrink: 0,
-  },
   label: {
     flex: 1,
     fontWeight: '400',
@@ -166,27 +174,26 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#aaa',
   },
-  addSubtaskBtn: {
-    width: 22,
-    height: 22,
+  rowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flexShrink: 0,
+  },
+  rowActionBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0,
-  },
-  addSubtaskText: {
-    fontSize: 18,
-    color: '#025f96',
-    lineHeight: 22,
-  },
-  chevron: {
-    color: '#6a3f1f',
-    fontSize: 16,
-    flexShrink: 0,
   },
   note: {
     fontSize: 12,
     color: '#888',
     paddingBottom: 4,
+    paddingRight: 12,
     fontStyle: 'italic',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#d9ccb4',
+    marginRight: 0,
   },
 });

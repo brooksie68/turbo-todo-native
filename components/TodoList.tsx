@@ -15,6 +15,16 @@ import { supabase } from '../lib/supabase/client';
 import type { Todo, List } from '../lib/types';
 import TodoItem from './TodoItem';
 import AddEditModal from './AddEditModal';
+import {
+  IconLogo,
+  IconSettings,
+  IconHelp,
+  IconOptions,
+  IconAddBottom,
+  IconAddTop,
+  IconExpandDown,
+  IconExpandUp,
+} from './Icons';
 
 function buildTree(todos: Todo[]): Todo[] {
   const map = new Map<number, Todo>();
@@ -46,6 +56,8 @@ function getAllParentIds(todos: Todo[]): number[] {
 }
 
 export default function TodoList() {
+  const insets = useSafeAreaInsets();
+
   const [lists, setLists] = useState<List[]>([]);
   const [activeListId, setActiveListId] = useState<number | null>(null);
   const [showListPicker, setShowListPicker] = useState(false);
@@ -53,7 +65,6 @@ export default function TodoList() {
   const [loading, setLoading] = useState(true);
   const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
-  const insets = useSafeAreaInsets();
 
   // CRUD modal state
   const [modalVisible, setModalVisible] = useState(false);
@@ -62,6 +73,7 @@ export default function TodoList() {
   const [modalInitialNote, setModalInitialNote] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [addParentId, setAddParentId] = useState<number | null>(null);
+  const [insertPosition, setInsertPosition] = useState<'top' | 'bottom'>('bottom');
 
   const fetchTodos = useCallback(async (listId: number, showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -154,7 +166,7 @@ export default function TodoList() {
 
   // --- CRUD ---
 
-  async function getNextSortOrder(parentId: number | null): Promise<number> {
+  async function getSortOrderForInsert(parentId: number | null, position: 'top' | 'bottom'): Promise<number> {
     let query = supabase
       .from('todos')
       .select('sort_order')
@@ -166,12 +178,15 @@ export default function TodoList() {
     }
     const { data } = await query;
     if (!data || data.length === 0) return 0;
-    return Math.max(...data.map((r: { sort_order: number }) => r.sort_order)) + 1;
+    const orders = data.map((r: { sort_order: number }) => r.sort_order);
+    return position === 'top'
+      ? Math.min(...orders) - 1
+      : Math.max(...orders) + 1;
   }
 
   async function addTask(task: string, note: string) {
     if (!activeListId || !userId) return;
-    const sort_order = await getNextSortOrder(addParentId);
+    const sort_order = await getSortOrderForInsert(addParentId, insertPosition);
     await supabase.from('todos').insert({
       user_id: userId,
       list_id: activeListId,
@@ -201,9 +216,10 @@ export default function TodoList() {
 
   // --- Modal helpers ---
 
-  function openAdd(parentId: number | null) {
+  function openAdd(parentId: number | null, position: 'top' | 'bottom' = 'bottom') {
     setEditingId(null);
     setAddParentId(parentId);
+    setInsertPosition(position);
     setModalTitle(parentId === null ? 'New task' : 'New subtask');
     setModalInitialTask('');
     setModalInitialNote('');
@@ -238,15 +254,8 @@ export default function TodoList() {
       [
         { text: 'Edit', onPress: () => openEdit(todo) },
         ...(canAddChild ? [{ text: 'Add subtask', onPress: () => openAdd(todo.id) }] : []),
-        {
-          text: 'Priority…',
-          onPress: () => showPriorityMenu(todo.id),
-        },
-        {
-          text: 'Delete',
-          style: 'destructive' as const,
-          onPress: () => confirmDelete(todo.id, todo.task),
-        },
+        { text: 'Priority…', onPress: () => showPriorityMenu(todo.id) },
+        { text: 'Delete', style: 'destructive' as const, onPress: () => confirmDelete(todo.id, todo.task) },
         { text: 'Cancel', style: 'cancel' as const },
       ]
     );
@@ -272,6 +281,61 @@ export default function TodoList() {
     );
   }
 
+  function showOptionsMenu() {
+    Alert.alert(
+      'Options',
+      undefined,
+      [
+        { text: 'Sync', onPress: () => activeListId && fetchTodos(activeListId, false) },
+        { text: 'Clear all completed', onPress: confirmClearCompleted },
+        { text: 'Clear entire list', style: 'destructive', onPress: confirmClearAll },
+        { text: 'Sign out', onPress: () => supabase.auth.signOut() },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  }
+
+  function confirmClearCompleted() {
+    Alert.alert('Clear all completed?', 'This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear', style: 'destructive', onPress: async () => {
+          if (!activeListId) return;
+          const flat = flattenTodos(todos);
+          const completedIds = flat.filter(t => t.is_complete).map(t => t.id);
+          if (completedIds.length === 0) return;
+          await supabase.from('todos').delete().in('id', completedIds);
+          fetchTodos(activeListId, false);
+        }
+      },
+    ]);
+  }
+
+  function confirmClearAll() {
+    Alert.alert('Clear entire list?', 'This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear', style: 'destructive', onPress: async () => {
+          if (!activeListId) return;
+          await supabase.from('todos').delete().eq('list_id', activeListId);
+          fetchTodos(activeListId, false);
+        }
+      },
+    ]);
+  }
+
+  function flattenTodos(nodes: Todo[]): Todo[] {
+    const result: Todo[] = [];
+    function walk(items: Todo[]) {
+      for (const item of items) {
+        result.push(item);
+        if (item.children) walk(item.children);
+      }
+    }
+    walk(nodes);
+    return result;
+  }
+
   // --- Render ---
 
   const activeList = lists.find(l => l.id === activeListId) ?? null;
@@ -292,9 +356,15 @@ export default function TodoList() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* ── Header ── */}
       <View style={styles.header}>
+        {/* Logo — left:8, top:10, 42×42 */}
+        <TouchableOpacity style={styles.logoBtn}>
+          <IconLogo size={42} color="#025f96" />
+        </TouchableOpacity>
+
+        {/* List selector — left:60, top:15, 189×34 */}
         <TouchableOpacity
           style={styles.listSelector}
           onPress={() => setShowListPicker(true)}
@@ -305,8 +375,14 @@ export default function TodoList() {
           <Text style={styles.listSelectorArrow}>▼</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.signOutBtn}>
-          <Text style={styles.signOutText}>Sign out</Text>
+        {/* List gear — left:260, top:20, 24×24 */}
+        <TouchableOpacity style={styles.gearBtn}>
+          <IconSettings size={24} color="#025f96" />
+        </TouchableOpacity>
+
+        {/* Help — right:21, top:20, 24×24 */}
+        <TouchableOpacity style={styles.helpBtn}>
+          <IconHelp size={24} color="#025f96" />
         </TouchableOpacity>
       </View>
 
@@ -343,14 +419,13 @@ export default function TodoList() {
         onSave={handleModalSave}
       />
 
-      {/* Todo list */}
+      {/* ── Todo list ── */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator color="#025f96" />
         </View>
       ) : (
         <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
-          {/* Incomplete */}
           <View style={styles.section}>
             {incomplete.length === 0 && (
               <Text style={styles.emptyState}>No tasks yet.</Text>
@@ -364,12 +439,11 @@ export default function TodoList() {
                 onToggleCollapse={toggleCollapse}
                 onToggleComplete={toggleComplete}
                 onLongPress={handleLongPress}
-                onAddSubtask={openAdd}
+                onAddSubtask={id => openAdd(id)}
               />
             ))}
           </View>
 
-          {/* Completed */}
           {complete.length > 0 && (
             <View style={[styles.section, styles.sectionDone]}>
               <Text style={styles.sectionLabel}>Completed</Text>
@@ -382,7 +456,7 @@ export default function TodoList() {
                   onToggleCollapse={toggleCollapse}
                   onToggleComplete={toggleComplete}
                   onLongPress={handleLongPress}
-                  onAddSubtask={openAdd}
+                  onAddSubtask={id => openAdd(id)}
                 />
               ))}
             </View>
@@ -390,37 +464,71 @@ export default function TodoList() {
         </ScrollView>
       )}
 
-      {/* Bottom toolbar */}
-      <View style={[styles.toolbar, { paddingBottom: insets.bottom }]}>
-        <View style={styles.toolbarLeft} />
+      {/* ── Bottom toolbar ── */}
+      <View style={[styles.toolbarOuter, { paddingBottom: insets.bottom }]}>
+        <View style={styles.toolbarInner}>
+          {/* Kebab — left:24, vertically centered */}
+          <TouchableOpacity style={styles.toolbarLeft} onPress={showOptionsMenu}>
+            <IconOptions size={24} color="#025f96" />
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addBtn} onPress={() => openAdd(null)}>
-          <Text style={styles.addBtnText}>+</Text>
-        </TouchableOpacity>
+          {/* Create-new group — centered */}
+          <View style={styles.toolbarCenter}>
+            <TouchableOpacity
+              style={styles.toolbarIconBtn}
+              onPress={() => openAdd(null, 'bottom')}
+            >
+              <IconAddBottom size={18} color="#025f96" />
+            </TouchableOpacity>
+            <Text style={styles.newLabel}>new</Text>
+            <TouchableOpacity
+              style={styles.toolbarIconBtn}
+              onPress={() => openAdd(null, 'top')}
+            >
+              <IconAddTop size={18} color="#025f96" />
+            </TouchableOpacity>
+          </View>
 
-        <TouchableOpacity onPress={toggleAll} style={styles.toolbarRight}>
-          <Text style={styles.expandBtnText}>{allExpanded ? '⌃' : '⌄'}</Text>
-        </TouchableOpacity>
+          {/* Expand/collapse — right:22, vertically centered */}
+          <TouchableOpacity style={styles.toolbarRight} onPress={toggleAll}>
+            {allExpanded
+              ? <IconExpandUp size={24} color="#025f96" />
+              : <IconExpandDown size={24} color="#025f96" />
+            }
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
 }
+
+const ICON_COLOR = '#025f96';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#003759',
   },
+
+  // ── Header ──
   header: {
     height: 64,
+    backgroundColor: '#F6CD75',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    gap: 8,
-    backgroundColor: '#F6CD75',
+    paddingLeft: 8,
+    paddingRight: 21,
+  },
+  logoBtn: {
+    width: 42,
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   listSelector: {
-    flex: 1,
+    width: 189,
+    height: 34,
+    marginLeft: 10,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffe8a9',
@@ -428,7 +536,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#023455',
     borderRadius: 3,
     paddingHorizontal: 10,
-    paddingVertical: 6,
     gap: 6,
   },
   listSelectorText: {
@@ -440,13 +547,22 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#00395b',
   },
-  signOutBtn: {
-    padding: 8,
+  gearBtn: {
+    width: 24,
+    height: 24,
+    marginLeft: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  signOutText: {
-    fontSize: 13,
-    color: '#6a3f1f',
+  helpBtn: {
+    width: 24,
+    height: 24,
+    marginLeft: 'auto',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+
+  // ── List picker ──
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.3)',
@@ -477,6 +593,8 @@ const styles = StyleSheet.create({
   listPickerTextActive: {
     fontWeight: '600',
   },
+
+  // ── Scroll area ──
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -513,39 +631,46 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 24,
   },
-  toolbar: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
+
+  // ── Toolbar ──
+  toolbarOuter: {
     backgroundColor: '#F6CD75',
     borderTopWidth: 1,
     borderTopColor: '#e0c060',
-    paddingHorizontal: 16,
+  },
+  toolbarInner: {
+    height: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   toolbarLeft: {
-    flex: 1,
-  },
-  addBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#025f96',
-    alignItems: 'center',
+    width: 56,
+    height: 42,
+    paddingLeft: 24,
+    alignItems: 'flex-start',
     justifyContent: 'center',
   },
-  addBtnText: {
-    color: '#fff',
-    fontSize: 24,
-    lineHeight: 28,
-    fontWeight: '300',
+  toolbarCenter: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  toolbarIconBtn: {
+    padding: 4,
+  },
+  newLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: ICON_COLOR,
+    letterSpacing: 0.5,
   },
   toolbarRight: {
-    flex: 1,
+    width: 58,
+    height: 42,
+    paddingRight: 22,
     alignItems: 'flex-end',
-    padding: 8,
-  },
-  expandBtnText: {
-    fontSize: 20,
-    color: '#025f96',
+    justifyContent: 'center',
   },
 });
