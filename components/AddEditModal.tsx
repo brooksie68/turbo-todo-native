@@ -15,6 +15,7 @@ type Props = {
   title: string;
   initialTask?: string;
   initialNote?: string;
+  noteMode?: boolean;
   onClose: () => void;
   onSave: (task: string, note: string) => void;
 };
@@ -24,6 +25,7 @@ export default function AddEditModal({
   title,
   initialTask = '',
   initialNote = '',
+  noteMode = false,
   onClose,
   onSave,
 }: Props) {
@@ -38,10 +40,16 @@ export default function AddEditModal({
   }, [visible, initialTask, initialNote]);
 
   function handleSave() {
+    if (noteMode) {
+      onSave('', note.trim());
+      return;
+    }
     const trimmed = task.trim();
     if (!trimmed) return;
     onSave(trimmed, note.trim());
   }
+
+  const canSave = noteMode ? note.trim().length > 0 : task.trim().length > 0;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -53,26 +61,30 @@ export default function AddEditModal({
         <View style={styles.sheet}>
           <Text style={styles.title}>{title}</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Task"
-            placeholderTextColor="#aaa"
-            value={task}
-            onChangeText={setTask}
-            autoFocus
-            returnKeyType="next"
-            maxLength={500}
-          />
+          {!noteMode && (
+            <TextInput
+              style={styles.input}
+              placeholder="Task"
+              placeholderTextColor="#aaa"
+              value={task}
+              onChangeText={setTask}
+              autoFocus
+              returnKeyType="next"
+              maxLength={500}
+            />
+          )}
 
           <TextInput
-            style={[styles.input, styles.noteInput]}
-            placeholder="Note (optional)"
+            style={[styles.input, noteMode ? styles.input : styles.noteInput]}
+            placeholder={noteMode ? 'Note' : 'Note (optional)'}
             placeholderTextColor="#aaa"
             value={note}
             onChangeText={setNote}
+            autoFocus={noteMode}
             returnKeyType="done"
             onSubmitEditing={handleSave}
-            maxLength={200}
+            maxLength={500}
+            multiline={noteMode}
           />
 
           <View style={styles.buttons}>
@@ -80,9 +92,9 @@ export default function AddEditModal({
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.saveBtn, !task.trim() && styles.saveBtnDisabled]}
+              style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
               onPress={handleSave}
-              disabled={!task.trim()}
+              disabled={!canSave}
             >
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>

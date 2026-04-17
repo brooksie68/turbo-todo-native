@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Modal,
   Alert,
+  Share,
   StyleSheet,
   ToastAndroid,
 } from 'react-native';
@@ -21,7 +22,7 @@ import TodoItem from './TodoItem';
 import AddEditModal from './AddEditModal';
 import AddLinkModal from './AddLinkModal';
 import ToolbarOptionsMenu from './ToolbarOptionsMenu';
-import ItemOptionsMenu from './ItemOptionsMenu';
+import ItemOptionsMenu, { type ButtonLayout } from './ItemOptionsMenu';
 import {
   IconLogo,
   IconSettings,
@@ -85,7 +86,12 @@ export default function TodoList() {
   const [showToolbarMenu, setShowToolbarMenu] = useState(false);
   const [itemMenuTodo, setItemMenuTodo] = useState<Todo | null>(null);
   const [itemMenuDepth, setItemMenuDepth] = useState(0);
+  const [itemMenuLayout, setItemMenuLayout] = useState<ButtonLayout | null>(null);
   const [insertPosition, setInsertPosition] = useState<'top' | 'bottom'>('bottom');
+
+  // Note modal state
+  const [noteModalVisible, setNoteModalVisible] = useState(false);
+  const [noteEditingTodo, setNoteEditingTodo] = useState<Todo | null>(null);
 
   // Image / link state
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -309,11 +315,61 @@ export default function TodoList() {
 
   // --- Menu handlers ---
 
-  async function handleLongPress(todo: Todo, depth: number) {
+  async function handleOptions(todo: Todo, depth: number, layout: ButtonLayout) {
     const images = await getImages(todo.id);
     setItemMenuImageCount(images.length);
     setItemMenuTodo(todo);
     setItemMenuDepth(depth);
+    setItemMenuLayout(layout);
+  }
+
+  function closeItemMenu() {
+    setItemMenuTodo(null);
+    setItemMenuLayout(null);
+  }
+
+  function handleEditNote() {
+    if (!itemMenuTodo) return;
+    setNoteEditingTodo(itemMenuTodo);
+    setNoteModalVisible(true);
+  }
+
+  async function handleSaveNote(_task: string, note: string) {
+    setNoteModalVisible(false);
+    if (!noteEditingTodo || !activeListId) return;
+    await supabase.from('todos').update({ note: note || null }).eq('id', noteEditingTodo.id);
+    fetchTodos(activeListId, false);
+    setNoteEditingTodo(null);
+  }
+
+  async function handleDeleteNote() {
+    if (!itemMenuTodo || !activeListId) return;
+    await supabase.from('todos').update({ note: null }).eq('id', itemMenuTodo.id);
+    fetchTodos(activeListId, false);
+  }
+
+  function formatItemTree(node: Todo, d: number): string {
+    const indent = '  '.repeat(d);
+    const label = d === 0 ? `- **${node.task}**` : `${indent}- ${node.task}`;
+    const incompleteChildren = (node.children ?? []).filter(c => !c.is_complete);
+    const childLines = incompleteChildren.map(c => formatItemTree(c, d + 1)).join('\n');
+    return childLines ? `${label}\n${childLines}` : label;
+  }
+
+  async function handleExportForAI() {
+    if (!itemMenuTodo) return;
+    const body = formatItemTree(itemMenuTodo, 0);
+    const text = [
+      `[TurboTodo Export — "${activeList?.name ?? ''}"]`,
+      `Markdown outline. Top-level item is bold. Each subtask level is indented 2 spaces + dash.\n`,
+      `---\n`,
+      body,
+      `\n---\n`,
+      `Please acknowledge receipt of this list only. Do not analyze, summarize, or take any action unless specifically asked.`,
+    ].join('\n');
+    try {
+      await Share.share({ message: text, title: 'TurboTodo Export' });
+    } catch {}
   }
 
   function handleItemDelete() {
@@ -472,14 +528,29 @@ export default function TodoList() {
         visible={itemMenuTodo !== null}
         todo={itemMenuTodo}
         depth={itemMenuDepth}
-        onClose={() => setItemMenuTodo(null)}
+        buttonLayout={itemMenuLayout}
+        onClose={closeItemMenu}
         onEdit={() => { if (itemMenuTodo) openEdit(itemMenuTodo); }}
-        onAddSubtask={() => { if (itemMenuTodo) openAdd(itemMenuTodo.id); }}
         onDelete={handleItemDelete}
         onSetStatus={(status) => { if (itemMenuTodo) setStatus(itemMenuTodo.id, status); }}
         onAddImage={() => { if (itemMenuTodo) handleAddImage(itemMenuTodo); }}
         onAddUrl={() => { if (itemMenuTodo) handleAddUrl(itemMenuTodo); }}
+        onEditNote={handleEditNote}
+        onDeleteNote={handleDeleteNote}
+        onExportForAI={handleExportForAI}
         imageCount={itemMenuImageCount}
+        hasNote={!!(itemMenuTodo?.note)}
+      />
+
+      {/* Note add/edit modal */}
+      <AddEditModal
+        visible={noteModalVisible}
+        title={noteEditingTodo?.note ? 'Edit note' : 'Add note'}
+        initialTask=""
+        initialNote={noteEditingTodo?.note ?? ''}
+        noteMode
+        onClose={() => { setNoteModalVisible(false); setNoteEditingTodo(null); }}
+        onSave={handleSaveNote}
       />
 
       {/* Add link modal */}
@@ -508,7 +579,7 @@ export default function TodoList() {
                 collapsedIds={collapsedIds}
                 onToggleCollapse={toggleCollapse}
                 onToggleComplete={toggleComplete}
-                onOptions={handleLongPress}
+                onOptions={handleOptions}
                 onAddSubtask={id => openAdd(id)}
                 imageRefreshToken={imageRefreshToken}
                 linkRefreshToken={linkRefreshToken}
@@ -527,7 +598,7 @@ export default function TodoList() {
                   collapsedIds={collapsedIds}
                   onToggleCollapse={toggleCollapse}
                   onToggleComplete={toggleComplete}
-                  onOptions={handleLongPress}
+                  onOptions={handleOptions}
                   onAddSubtask={id => openAdd(id)}
                 />
               ))}

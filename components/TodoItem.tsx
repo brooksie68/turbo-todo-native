@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { IconOptions, IconAddBottom, IconClose } from './Icons';
 import { getImages, deleteImage, type TaskImage } from '../lib/imageStore';
 import { getLinks, deleteLink, type TaskLink } from '../lib/linkStore';
 import ImageViewer from './ImageViewer';
+import type { ButtonLayout } from './ItemOptionsMenu';
 
 const INDENT_PX = 20;
 const MAX_DEPTH = 3;
@@ -23,7 +24,7 @@ type Props = {
   collapsedIds: Set<number>;
   onToggleCollapse: (id: number) => void;
   onToggleComplete: (id: number, current: boolean) => void;
-  onOptions: (todo: Todo, depth: number) => void;
+  onOptions: (todo: Todo, depth: number, layout: ButtonLayout) => void;
   onAddSubtask: (parentId: number) => void;
   // signals from parent to refresh images/links after add
   imageRefreshToken?: number;
@@ -41,6 +42,7 @@ export default function TodoItem({
   imageRefreshToken,
   linkRefreshToken,
 }: Props) {
+  const optionsBtnRef = useRef<View>(null);
   const hasChildren = (todo.children?.length ?? 0) > 0;
   const isCollapsed = collapsedIds.has(todo.id);
   const visibleChildren = todo.children ?? [];
@@ -124,13 +126,19 @@ export default function TodoItem({
               <IconAddBottom size={16} color="#025f96" />
             </TouchableOpacity>
           )}
-          <TouchableOpacity
-            onPress={() => onOptions(todo, depth)}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={styles.rowActionBtn}
-          >
-            <IconOptions size={16} color="#025f96" />
-          </TouchableOpacity>
+          <View ref={optionsBtnRef} collapsable={false}>
+            <TouchableOpacity
+              onPress={() => {
+                optionsBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
+                  onOptions(todo, depth, { pageX, pageY, width: w, height: h });
+                });
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.rowActionBtn}
+            >
+              <IconOptions size={16} color="#025f96" />
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableOpacity>
 
