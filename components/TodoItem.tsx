@@ -10,6 +10,8 @@ type Props = {
   collapsedIds: Set<number>;
   onToggleCollapse: (id: number) => void;
   onToggleComplete: (id: number, current: boolean) => void;
+  onLongPress: (todo: Todo, depth: number) => void;
+  onAddSubtask: (parentId: number) => void;
 };
 
 export default function TodoItem({
@@ -18,10 +20,13 @@ export default function TodoItem({
   collapsedIds,
   onToggleCollapse,
   onToggleComplete,
+  onLongPress,
+  onAddSubtask,
 }: Props) {
   const hasChildren = (todo.children?.length ?? 0) > 0;
   const isCollapsed = collapsedIds.has(todo.id);
   const visibleChildren = todo.children ?? [];
+  const canAddChild = depth < MAX_DEPTH - 1;
 
   const depthColors = ['#1a2a38', '#3a5068', '#5a7088'];
   const textColor = todo.is_complete
@@ -36,6 +41,8 @@ export default function TodoItem({
         onPress={() => {
           if (hasChildren) onToggleCollapse(todo.id);
         }}
+        onLongPress={() => onLongPress(todo, depth)}
+        delayLongPress={400}
       >
         {/* Checkbox */}
         <TouchableOpacity
@@ -65,6 +72,17 @@ export default function TodoItem({
         >
           {todo.task}
         </Text>
+
+        {/* Add subtask button */}
+        {canAddChild && !todo.is_complete && (
+          <TouchableOpacity
+            onPress={() => onAddSubtask(todo.id)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={styles.addSubtaskBtn}
+          >
+            <Text style={styles.addSubtaskText}>+</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Expand/collapse indicator */}
         {hasChildren && (
@@ -96,6 +114,8 @@ export default function TodoItem({
                 collapsedIds={collapsedIds}
                 onToggleCollapse={onToggleCollapse}
                 onToggleComplete={onToggleComplete}
+                onLongPress={onLongPress}
+                onAddSubtask={onAddSubtask}
               />
             ))}
         </View>
@@ -145,6 +165,18 @@ const styles = StyleSheet.create({
   labelDone: {
     textDecorationLine: 'line-through',
     color: '#aaa',
+  },
+  addSubtaskBtn: {
+    width: 22,
+    height: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  addSubtaskText: {
+    fontSize: 18,
+    color: '#025f96',
+    lineHeight: 22,
   },
   chevron: {
     color: '#6a3f1f',

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Modal,
+  Alert,
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
@@ -13,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase/client';
 import type { Todo, List } from '../lib/types';
 import TodoItem from './TodoItem';
+import AddEditModal from './AddEditModal';
 
 function buildTree(todos: Todo[]): Todo[] {
   const map = new Map<number, Todo>();
@@ -50,6 +52,15 @@ export default function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // CRUD modal state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState('New task');
+  const [modalInitialTask, setModalInitialTask] = useState('');
+  const [modalInitialNote, setModalInitialNote] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [addParentId, setAddParentId] = useState<number | null>(null);
 
   const fetchTodos = useCallback(async (listId: number, showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -64,6 +75,10 @@ export default function TodoList() {
   }, []);
 
   const fetchLists = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setUserId(user.id);
+
     const { data } = await supabase
       .from('lists')
       .select('*')
@@ -73,8 +88,6 @@ export default function TodoList() {
     let loadedLists = (data as List[]) || [];
 
     if (loadedLists.length === 0) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
       const { data: newList } = await supabase
         .from('lists')
         .insert({ user_id: user.id, name: 'My ToDo List', sort_order: 0 })
@@ -138,6 +151,128 @@ export default function TodoList() {
     if (activeListId !== null) fetchTodos(activeListId, false);
   }
 
+  // --- CRUD ---
+
+  async function getNextSortOrder(parentId: number | null): Promise<number> {
+    let query = supabase
+      .from('todos')
+      .select('sort_order')
+      .eq('list_id', activeListId!);
+    if (parentId === null) {
+      query = query.is('parent_id', null);
+    } else {
+      query = query.eq('parent_id', parentId);
+    }
+    const { data } = await query;
+    if (!data || data.length === 0) return 0;
+    return Math.max(...data.map((r: { sort_order: number }) => r.sort_order)) + 1;
+  }
+
+  async function addTask(task: string, note: string) {
+    if (!activeListId || !userId) return;
+    const sort_order = await getNextSortOrder(addParentId);
+    await supabase.from('todos').insert({
+      user_id: userId,
+      list_id: activeListId,
+      parent_id: addParentId,
+      task,
+      note: note || null,
+      is_complete: false,
+      sort_order,
+    });
+    fetchTodos(activeListId, false);
+  }
+
+  async function updateTask(id: number, task: string, note: string) {
+    await supabase.from('todos').update({ task, note: note || null }).eq('id', id);
+    if (activeListId !== null) fetchTodos(activeListId, false);
+  }
+
+  async function deleteTask(id: number) {
+    await supabase.from('todos').delete().eq('id', id);
+    if (activeListId !== null) fetchTodos(activeListId, false);
+  }
+
+  async function setStatus(id: number, status: string | null) {
+    await supabase.from('todos').update({ status }).eq('id', id);
+    if (activeListId !== null) fetchTodos(activeListId, false);
+  }
+
+  // --- Modal helpers ---
+
+  function openAdd(parentId: number | null) {
+    setEditingId(null);
+    setAddParentId(parentId);
+    setModalTitle(parentId === null ? 'New task' : 'New subtask');
+    setModalInitialTask('');
+    setModalInitialNote('');
+    setModalVisible(true);
+  }
+
+  function openEdit(todo: Todo) {
+    setEditingId(todo.id);
+    setAddParentId(null);
+    setModalTitle('Edit task');
+    setModalInitialTask(todo.task);
+    setModalInitialNote(todo.note ?? '');
+    setModalVisible(true);
+  }
+
+  function handleModalSave(task: string, note: string) {
+    setModalVisible(false);
+    if (editingId !== null) {
+      updateTask(editingId, task, note);
+    } else {
+      addTask(task, note);
+    }
+  }
+
+  // --- Long press action menu ---
+
+  function handleLongPress(todo: Todo, depth: number) {
+    const canAddChild = depth < 2;
+    Alert.alert(
+      todo.task,
+      undefined,
+      [
+        { text: 'Edit', onPress: () => openEdit(todo) },
+        ...(canAddChild ? [{ text: 'Add subtask', onPress: () => openAdd(todo.id) }] : []),
+        {
+          text: 'Priority…',
+          onPress: () => showPriorityMenu(todo.id),
+        },
+        {
+          text: 'Delete',
+          style: 'destructive' as const,
+          onPress: () => confirmDelete(todo.id, todo.task),
+        },
+        { text: 'Cancel', style: 'cancel' as const },
+      ]
+    );
+  }
+
+  function showPriorityMenu(id: number) {
+    Alert.alert('Set priority', undefined, [
+      { text: 'None', onPress: () => setStatus(id, null) },
+      { text: 'Elevated', onPress: () => setStatus(id, 'elevated') },
+      { text: 'Top priority', onPress: () => setStatus(id, 'top-priority') },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }
+
+  function confirmDelete(id: number, task: string) {
+    Alert.alert(
+      'Delete task?',
+      `"${task}" and any subtasks will be removed.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteTask(id) },
+      ]
+    );
+  }
+
+  // --- Render ---
+
   const activeList = lists.find(l => l.id === activeListId) ?? null;
   const incomplete = todos.filter(t => !t.is_complete);
   const complete = todos.filter(t => t.is_complete);
@@ -169,10 +304,6 @@ export default function TodoList() {
           <Text style={styles.listSelectorArrow}>▼</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={toggleAll} style={styles.expandBtn}>
-          <Text style={styles.expandBtnText}>{allExpanded ? '⌃' : '⌄'}</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.signOutBtn}>
           <Text style={styles.signOutText}>Sign out</Text>
         </TouchableOpacity>
@@ -201,6 +332,16 @@ export default function TodoList() {
         </TouchableOpacity>
       </Modal>
 
+      {/* Add/edit modal */}
+      <AddEditModal
+        visible={modalVisible}
+        title={modalTitle}
+        initialTask={modalInitialTask}
+        initialNote={modalInitialNote}
+        onClose={() => setModalVisible(false)}
+        onSave={handleModalSave}
+      />
+
       {/* Todo list */}
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -221,6 +362,8 @@ export default function TodoList() {
                 collapsedIds={collapsedIds}
                 onToggleCollapse={toggleCollapse}
                 onToggleComplete={toggleComplete}
+                onLongPress={handleLongPress}
+                onAddSubtask={openAdd}
               />
             ))}
           </View>
@@ -237,12 +380,27 @@ export default function TodoList() {
                   collapsedIds={collapsedIds}
                   onToggleCollapse={toggleCollapse}
                   onToggleComplete={toggleComplete}
+                  onLongPress={handleLongPress}
+                  onAddSubtask={openAdd}
                 />
               ))}
             </View>
           )}
         </ScrollView>
       )}
+
+      {/* Bottom toolbar */}
+      <View style={styles.toolbar}>
+        <View style={styles.toolbarLeft} />
+
+        <TouchableOpacity style={styles.addBtn} onPress={() => openAdd(null)}>
+          <Text style={styles.addBtnText}>+</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={toggleAll} style={styles.toolbarRight}>
+          <Text style={styles.expandBtnText}>{allExpanded ? '⌃' : '⌄'}</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -280,13 +438,6 @@ const styles = StyleSheet.create({
   listSelectorArrow: {
     fontSize: 10,
     color: '#00395b',
-  },
-  expandBtn: {
-    padding: 8,
-  },
-  expandBtnText: {
-    fontSize: 20,
-    color: '#025f96',
   },
   signOutBtn: {
     padding: 8,
@@ -334,7 +485,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 24,
+    paddingBottom: 8,
   },
   section: {
     backgroundColor: '#e6dac8',
@@ -360,5 +511,40 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
     paddingVertical: 24,
+  },
+  toolbar: {
+    height: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F6CD75',
+    borderTopWidth: 1,
+    borderTopColor: '#e0c060',
+    paddingHorizontal: 16,
+  },
+  toolbarLeft: {
+    flex: 1,
+  },
+  addBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#025f96',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addBtnText: {
+    color: '#fff',
+    fontSize: 24,
+    lineHeight: 28,
+    fontWeight: '300',
+  },
+  toolbarRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+    padding: 8,
+  },
+  expandBtnText: {
+    fontSize: 20,
+    color: '#025f96',
   },
 });
