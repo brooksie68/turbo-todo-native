@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconOptions, IconAddBottom, IconBolt, IconPriorityHigh, IconClose } from './Icons';
+import { IconOptions, IconAddBottom, IconClose } from './Icons';
 import { getImages, deleteImage, type TaskImage } from '../lib/imageStore';
 import { getLinks, deleteLink, type TaskLink } from '../lib/linkStore';
 import ImageViewer from './ImageViewer';
@@ -100,10 +100,6 @@ export default function TodoItem({
         >
           {todo.is_complete && <Text style={styles.checkmark}>✓</Text>}
         </TouchableOpacity>
-
-        {/* Priority icon */}
-        {todo.status === 'top-priority' && <IconPriorityHigh size={16} color="#b52a1a" />}
-        {todo.status === 'elevated' && <IconBolt size={16} color="#c96a00" />}
 
         {/* Label */}
         <Text
