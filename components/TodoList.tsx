@@ -8,8 +8,8 @@ import {
   Modal,
   Alert,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase/client';
 import type { Todo, List } from '../lib/types';
@@ -53,6 +53,7 @@ export default function TodoList() {
   const [loading, setLoading] = useState(true);
   const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
+  const insets = useSafeAreaInsets();
 
   // CRUD modal state
   const [modalVisible, setModalVisible] = useState(false);
@@ -390,7 +391,7 @@ export default function TodoList() {
       )}
 
       {/* Bottom toolbar */}
-      <View style={styles.toolbar}>
+      <View style={[styles.toolbar, { paddingBottom: insets.bottom }]}>
         <View style={styles.toolbarLeft} />
 
         <TouchableOpacity style={styles.addBtn} onPress={() => openAdd(null)}>

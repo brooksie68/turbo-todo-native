@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { Session } from '@supabase/supabase-js';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase/client';
 
 export default function RootLayout() {
@@ -34,5 +35,5 @@ export default function RootLayout() {
     }
   }, [session, initialized, segments]);
 
-  return <Slot />;
+  return <SafeAreaProvider><Slot /></SafeAreaProvider>;
 }
