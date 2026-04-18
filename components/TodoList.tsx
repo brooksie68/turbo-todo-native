@@ -23,6 +23,7 @@ import AddEditModal from './AddEditModal';
 import AddLinkModal from './AddLinkModal';
 import ToolbarOptionsMenu from './ToolbarOptionsMenu';
 import ItemOptionsMenu, { type ButtonLayout } from './ItemOptionsMenu';
+import { useTheme } from '../lib/theme';
 import {
   IconLogo,
   IconSettings,
@@ -65,6 +66,7 @@ function getAllParentIds(todos: Todo[]): number[] {
 
 export default function TodoList() {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
 
   const [lists, setLists] = useState<List[]>([]);
   const [activeListId, setActiveListId] = useState<number | null>(null);
@@ -432,33 +434,33 @@ export default function TodoList() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]} edges={['top']}>
       {/* ── Header ── */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.headerBg }]}>
         {/* Logo — left:8, top:10, 42×42 */}
         <TouchableOpacity style={styles.logoBtn}>
-          <IconLogo size={42} color="#025f96" />
+          <IconLogo size={42} color={theme.iconColor} />
         </TouchableOpacity>
 
         {/* List selector — left:60, top:15, 189×34 */}
         <TouchableOpacity
-          style={styles.listSelector}
+          style={[styles.listSelector, { backgroundColor: theme.listSelectorBg, borderBottomColor: theme.listSelectorBorder }]}
           onPress={() => setShowListPicker(true)}
         >
-          <Text style={styles.listSelectorText} numberOfLines={1}>
+          <Text style={[styles.listSelectorText, { color: theme.listSelectorText }]} numberOfLines={1}>
             {activeList?.name ?? '…'}
           </Text>
-          <Text style={styles.listSelectorArrow}>▼</Text>
+          <Text style={[styles.listSelectorArrow, { color: theme.listSelectorText }]}>▼</Text>
         </TouchableOpacity>
 
         {/* List gear — left:260, top:20, 24×24 */}
         <TouchableOpacity style={styles.gearBtn}>
-          <IconSettings size={24} color="#025f96" />
+          <IconSettings size={24} color={theme.iconColor} />
         </TouchableOpacity>
 
         {/* Help — right:21, top:20, 24×24 */}
         <TouchableOpacity style={styles.helpBtn}>
-          <IconHelp size={24} color="#025f96" />
+          <IconHelp size={24} color={theme.iconColor} />
         </TouchableOpacity>
       </View>
 
@@ -469,14 +471,14 @@ export default function TodoList() {
           activeOpacity={1}
           onPress={() => setShowListPicker(false)}
         >
-          <View style={styles.listPickerDropdown}>
+          <View style={[styles.listPickerDropdown, { backgroundColor: theme.listSelectorBg, borderColor: theme.border }]}>
             {lists.map(l => (
               <TouchableOpacity
                 key={l.id}
-                style={[styles.listPickerItem, l.id === activeListId && styles.listPickerItemActive]}
+                style={[styles.listPickerItem, { borderBottomColor: theme.border }, l.id === activeListId && { backgroundColor: theme.surface }]}
                 onPress={() => switchToList(l.id)}
               >
-                <Text style={[styles.listPickerText, l.id === activeListId && styles.listPickerTextActive]}>
+                <Text style={[styles.listPickerText, { color: theme.listSelectorText }, l.id === activeListId && styles.listPickerTextActive]}>
                   {l.name}
                 </Text>
               </TouchableOpacity>
@@ -563,13 +565,13 @@ export default function TodoList() {
       {/* ── Todo list ── */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator color="#025f96" />
+          <ActivityIndicator color={theme.iconColor} />
         </View>
       ) : (
         <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.section}>
+          <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             {incomplete.length === 0 && (
-              <Text style={styles.emptyState}>No tasks yet.</Text>
+              <Text style={[styles.emptyState, { color: theme.textSub }]}>No tasks yet.</Text>
             )}
             {incomplete.map(todo => (
               <TodoItem
@@ -588,8 +590,8 @@ export default function TodoList() {
           </View>
 
           {complete.length > 0 && (
-            <View style={[styles.section, styles.sectionDone]}>
-              <Text style={styles.sectionLabel}>Completed</Text>
+            <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }, styles.sectionDone]}>
+              <Text style={[styles.sectionLabel, { color: theme.accent }]}>Completed</Text>
               {complete.map(todo => (
                 <TodoItem
                   key={todo.id}
@@ -608,35 +610,26 @@ export default function TodoList() {
       )}
 
       {/* ── Bottom toolbar ── */}
-      <View style={[styles.toolbarOuter, { paddingBottom: insets.bottom }]}>
+      <View style={[styles.toolbarOuter, { backgroundColor: theme.headerBg, borderTopColor: theme.headerBorder, paddingBottom: insets.bottom }]}>
         <View style={styles.toolbarInner}>
-          {/* Kebab — left:24, vertically centered */}
           <TouchableOpacity style={styles.toolbarLeft} onPress={() => setShowToolbarMenu(true)}>
-            <IconOptions size={24} color="#025f96" />
+            <IconOptions size={24} color={theme.iconColor} />
           </TouchableOpacity>
 
-          {/* Create-new group — centered */}
           <View style={styles.toolbarCenter}>
-            <TouchableOpacity
-              style={styles.toolbarIconBtn}
-              onPress={() => openAdd(null, 'bottom')}
-            >
-              <IconAddBottom size={18} color="#025f96" />
+            <TouchableOpacity style={styles.toolbarIconBtn} onPress={() => openAdd(null, 'bottom')}>
+              <IconAddBottom size={18} color={theme.iconColor} />
             </TouchableOpacity>
-            <Text style={styles.newLabel}>new</Text>
-            <TouchableOpacity
-              style={styles.toolbarIconBtn}
-              onPress={() => openAdd(null, 'top')}
-            >
-              <IconAddTop size={18} color="#025f96" />
+            <Text style={[styles.newLabel, { color: theme.iconColor }]}>new</Text>
+            <TouchableOpacity style={styles.toolbarIconBtn} onPress={() => openAdd(null, 'top')}>
+              <IconAddTop size={18} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
 
-          {/* Expand/collapse — right:22, vertically centered */}
           <TouchableOpacity style={styles.toolbarRight} onPress={toggleAll}>
             {allExpanded
-              ? <IconExpandUp size={24} color="#025f96" />
-              : <IconExpandDown size={24} color="#025f96" />
+              ? <IconExpandUp size={24} color={theme.iconColor} />
+              : <IconExpandDown size={24} color={theme.iconColor} />
             }
           </TouchableOpacity>
         </View>
@@ -645,18 +638,14 @@ export default function TodoList() {
   );
 }
 
-const ICON_COLOR = '#025f96';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#003759',
   },
 
   // ── Header ──
   header: {
     height: 64,
-    backgroundColor: '#F6CD75',
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: 8,
@@ -674,9 +663,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffe8a9',
     borderBottomWidth: 1,
-    borderBottomColor: '#023455',
     borderRadius: 3,
     paddingHorizontal: 10,
     gap: 6,
@@ -684,11 +671,9 @@ const styles = StyleSheet.create({
   listSelectorText: {
     flex: 1,
     fontSize: 15,
-    color: '#00395b',
   },
   listSelectorArrow: {
     fontSize: 10,
-    color: '#00395b',
   },
   gearBtn: {
     width: 24,
@@ -714,24 +699,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   listPickerDropdown: {
-    backgroundColor: '#ffe8a9',
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#c7ba9b',
     overflow: 'hidden',
   },
   listPickerItem: {
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0d0a0',
-  },
-  listPickerItemActive: {
-    backgroundColor: '#E2D4AD',
   },
   listPickerText: {
     fontSize: 15,
-    color: '#00395b',
   },
   listPickerTextActive: {
     fontWeight: '600',
@@ -750,11 +728,9 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   section: {
-    backgroundColor: '#e6dac8',
     margin: 8,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#c7ba9b',
   },
   sectionDone: {
     opacity: 0.75,
@@ -762,7 +738,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#6a3f1f',
     paddingHorizontal: 12,
     paddingTop: 8,
     textTransform: 'uppercase',
@@ -770,16 +745,13 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     fontSize: 14,
-    color: '#888',
     textAlign: 'center',
     paddingVertical: 24,
   },
 
   // ── Toolbar ──
   toolbarOuter: {
-    backgroundColor: '#F6CD75',
     borderTopWidth: 1,
-    borderTopColor: '#e0c060',
   },
   toolbarInner: {
     height: 42,
@@ -806,7 +778,6 @@ const styles = StyleSheet.create({
   newLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: ICON_COLOR,
     letterSpacing: 0.5,
   },
   toolbarRight: {

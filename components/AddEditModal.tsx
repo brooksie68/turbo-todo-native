@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useTheme } from '../lib/theme';
 
 type Props = {
   visible: boolean;
@@ -29,6 +30,7 @@ export default function AddEditModal({
   onClose,
   onSave,
 }: Props) {
+  const theme = useTheme();
   const [task, setTask] = useState(initialTask);
   const [note, setNote] = useState(initialNote);
 
@@ -58,14 +60,14 @@ export default function AddEditModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-        <View style={styles.sheet}>
-          <Text style={styles.title}>{title}</Text>
+        <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.title, { color: theme.accent }]}>{title}</Text>
 
           {!noteMode && (
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
               placeholder="Task"
-              placeholderTextColor="#aaa"
+              placeholderTextColor={theme.textSub}
               value={task}
               onChangeText={setTask}
               autoFocus
@@ -75,9 +77,9 @@ export default function AddEditModal({
           )}
 
           <TextInput
-            style={[styles.input, noteMode ? styles.input : styles.noteInput]}
+            style={[styles.input, noteMode ? null : styles.noteInput, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
             placeholder={noteMode ? 'Note' : 'Note (optional)'}
-            placeholderTextColor="#aaa"
+            placeholderTextColor={theme.textSub}
             value={note}
             onChangeText={setNote}
             autoFocus={noteMode}
@@ -89,10 +91,10 @@ export default function AddEditModal({
 
           <View style={styles.buttons}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={[styles.cancelText, { color: theme.accent }]}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
+              style={[styles.saveBtn, { backgroundColor: theme.iconColor }, !canSave && styles.saveBtnDisabled]}
               onPress={handleSave}
               disabled={!canSave}
             >
@@ -115,7 +117,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheet: {
-    backgroundColor: '#e6dac8',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     padding: 20,
@@ -124,22 +125,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#00395b',
     marginBottom: 4,
   },
   input: {
-    backgroundColor: '#fffdf5',
     borderWidth: 1,
-    borderColor: '#c7ba9b',
     borderRadius: 4,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#1a2a38',
   },
   noteInput: {
     fontSize: 14,
-    color: '#555',
   },
   buttons: {
     flexDirection: 'row',
@@ -153,12 +149,10 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     fontSize: 15,
-    color: '#6a3f1f',
   },
   saveBtn: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#025f96',
     borderRadius: 4,
   },
   saveBtnDisabled: {

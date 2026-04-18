@@ -3,6 +3,7 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { Session } from '@supabase/supabase-js';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase/client';
+import { ThemeProvider } from '../lib/theme';
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
@@ -35,5 +36,5 @@ export default function RootLayout() {
     }
   }, [session, initialized, segments]);
 
-  return <SafeAreaProvider><Slot /></SafeAreaProvider>;
+  return <SafeAreaProvider><ThemeProvider><Slot /></ThemeProvider></SafeAreaProvider>;
 }

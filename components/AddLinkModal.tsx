@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTheme } from '../lib/theme';
 import {
   Modal,
   View,
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export default function AddLinkModal({ visible, onClose, onSave }: Props) {
+  const theme = useTheme();
   const [url, setUrl] = useState('');
   const [name, setName] = useState('');
 
@@ -38,13 +40,13 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-        <View style={styles.sheet}>
-          <Text style={styles.title}>Add URL</Text>
+        <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.title, { color: theme.accent }]}>Add URL</Text>
 
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
             placeholder="URL (required)"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={theme.textSub}
             value={url}
             onChangeText={setUrl}
             autoFocus
@@ -55,9 +57,9 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
           />
 
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
             placeholder="Name (optional)"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={theme.textSub}
             value={name}
             onChangeText={setName}
             returnKeyType="done"
@@ -67,10 +69,10 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
 
           <View style={styles.buttons}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={[styles.cancelText, { color: theme.accent }]}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.saveBtn, !url.trim() && styles.saveBtnDisabled]}
+              style={[styles.saveBtn, { backgroundColor: theme.iconColor }, !url.trim() && styles.saveBtnDisabled]}
               onPress={handleSave}
               disabled={!url.trim()}
             >
@@ -87,27 +89,23 @@ const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
-    backgroundColor: '#e6dac8',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     padding: 20,
     gap: 12,
   },
-  title: { fontSize: 16, fontWeight: '600', color: '#00395b', marginBottom: 4 },
+  title: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
   input: {
-    backgroundColor: '#fffdf5',
     borderWidth: 1,
-    borderColor: '#c7ba9b',
     borderRadius: 4,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#1a2a38',
   },
   buttons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 4 },
   cancelBtn: { paddingVertical: 10, paddingHorizontal: 16 },
-  cancelText: { fontSize: 15, color: '#6a3f1f' },
-  saveBtn: { paddingVertical: 10, paddingHorizontal: 20, backgroundColor: '#025f96', borderRadius: 4 },
+  cancelText: { fontSize: 15 },
+  saveBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 4 },
   saveBtnDisabled: { opacity: 0.4 },
   saveText: { fontSize: 15, color: '#fff', fontWeight: '600' },
 });

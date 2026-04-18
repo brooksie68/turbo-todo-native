@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useThemeContext, themes } from '../lib/theme';
 
 type Props = {
   visible: boolean;
@@ -28,6 +29,7 @@ export default function ToolbarOptionsMenu({
   onSort,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const { theme, themeId, setThemeId } = useThemeContext();
   const [confirmClear, setConfirmClear] = useState(false);
 
   function handleClose() {
@@ -39,6 +41,8 @@ export default function ToolbarOptionsMenu({
   function handleClearCompleted() { onClearCompleted(); handleClose(); }
   function handleClearAll() { setConfirmClear(false); onClearAll(); handleClose(); }
   function handleSignOut() { onSignOut(); handleClose(); }
+
+  const t = theme;
 
   return (
     <Modal
@@ -52,19 +56,19 @@ export default function ToolbarOptionsMenu({
         activeOpacity={1}
         onPress={handleClose}
       />
-      <View style={[styles.sheet, { paddingBottom: insets.bottom + 8 }]}>
+      <View style={[styles.sheet, { backgroundColor: t.surface, borderColor: t.border, paddingBottom: insets.bottom + 8 }]}>
         {confirmClear ? (
           <View style={styles.confirmBox}>
-            <Text style={styles.confirmMsg}>This cannot be undone</Text>
+            <Text style={[styles.confirmMsg, { color: t.accent }]}>This cannot be undone</Text>
             <View style={styles.confirmActions}>
               <TouchableOpacity
-                style={styles.confirmCancelBtn}
+                style={[styles.confirmCancelBtn, { backgroundColor: t.border }]}
                 onPress={() => setConfirmClear(false)}
               >
-                <Text style={styles.confirmCancelText}>Cancel</Text>
+                <Text style={[styles.confirmCancelText, { color: t.text }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.confirmClearBtn}
+                style={[styles.confirmClearBtn, { backgroundColor: t.danger }]}
                 onPress={handleClearAll}
               >
                 <Text style={styles.confirmClearText}>Clear</Text>
@@ -74,40 +78,66 @@ export default function ToolbarOptionsMenu({
         ) : (
           <>
             <TouchableOpacity style={styles.item} onPress={handleSync}>
-              <Text style={styles.itemText}>Sync</Text>
+              <Text style={[styles.itemText, { color: t.text }]}>Sync</Text>
             </TouchableOpacity>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: t.border }]} />
 
             {/* Sort by */}
-            <Text style={styles.sectionLabel}>Sort by:</Text>
+            <Text style={[styles.sectionLabel, { color: t.accent }]}>Sort by:</Text>
             <View style={styles.sortRow}>
               <TouchableOpacity style={styles.sortBtn} onPress={() => { onSort('status'); handleClose(); }}>
-                <Text style={styles.sortBtnText}>Status</Text>
+                <Text style={[styles.sortBtnText, { color: t.text }]}>Status</Text>
               </TouchableOpacity>
-              <Text style={styles.sortPipe}>|</Text>
+              <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
               <TouchableOpacity style={styles.sortBtn} onPress={() => { onSort('date'); handleClose(); }}>
-                <Text style={styles.sortBtnText}>Date</Text>
+                <Text style={[styles.sortBtnText, { color: t.text }]}>Date</Text>
               </TouchableOpacity>
-              <Text style={styles.sortPipe}>|</Text>
+              <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
               <TouchableOpacity style={styles.sortBtn} onPress={() => { onSort('alpha'); handleClose(); }}>
-                <Text style={styles.sortBtnText}>Alpha</Text>
+                <Text style={[styles.sortBtnText, { color: t.text }]}>Alpha</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: t.border }]} />
+
+            {/* Theme */}
+            <Text style={[styles.sectionLabel, { color: t.accent }]}>Theme:</Text>
+            <View style={styles.sortRow}>
+              {Object.values(themes).map((th, i, arr) => (
+                <View key={th.id} style={{ flexDirection: 'row', alignItems: 'center', flex: i < arr.length - 1 ? undefined : 1 }}>
+                  <TouchableOpacity
+                    style={styles.sortBtn}
+                    onPress={() => setThemeId(th.id)}
+                  >
+                    <Text style={[
+                      styles.sortBtnText,
+                      { color: themeId === th.id ? t.accent : t.text },
+                      themeId === th.id && styles.activeThemeText,
+                    ]}>
+                      {th.name}
+                    </Text>
+                  </TouchableOpacity>
+                  {i < arr.length - 1 && (
+                    <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
+                  )}
+                </View>
+              ))}
+            </View>
+
+            <View style={[styles.divider, { backgroundColor: t.border }]} />
 
             <TouchableOpacity style={styles.item} onPress={handleClearCompleted}>
-              <Text style={styles.itemText}>Clear all completed</Text>
+              <Text style={[styles.itemText, { color: t.text }]}>Clear all completed</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.item} onPress={() => setConfirmClear(true)}>
-              <Text style={styles.itemText}>Clear entire list</Text>
+              <Text style={[styles.itemText, { color: t.text }]}>Clear entire list</Text>
             </TouchableOpacity>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: t.border }]} />
 
             <TouchableOpacity style={styles.item} onPress={handleSignOut}>
-              <Text style={styles.itemText}>Sign out</Text>
+              <Text style={[styles.itemText, { color: t.text }]}>Sign out</Text>
             </TouchableOpacity>
           </>
         )}
@@ -122,12 +152,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
   },
   sheet: {
-    backgroundColor: '#e6dac8',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     borderWidth: 1,
     borderBottomWidth: 0,
-    borderColor: '#c7ba9b',
     paddingTop: 4,
     elevation: 8,
     shadowColor: '#000',
@@ -141,11 +169,9 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
-    color: '#1a2a38',
   },
   divider: {
     height: 1,
-    backgroundColor: '#c7ba9b',
     marginVertical: 4,
   },
   sectionLabel: {
@@ -153,7 +179,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    color: '#6a3f1f',
     paddingHorizontal: 16,
     paddingTop: 6,
     paddingBottom: 2,
@@ -171,11 +196,12 @@ const styles = StyleSheet.create({
   },
   sortBtnText: {
     fontSize: 16,
-    color: '#1a2a38',
+  },
+  activeThemeText: {
+    fontWeight: '600',
   },
   sortPipe: {
     fontSize: 16,
-    color: '#6a3f1f',
     flexShrink: 0,
   },
   confirmBox: {
@@ -184,7 +210,6 @@ const styles = StyleSheet.create({
   },
   confirmMsg: {
     fontSize: 15,
-    color: '#6a3f1f',
   },
   confirmActions: {
     flexDirection: 'row',
@@ -192,17 +217,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   confirmCancelBtn: {
-    backgroundColor: '#E2D4AD',
     borderRadius: 4,
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
   confirmCancelText: {
     fontSize: 15,
-    color: '#1a2a38',
   },
   confirmClearBtn: {
-    backgroundColor: '#9e3a2a',
     borderRadius: 4,
     paddingVertical: 8,
     paddingHorizontal: 16,

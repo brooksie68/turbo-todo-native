@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import type { Todo } from '../lib/types';
 import { IconBolt, IconPriorityHigh } from './Icons';
+import { useTheme } from '../lib/theme';
 
 export type ButtonLayout = {
   pageX: number;
@@ -51,6 +52,8 @@ export default function ItemOptionsMenu({
   imageCount = 0,
   hasNote,
 }: Props) {
+  const theme = useTheme();
+
   if (!todo) return null;
 
   const { width: screenW, height: screenH } = Dimensions.get('window');
@@ -81,6 +84,7 @@ export default function ItemOptionsMenu({
       />
       <View style={[
         styles.dropdown,
+        { backgroundColor: theme.surface, borderColor: theme.border },
         flipAbove ? { bottom, right } : { top, right },
       ]}>
         {/* Priority row */}
@@ -89,54 +93,54 @@ export default function ItemOptionsMenu({
             style={styles.priorityBtn}
             onPress={() => handle(() => onSetStatus(todo.status === 'elevated' ? null : 'elevated'))}
           >
-            <IconBolt size={20} color={todo.status === 'elevated' ? '#c96a00' : '#aaa'} />
+            <IconBolt size={20} color={todo.status === 'elevated' ? theme.priorityElevated : theme.textSub} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.priorityBtn}
             onPress={() => handle(() => onSetStatus(todo.status === 'top-priority' ? null : 'top-priority'))}
           >
-            <IconPriorityHigh size={20} color={todo.status === 'top-priority' ? '#b52a1a' : '#aaa'} />
+            <IconPriorityHigh size={20} color={todo.status === 'top-priority' ? theme.priorityTop : theme.textSub} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
         <TouchableOpacity style={styles.item} onPress={() => handle(onEdit)}>
-          <Text style={styles.itemText}>Edit</Text>
+          <Text style={[styles.itemText, { color: theme.text }]}>Edit</Text>
         </TouchableOpacity>
 
         {depth === 1 && onAddImage && imageCount < 5 && (
           <TouchableOpacity style={styles.item} onPress={() => handle(onAddImage)}>
-            <Text style={styles.itemText}>Add image</Text>
+            <Text style={[styles.itemText, { color: theme.text }]}>Add image</Text>
           </TouchableOpacity>
         )}
 
         {depth === 1 && onAddUrl && (
           <TouchableOpacity style={styles.item} onPress={() => handle(onAddUrl)}>
-            <Text style={styles.itemText}>Add URL</Text>
+            <Text style={[styles.itemText, { color: theme.text }]}>Add URL</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity style={styles.item} onPress={() => handle(onEditNote)}>
-          <Text style={styles.itemText}>{hasNote ? 'Edit note' : 'Add note'}</Text>
+          <Text style={[styles.itemText, { color: theme.text }]}>{hasNote ? 'Edit note' : 'Add note'}</Text>
         </TouchableOpacity>
 
         {hasNote && (
           <TouchableOpacity style={styles.item} onPress={() => handle(onDeleteNote)}>
-            <Text style={[styles.itemText, styles.dangerText]}>Delete note</Text>
+            <Text style={[styles.itemText, { color: theme.danger }]}>Delete note</Text>
           </TouchableOpacity>
         )}
 
         {depth <= 1 && (
           <TouchableOpacity style={styles.item} onPress={() => handle(onExportForAI)}>
-            <Text style={styles.itemText}>Export for AI</Text>
+            <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>
           </TouchableOpacity>
         )}
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
         <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
-          <Text style={[styles.itemText, styles.dangerText]}>Delete</Text>
+          <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>
         </TouchableOpacity>
       </View>
     </Modal>
@@ -177,14 +181,9 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
-    color: '#1a2a38',
-  },
-  dangerText: {
-    color: '#9e3a2a',
   },
   divider: {
     height: 1,
-    backgroundColor: '#c7ba9b',
     marginVertical: 2,
   },
 });

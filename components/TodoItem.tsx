@@ -14,6 +14,7 @@ import { getImages, deleteImage, type TaskImage } from '../lib/imageStore';
 import { getLinks, deleteLink, type TaskLink } from '../lib/linkStore';
 import ImageViewer from './ImageViewer';
 import type { ButtonLayout } from './ItemOptionsMenu';
+import { useTheme } from '../lib/theme';
 
 const INDENT_PX = 20;
 const MAX_DEPTH = 3;
@@ -26,7 +27,6 @@ type Props = {
   onToggleComplete: (id: number, current: boolean) => void;
   onOptions: (todo: Todo, depth: number, layout: ButtonLayout) => void;
   onAddSubtask: (parentId: number) => void;
-  // signals from parent to refresh images/links after add
   imageRefreshToken?: number;
   linkRefreshToken?: number;
 };
@@ -42,7 +42,9 @@ export default function TodoItem({
   imageRefreshToken,
   linkRefreshToken,
 }: Props) {
+  const theme = useTheme();
   const optionsBtnRef = useRef<View>(null);
+
   const hasChildren = (todo.children?.length ?? 0) > 0;
   const isCollapsed = collapsedIds.has(todo.id);
   const visibleChildren = todo.children ?? [];
@@ -76,11 +78,10 @@ export default function TodoItem({
   }
 
   function getLabelColor() {
-    if (todo.is_complete) return '#aaa';
-    if (todo.status === 'top-priority') return '#b52a1a';
-    if (todo.status === 'elevated') return '#c96a00';
-    const depthColors = ['#1a2a38', '#3a5068', '#5a7088'];
-    return depthColors[Math.min(depth, depthColors.length - 1)];
+    if (todo.is_complete) return theme.textDone;
+    if (todo.status === 'top-priority') return theme.priorityTop;
+    if (todo.status === 'elevated') return theme.priorityElevated;
+    return theme.textDepth[Math.min(depth, 2)];
   }
 
   const labelColor = getLabelColor();
@@ -96,7 +97,11 @@ export default function TodoItem({
       >
         {/* Checkbox */}
         <TouchableOpacity
-          style={[styles.checkbox, todo.is_complete && styles.checkboxDone]}
+          style={[
+            styles.checkbox,
+            { backgroundColor: theme.checkboxBg, borderColor: theme.border },
+            todo.is_complete && { backgroundColor: theme.checkboxDone, borderColor: theme.checkboxDone },
+          ]}
           onPress={() => onToggleComplete(todo.id, todo.is_complete)}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
@@ -123,7 +128,7 @@ export default function TodoItem({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.rowActionBtn}
             >
-              <IconAddBottom size={16} color="#025f96" />
+              <IconAddBottom size={16} color={theme.iconColor} />
             </TouchableOpacity>
           )}
           <View ref={optionsBtnRef} collapsable={false}>
@@ -136,7 +141,7 @@ export default function TodoItem({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.rowActionBtn}
             >
-              <IconOptions size={16} color="#025f96" />
+              <IconOptions size={16} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         </View>
@@ -144,7 +149,7 @@ export default function TodoItem({
 
       {/* Note */}
       {todo.note ? (
-        <Text style={[styles.note, { paddingLeft: indentLeft + 26 }]}>
+        <Text style={[styles.note, { paddingLeft: indentLeft + 26, color: theme.textSub }]}>
           {todo.note}
         </Text>
       ) : null}
@@ -156,10 +161,10 @@ export default function TodoItem({
             {images.map(img => (
               <View key={img.id} style={styles.thumbWrap}>
                 <TouchableOpacity onPress={() => setViewerUri(img.localPath)}>
-                  <Image source={{ uri: img.localPath }} style={styles.thumb} />
+                  <Image source={{ uri: img.localPath }} style={[styles.thumb, { backgroundColor: theme.border }]} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.thumbDelete}
+                  style={[styles.thumbDelete, { backgroundColor: theme.iconColor }]}
                   onPress={() => handleDeleteImage(img.id)}
                   hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
                 >
@@ -180,7 +185,7 @@ export default function TodoItem({
                 style={styles.linkBtn}
                 onPress={() => Linking.openURL(link.url)}
               >
-                <Text style={styles.linkText} numberOfLines={1}>
+                <Text style={[styles.linkText, { color: theme.iconColor }]} numberOfLines={1}>
                   {link.name || link.url}
                 </Text>
               </TouchableOpacity>
@@ -188,7 +193,7 @@ export default function TodoItem({
                 onPress={() => handleDeleteLink(link.id)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <IconClose size={14} color="#025f96" />
+                <IconClose size={14} color={theme.iconColor} />
               </TouchableOpacity>
             </View>
           ))}
@@ -227,7 +232,7 @@ export default function TodoItem({
       )}
 
       {/* Row separator */}
-      <View style={[styles.separator, { marginLeft: indentLeft }]} />
+      <View style={[styles.separator, { marginLeft: indentLeft, backgroundColor: theme.separator }]} />
     </View>
   );
 }
@@ -244,16 +249,10 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderWidth: 1.5,
-    borderColor: '#c7ba9b',
     borderRadius: 3,
-    backgroundColor: '#fffdf5',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-  },
-  checkboxDone: {
-    backgroundColor: '#6a3f1f',
-    borderColor: '#6a3f1f',
   },
   checkmark: {
     color: '#fff',
@@ -267,7 +266,6 @@ const styles = StyleSheet.create({
   },
   labelDone: {
     textDecorationLine: 'line-through',
-    color: '#aaa',
   },
   rowActions: {
     flexDirection: 'row',
@@ -281,7 +279,6 @@ const styles = StyleSheet.create({
   },
   note: {
     fontSize: 12,
-    color: '#888',
     paddingBottom: 4,
     paddingRight: 12,
     fontStyle: 'italic',
@@ -301,7 +298,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 3,
-    backgroundColor: '#c7ba9b',
   },
   thumbDelete: {
     position: 'absolute',
@@ -310,7 +306,6 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: '#025f96',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -329,11 +324,9 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 13,
-    color: '#025f96',
     textDecorationLine: 'underline',
   },
   separator: {
     height: 1,
-    backgroundColor: '#d9ccb4',
   },
 });
