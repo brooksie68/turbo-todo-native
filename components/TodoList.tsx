@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import AddEditModal from './AddEditModal';
 import AddLinkModal from './AddLinkModal';
 import ToolbarOptionsMenu from './ToolbarOptionsMenu';
 import ItemOptionsMenu, { type ButtonLayout } from './ItemOptionsMenu';
-import { useTheme } from '../lib/theme';
+import { useTheme, useThemeContext, themes } from '../lib/theme';
 import {
   IconLogo,
   IconSettings,
@@ -66,11 +66,13 @@ function getAllParentIds(todos: Todo[]): number[] {
 
 export default function TodoList() {
   const insets = useSafeAreaInsets();
-  const theme = useTheme();
+  const { theme, themeId, setThemeId } = useThemeContext();
 
   const [lists, setLists] = useState<List[]>([]);
   const [activeListId, setActiveListId] = useState<number | null>(null);
   const [showListPicker, setShowListPicker] = useState(false);
+  const [themePickerLayout, setThemePickerLayout] = useState<{ top: number; left: number } | null>(null);
+  const logoBtnRef = useRef<View>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
@@ -437,10 +439,20 @@ export default function TodoList() {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]} edges={['top']}>
       {/* ── Header ── */}
       <View style={[styles.header, { backgroundColor: theme.headerBg }]}>
-        {/* Logo — left:8, top:10, 42×42 */}
-        <TouchableOpacity style={styles.logoBtn}>
-          <IconLogo size={42} color={theme.iconColor} />
-        </TouchableOpacity>
+        {/* Logo — left:8, top:10, 42×42 — taps open theme picker */}
+        <View ref={logoBtnRef} collapsable={false} style={styles.logoBtn}>
+          <TouchableOpacity
+            style={styles.logoBtn}
+            onPress={() => {
+              if (themePickerLayout) { setThemePickerLayout(null); return; }
+              logoBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
+                setThemePickerLayout({ top: pageY + h + 4, left: pageX });
+              });
+            }}
+          >
+            <IconLogo size={42} color={theme.iconColor} />
+          </TouchableOpacity>
+        </View>
 
         {/* List selector — left:60, top:15, 189×34 */}
         <TouchableOpacity
@@ -486,6 +498,29 @@ export default function TodoList() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Theme picker dropdown */}
+      {themePickerLayout && (
+        <Modal visible transparent animationType="none" onRequestClose={() => setThemePickerLayout(null)}>
+          <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setThemePickerLayout(null)} />
+          <View style={[
+            styles.themeDropdown,
+            { backgroundColor: theme.surface, borderColor: theme.border, top: themePickerLayout.top, left: themePickerLayout.left },
+          ]}>
+            {Object.values(themes).map((th, i, arr) => (
+              <TouchableOpacity
+                key={th.id}
+                style={[styles.themeItem, i < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.border }]}
+                onPress={() => { setThemeId(th.id); setThemePickerLayout(null); }}
+              >
+                <Text style={[styles.themeItemText, { color: themeId === th.id ? theme.accent : theme.text }, themeId === th.id && styles.themeItemActive]}>
+                  {th.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Modal>
+      )}
 
       {/* Add/edit modal */}
       <AddEditModal
@@ -688,6 +723,30 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // ── Theme picker ──
+  themeDropdown: {
+    position: 'absolute',
+    borderWidth: 1,
+    borderRadius: 4,
+    minWidth: 160,
+    overflow: 'hidden',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+  },
+  themeItem: {
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+  },
+  themeItemText: {
+    fontSize: 16,
+  },
+  themeItemActive: {
+    fontWeight: '600',
   },
 
   // ── List picker ──

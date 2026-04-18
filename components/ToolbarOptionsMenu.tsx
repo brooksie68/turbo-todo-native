@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useThemeContext, themes } from '../lib/theme';
+import { useThemeContext } from '../lib/theme';
 
 type Props = {
   visible: boolean;
@@ -29,7 +29,7 @@ export default function ToolbarOptionsMenu({
   onSort,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const { theme, themeId, setThemeId } = useThemeContext();
+  const { theme } = useThemeContext();
   const [confirmClear, setConfirmClear] = useState(false);
 
   function handleClose() {
@@ -97,32 +97,6 @@ export default function ToolbarOptionsMenu({
               <TouchableOpacity style={styles.sortBtn} onPress={() => { onSort('alpha'); handleClose(); }}>
                 <Text style={[styles.sortBtnText, { color: t.text }]}>Alpha</Text>
               </TouchableOpacity>
-            </View>
-
-            <View style={[styles.divider, { backgroundColor: t.border }]} />
-
-            {/* Theme */}
-            <Text style={[styles.sectionLabel, { color: t.accent }]}>Theme:</Text>
-            <View style={styles.sortRow}>
-              {Object.values(themes).map((th, i, arr) => (
-                <View key={th.id} style={{ flexDirection: 'row', alignItems: 'center', flex: i < arr.length - 1 ? undefined : 1 }}>
-                  <TouchableOpacity
-                    style={styles.sortBtn}
-                    onPress={() => setThemeId(th.id)}
-                  >
-                    <Text style={[
-                      styles.sortBtnText,
-                      { color: themeId === th.id ? t.accent : t.text },
-                      themeId === th.id && styles.activeThemeText,
-                    ]}>
-                      {th.name}
-                    </Text>
-                  </TouchableOpacity>
-                  {i < arr.length - 1 && (
-                    <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
-                  )}
-                </View>
-              ))}
             </View>
 
             <View style={[styles.divider, { backgroundColor: t.border }]} />
@@ -196,9 +170,6 @@ const styles = StyleSheet.create({
   },
   sortBtnText: {
     fontSize: 16,
-  },
-  activeThemeText: {
-    fontWeight: '600',
   },
   sortPipe: {
     fontSize: 16,
