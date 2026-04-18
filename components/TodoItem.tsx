@@ -22,32 +22,32 @@ const MAX_DEPTH = 3;
 type Props = {
   todo: Todo;
   depth: number;
-  collapsedIds: Set<number>;
   onToggleCollapse: (id: number) => void;
   onToggleComplete: (id: number, current: boolean) => void;
   onOptions: (todo: Todo, depth: number, layout: ButtonLayout) => void;
   onAddSubtask: (parentId: number) => void;
   imageRefreshToken?: number;
   linkRefreshToken?: number;
+  onDrag?: () => void;
+  isBeingDragged?: boolean;
 };
 
 export default function TodoItem({
   todo,
   depth,
-  collapsedIds,
   onToggleCollapse,
   onToggleComplete,
   onOptions,
   onAddSubtask,
   imageRefreshToken,
   linkRefreshToken,
+  onDrag,
+  isBeingDragged,
 }: Props) {
   const theme = useTheme();
   const optionsBtnRef = useRef<View>(null);
 
   const hasChildren = (todo.children?.length ?? 0) > 0;
-  const isCollapsed = collapsedIds.has(todo.id);
-  const visibleChildren = todo.children ?? [];
   const canAddChild = depth < MAX_DEPTH - 1;
   const showMedia = depth === 1;
 
@@ -89,11 +89,13 @@ export default function TodoItem({
   const indentLeft = 12 + depth * INDENT_PX;
 
   return (
-    <View>
+    <View style={isBeingDragged ? styles.dragging : undefined}>
       <TouchableOpacity
         style={[styles.row, { paddingLeft: indentLeft }]}
         activeOpacity={0.7}
         onPress={() => { if (hasChildren) onToggleCollapse(todo.id); }}
+        onLongPress={onDrag}
+        delayLongPress={300}
       >
         {/* Checkbox */}
         <TouchableOpacity
@@ -207,30 +209,6 @@ export default function TodoItem({
         onClose={() => setViewerUri(null)}
       />
 
-      {/* Children */}
-      {hasChildren && !isCollapsed && depth < MAX_DEPTH - 1 && (
-        <View>
-          {visibleChildren
-            .slice()
-            .sort((a, b) => {
-              if (a.is_complete !== b.is_complete) return a.is_complete ? 1 : -1;
-              return 0;
-            })
-            .map(child => (
-              <TodoItem
-                key={child.id}
-                todo={child}
-                depth={depth + 1}
-                collapsedIds={collapsedIds}
-                onToggleCollapse={onToggleCollapse}
-                onToggleComplete={onToggleComplete}
-                onOptions={onOptions}
-                onAddSubtask={onAddSubtask}
-              />
-            ))}
-        </View>
-      )}
-
       {/* Row separator */}
       <View style={[styles.separator, { marginLeft: indentLeft, backgroundColor: theme.separator }]} />
     </View>
@@ -328,5 +306,13 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
+  },
+  dragging: {
+    opacity: 0.85,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
 });

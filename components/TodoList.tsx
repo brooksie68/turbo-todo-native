@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,10 @@ import {
   Share,
   StyleSheet,
   ToastAndroid,
+  Vibration,
 } from 'react-native';
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+import type { RenderItemParams } from 'react-native-draggable-flatlist';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
@@ -48,6 +51,32 @@ function buildTree(todos: Todo[]): Todo[] {
     }
   });
   return roots;
+}
+
+type FlatItem = {
+  todo: Todo;
+  depth: number;
+  parentId: number | null;
+};
+
+function flattenVisible(
+  nodes: Todo[],
+  collapsedIds: Set<number>,
+  depth = 0,
+  parentId: number | null = null,
+): FlatItem[] {
+  const result: FlatItem[] = [];
+  for (const node of nodes) {
+    result.push({ todo: node, depth, parentId });
+    if (node.children && node.children.length > 0 && !collapsedIds.has(node.id)) {
+      const sorted = [...node.children].sort((a, b) => {
+        if (a.is_complete !== b.is_complete) return a.is_complete ? 1 : -1;
+        return 0;
+      });
+      result.push(...flattenVisible(sorted, collapsedIds, depth + 1, node.id));
+    }
+  }
+  return result;
 }
 
 function getAllParentIds(todos: Todo[]): number[] {
@@ -96,6 +125,8 @@ export default function TodoList() {
   // Note modal state
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const [noteEditingTodo, setNoteEditingTodo] = useState<Todo | null>(null);
+
+  const [dragExpandedId, setDragExpandedId] = useState<number | null>(null);
 
   // Image / link state
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -416,12 +447,62 @@ export default function TodoList() {
     return result;
   }
 
+  // --- Drag and drop ---
+
+  function handleDragBegin(index: number) {
+    const item = incompleteFlat[index];
+    if (!item) return;
+    Vibration.vibrate(40);
+    if (item.todo.children && item.todo.children.length > 0 && !collapsedIds.has(item.todo.id)) {
+      setDragExpandedId(item.todo.id);
+      setCollapsedIds(prev => {
+        const next = new Set(prev);
+        next.add(item.todo.id);
+        saveCollapsedIds(next);
+        return next;
+      });
+    }
+  }
+
+  async function handleDragEnd({ data: newFlat, from, to }: { data: FlatItem[]; from: number; to: number }) {
+    if (dragExpandedId !== null) {
+      const expandId = dragExpandedId;
+      setDragExpandedId(null);
+      setCollapsedIds(prev => {
+        const next = new Set(prev);
+        next.delete(expandId);
+        saveCollapsedIds(next);
+        return next;
+      });
+    }
+    if (from === to) return;
+    Vibration.vibrate(25);
+    const draggedItem = newFlat[to];
+    if (!draggedItem) return;
+    const siblings = newFlat.filter(fi => fi.parentId === draggedItem.parentId);
+    await Promise.all(
+      siblings.map((fi, idx) =>
+        supabase.from('todos').update({ sort_order: idx * 10 }).eq('id', fi.todo.id)
+      )
+    );
+    if (activeListId !== null) fetchTodos(activeListId, false);
+  }
+
   // --- Render ---
 
   const activeList = lists.find(l => l.id === activeListId) ?? null;
   const incomplete = todos.filter(t => !t.is_complete);
   const complete = todos.filter(t => t.is_complete);
   const allExpanded = collapsedIds.size === 0;
+
+  const incompleteFlat = useMemo(
+    () => flattenVisible(incomplete, collapsedIds),
+    [incomplete, collapsedIds],
+  );
+  const completeFlat = useMemo(
+    () => flattenVisible(complete, collapsedIds),
+    [complete, collapsedIds],
+  );
 
   function toggleAll() {
     if (allExpanded) {
@@ -605,34 +686,45 @@ export default function TodoList() {
       ) : (
         <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
           <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            {incomplete.length === 0 && (
+            {incompleteFlat.length === 0 && (
               <Text style={[styles.emptyState, { color: theme.textSub }]}>No tasks yet.</Text>
             )}
-            {incomplete.map(todo => (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                depth={0}
-                collapsedIds={collapsedIds}
-                onToggleCollapse={toggleCollapse}
-                onToggleComplete={toggleComplete}
-                onOptions={handleOptions}
-                onAddSubtask={id => openAdd(id)}
-                imageRefreshToken={imageRefreshToken}
-                linkRefreshToken={linkRefreshToken}
-              />
-            ))}
+            <DraggableFlatList
+              data={incompleteFlat}
+              keyExtractor={item => String(item.todo.id)}
+              scrollEnabled={false}
+              onDragBegin={handleDragBegin}
+              onDragEnd={handleDragEnd}
+              renderItem={({ item, drag, isActive }: RenderItemParams<FlatItem>) => (
+                <ScaleDecorator>
+                  <TodoItem
+                    todo={item.todo}
+                    depth={item.depth}
+                    onToggleCollapse={toggleCollapse}
+                    onToggleComplete={toggleComplete}
+                    onOptions={handleOptions}
+                    onAddSubtask={id => openAdd(id)}
+                    imageRefreshToken={imageRefreshToken}
+                    linkRefreshToken={linkRefreshToken}
+                    onDrag={drag}
+                    isBeingDragged={isActive}
+                  />
+                </ScaleDecorator>
+              )}
+              renderPlaceholder={() => (
+                <View style={[styles.dropIndicator, { backgroundColor: theme.accent }]} />
+              )}
+            />
           </View>
 
-          {complete.length > 0 && (
+          {completeFlat.length > 0 && (
             <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }, styles.sectionDone]}>
               <Text style={[styles.sectionLabel, { color: theme.accent }]}>Completed</Text>
-              {complete.map(todo => (
+              {completeFlat.map(item => (
                 <TodoItem
-                  key={todo.id}
-                  todo={todo}
-                  depth={0}
-                  collapsedIds={collapsedIds}
+                  key={item.todo.id}
+                  todo={item.todo}
+                  depth={item.depth}
                   onToggleCollapse={toggleCollapse}
                   onToggleComplete={toggleComplete}
                   onOptions={handleOptions}
@@ -806,6 +898,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: 24,
+  },
+  dropIndicator: {
+    height: 2,
+    marginHorizontal: 12,
+    borderRadius: 1,
   },
 
   // ── Toolbar ──
