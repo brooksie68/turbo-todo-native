@@ -33,6 +33,25 @@ import {
   IconExpandUp,
 } from './Icons';
 
+// Renders LinearGradient for themes that define gradientColors, plain View otherwise.
+// LinearGradient requires a native build — this guard prevents warnings in dev builds
+// before expo-linear-gradient has been compiled into the APK.
+function ThemeBg({ style, children }: { style: object; children: React.ReactNode }) {
+  const { theme } = useThemeContext();
+  if (theme.gradientColors) {
+    return (
+      <LinearGradient
+        colors={theme.gradientColors as [string, string, ...string[]]}
+        locations={(theme.gradientLocations ?? undefined) as [number, number, ...number[]] | undefined}
+        style={style}
+      >
+        {children}
+      </LinearGradient>
+    );
+  }
+  return <View style={[style, { backgroundColor: theme.bg }]}>{children}</View>;
+}
+
 export default function TodoList() {
   const insets = useSafeAreaInsets();
   const { theme, themeId, setThemeId } = useThemeContext();
@@ -153,11 +172,7 @@ export default function TodoList() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]} edges={['top']}>
-      <LinearGradient
-        colors={(theme.gradientColors ?? [theme.bg, theme.bg]) as [string, string, ...string[]]}
-        locations={(theme.gradientLocations ?? undefined) as [number, number, ...number[]] | undefined}
-        style={styles.container}
-      >
+      <ThemeBg style={styles.container}>
 
         {/* ── Header ── */}
         <View style={[styles.header, { backgroundColor: theme.headerBg }]}>
@@ -348,7 +363,7 @@ export default function TodoList() {
           </View>
         </View>
 
-      </LinearGradient>
+      </ThemeBg>
     </SafeAreaView>
   );
 }
