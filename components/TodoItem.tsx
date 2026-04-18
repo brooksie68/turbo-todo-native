@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import {
   View,
   Text,
@@ -32,7 +32,7 @@ type Props = {
   isBeingDragged?: boolean;
 };
 
-export default function TodoItem({
+const TodoItem = memo(function TodoItem({
   todo,
   depth,
   onToggleCollapse,
@@ -213,7 +213,9 @@ export default function TodoItem({
       <View style={[styles.separator, { marginLeft: indentLeft, backgroundColor: theme.separator }]} />
     </View>
   );
-}
+});
+
+export default TodoItem;
 
 const styles = StyleSheet.create({
   row: {
