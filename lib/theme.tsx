@@ -24,6 +24,8 @@ export type Theme = {
   checkboxBg: string;
   checkboxDone: string;
   separator: string;
+  gradientColors: string[] | null;
+  gradientLocations: number[] | null;
 };
 
 export const themes: Record<string, Theme> = {
@@ -50,6 +52,8 @@ export const themes: Record<string, Theme> = {
     checkboxBg: '#fffdf5',
     checkboxDone: '#6a3f1f',
     separator: '#d9ccb4',
+    gradientColors: null,
+    gradientLocations: null,
   },
   'bimini-breeze': {
     id: 'bimini-breeze',
@@ -74,6 +78,8 @@ export const themes: Record<string, Theme> = {
     checkboxBg: '#f0fbf7',
     checkboxDone: '#007766',
     separator: '#b0ddd4',
+    gradientColors: ['#fdf5e0', '#c8f0e8', '#7dd8cc'],
+    gradientLocations: [0, 0.6, 1],
   },
 };
 

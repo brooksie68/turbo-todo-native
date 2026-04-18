@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   Modal,
@@ -518,6 +517,7 @@ export default function TodoList() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]} edges={['top']}>
+      <View style={[styles.container, { backgroundColor: theme.gradientColors ? theme.gradientColors[1] : theme.bg }]}>
       {/* ── Header ── */}
       <View style={[styles.header, { backgroundColor: theme.headerBg }]}>
         {/* Logo — left:8, top:10, 42×42 — taps open theme picker */}
@@ -684,40 +684,36 @@ export default function TodoList() {
           <ActivityIndicator color={theme.iconColor} />
         </View>
       ) : (
-        <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
-          <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            {incompleteFlat.length === 0 && (
-              <Text style={[styles.emptyState, { color: theme.textSub }]}>No tasks yet.</Text>
-            )}
-            <DraggableFlatList
-              data={incompleteFlat}
-              keyExtractor={item => String(item.todo.id)}
-              scrollEnabled={false}
-              onDragBegin={handleDragBegin}
-              onDragEnd={handleDragEnd}
-              renderItem={({ item, drag, isActive }: RenderItemParams<FlatItem>) => (
-                <ScaleDecorator>
-                  <TodoItem
-                    todo={item.todo}
-                    depth={item.depth}
-                    onToggleCollapse={toggleCollapse}
-                    onToggleComplete={toggleComplete}
-                    onOptions={handleOptions}
-                    onAddSubtask={id => openAdd(id)}
-                    imageRefreshToken={imageRefreshToken}
-                    linkRefreshToken={linkRefreshToken}
-                    onDrag={drag}
-                    isBeingDragged={isActive}
-                  />
-                </ScaleDecorator>
-              )}
-              renderPlaceholder={() => (
-                <View style={[styles.dropIndicator, { backgroundColor: theme.accent }]} />
-              )}
-            />
-          </View>
-
-          {completeFlat.length > 0 && (
+        <DraggableFlatList
+          data={incompleteFlat}
+          keyExtractor={item => String(item.todo.id)}
+          containerStyle={[styles.scrollArea, { backgroundColor: theme.surface }]}
+          contentContainerStyle={styles.scrollContent}
+          onDragBegin={handleDragBegin}
+          onDragEnd={handleDragEnd}
+          renderItem={({ item, drag, isActive }: RenderItemParams<FlatItem>) => (
+            <ScaleDecorator>
+              <TodoItem
+                todo={item.todo}
+                depth={item.depth}
+                onToggleCollapse={toggleCollapse}
+                onToggleComplete={toggleComplete}
+                onOptions={handleOptions}
+                onAddSubtask={id => openAdd(id)}
+                imageRefreshToken={imageRefreshToken}
+                linkRefreshToken={linkRefreshToken}
+                onDrag={drag}
+                isBeingDragged={isActive}
+              />
+            </ScaleDecorator>
+          )}
+          renderPlaceholder={() => (
+            <View style={[styles.dropIndicator, { backgroundColor: theme.accent }]} />
+          )}
+          ListHeaderComponent={incompleteFlat.length === 0 ? (
+            <Text style={[styles.emptyState, { color: theme.textSub }]}>No tasks yet.</Text>
+          ) : null}
+          ListFooterComponent={completeFlat.length > 0 ? (
             <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }, styles.sectionDone]}>
               <Text style={[styles.sectionLabel, { color: theme.accent }]}>Completed</Text>
               {completeFlat.map(item => (
@@ -732,8 +728,8 @@ export default function TodoList() {
                 />
               ))}
             </View>
-          )}
-        </ScrollView>
+          ) : null}
+        />
       )}
 
       {/* ── Bottom toolbar ── */}
@@ -760,6 +756,7 @@ export default function TodoList() {
             }
           </TouchableOpacity>
         </View>
+      </View>
       </View>
     </SafeAreaView>
   );
