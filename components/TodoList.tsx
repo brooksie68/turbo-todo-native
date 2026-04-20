@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
   Modal,
   FlatList,
   StyleSheet,
@@ -12,11 +13,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
 import type { RenderItemParams } from 'react-native-draggable-flatlist';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { supabase } from '../lib/supabase/client';
+import { runMigration, isMigrationDone } from '../lib/migration';
+import migrationData from '../lib/migration-data.json';
 import type { FlatItem } from '../hooks/useTodoData';
 import { useTodoData } from '../hooks/useTodoData';
 import { useOverlayState } from '../hooks/useOverlayState';
 import TodoItem from './TodoItem';
+import ImageViewer from './ImageViewer';
 import AddEditModal from './AddEditModal';
 import AddLinkModal from './AddLinkModal';
 import ToolbarOptionsMenu from './ToolbarOptionsMenu';
@@ -62,6 +65,7 @@ export default function TodoList() {
   // Header-only state — doesn't affect list rendering
   const [showListPicker, setShowListPicker] = useState(false);
   const [themePickerLayout, setThemePickerLayout] = useState<{ top: number; left: number } | null>(null);
+  const [viewerUri, setViewerUri] = useState<string | null>(null);
   const logoBtnRef = useRef<View>(null);
 
   // ── Stable callbacks for TodoItem props ──────────────────────────────────
@@ -75,8 +79,8 @@ export default function TodoList() {
     if (data.editingId !== null) {
       if (data.activeListId) data.updateTask(data.editingId, task, note, data.activeListId);
     } else {
-      if (data.activeListId && data.userId) {
-        data.addTask(task, note, data.addParentId, data.insertPosition, data.activeListId, data.userId);
+      if (data.activeListId) {
+        data.addTask(task, note, data.addParentId, data.insertPosition, data.activeListId);
       }
     }
   }, [data]);
@@ -97,6 +101,29 @@ export default function TodoList() {
     if (data.activeListId) data.handleClearAll(data.todos, data.activeListId);
   }, [data.todos, data.activeListId, data.handleClearAll]);
 
+  const handleImport = useCallback(async () => {
+    const done = await isMigrationDone();
+    if (done) {
+      Alert.alert('Already imported', 'Supabase data has already been imported.');
+      return;
+    }
+    Alert.alert(
+      'Import from Supabase?',
+      `This will load ${migrationData.lists.length} lists and ${migrationData.todos.length} tasks into the app.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Import', onPress: async () => {
+            await runMigration(migrationData as any);
+            await data.fetchLists();
+            const firstListId = (migrationData as any).lists[0]?.id;
+            if (firstListId) data.fetchTodos(firstListId, true);
+          },
+        },
+      ],
+    );
+  }, [data.fetchLists]);
+
   const handleToggleAll = useCallback(() => {
     data.toggleAll(data.allExpanded);
   }, [data.allExpanded, data.toggleAll]);
@@ -109,7 +136,7 @@ export default function TodoList() {
     if (data.activeListId) data.handleDragEnd(newFlat, from, to, data.activeListId);
   }, [data.activeListId, data.handleDragEnd]);
 
-  // ── renderItem — memoized, stable prop references let React.memo work ───
+  // ── renderItem ───────────────────────────────────────────────────────────
 
   const renderItem = useCallback(({ item, drag, isActive }: RenderItemParams<FlatItem>) => (
     <ScaleDecorator>
@@ -120,8 +147,10 @@ export default function TodoList() {
         onToggleComplete={data.toggleComplete}
         onOptions={overlay.handleOptions}
         onAddSubtask={handleAddSubtask}
-        imageRefreshToken={overlay.imageTokens[item.todo.id] ?? 0}
-        linkRefreshToken={overlay.linkTokens[item.todo.id] ?? 0}
+        images={data.imageMap[item.todo.id]}
+        links={data.linkMap[item.todo.id]}
+        onViewImage={setViewerUri}
+        onMediaChanged={data.refreshMedia}
         onDrag={drag}
         isBeingDragged={isActive}
       />
@@ -129,10 +158,11 @@ export default function TodoList() {
   ), [
     data.toggleCollapse,
     data.toggleComplete,
+    data.imageMap,
+    data.linkMap,
+    data.refreshMedia,
     overlay.handleOptions,
     handleAddSubtask,
-    overlay.imageTokens,
-    overlay.linkTokens,
   ]);
 
   // ── Completed section renderer ───────────────────────────────────────────
@@ -145,10 +175,17 @@ export default function TodoList() {
       onToggleComplete={data.toggleComplete}
       onOptions={overlay.handleOptions}
       onAddSubtask={handleAddSubtask}
+      images={data.imageMap[item.todo.id]}
+      links={data.linkMap[item.todo.id]}
+      onViewImage={setViewerUri}
+      onMediaChanged={data.refreshMedia}
     />
   ), [
     data.toggleCollapse,
     data.toggleComplete,
+    data.imageMap,
+    data.linkMap,
+    data.refreshMedia,
     overlay.handleOptions,
     handleAddSubtask,
   ]);
@@ -175,10 +212,10 @@ export default function TodoList() {
       <ThemeBg style={styles.container}>
 
         {/* ── Header ── */}
-        <View style={[styles.header, { backgroundColor: theme.headerBg }]}>
+        <View style={[styles.header, { backgroundColor: 'transparent' }]}>
           <View ref={logoBtnRef} collapsable={false} style={styles.logoBtn}>
             <TouchableOpacity
-              style={styles.logoBtn}
+              style={styles.logoBtnInner}
               onPress={() => {
                 if (themePickerLayout) { setThemePickerLayout(null); return; }
                 logoBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
@@ -201,11 +238,11 @@ export default function TodoList() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.gearBtn}>
-            <IconSettings size={24} color={theme.iconColor} />
+            <IconSettings size={28} color={theme.iconColor} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.helpBtn}>
-            <IconHelp size={24} color={theme.iconColor} />
+            <IconHelp size={28} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
 
@@ -273,7 +310,7 @@ export default function TodoList() {
           onSort={handleSort}
           onClearCompleted={handleClearCompleted}
           onClearAll={handleClearAll}
-          onSignOut={() => supabase.auth.signOut()}
+          onImport={handleImport}
         />
 
         {/* Item options menu */}
@@ -322,7 +359,7 @@ export default function TodoList() {
           <DraggableFlatList
             data={data.incompleteFlat}
             keyExtractor={item => String(item.todo.id)}
-            containerStyle={[styles.scrollArea, { backgroundColor: theme.surface }]}
+            containerStyle={[styles.scrollArea, { backgroundColor: theme.surface, borderColor: theme.listSelectorBorder }]}
             contentContainerStyle={styles.scrollContent}
             onDragBegin={handleDragBegin}
             onDragEnd={handleDragEnd}
@@ -338,7 +375,7 @@ export default function TodoList() {
         )}
 
         {/* ── Bottom toolbar ── */}
-        <View style={[styles.toolbarOuter, { backgroundColor: theme.headerBg, borderTopColor: theme.headerBorder, paddingBottom: insets.bottom }]}>
+        <View style={[styles.toolbarOuter, { backgroundColor: 'transparent', borderTopColor: theme.headerBorder, paddingBottom: insets.bottom }]}>
           <View style={styles.toolbarInner}>
             <TouchableOpacity style={styles.toolbarLeft} onPress={() => overlay.setShowToolbarMenu(true)}>
               <IconOptions size={24} color={theme.iconColor} />
@@ -363,6 +400,13 @@ export default function TodoList() {
           </View>
         </View>
 
+        {/* Single global image viewer — replaces one-per-row approach */}
+        <ImageViewer
+          visible={viewerUri !== null}
+          uri={viewerUri}
+          onClose={() => setViewerUri(null)}
+        />
+
       </ThemeBg>
     </SafeAreaView>
   );
@@ -379,6 +423,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 8,
     top: 10,
+    width: 42,
+    height: 42,
+  },
+  logoBtnInner: {
     width: 42,
     height: 42,
     alignItems: 'center',
@@ -401,19 +449,19 @@ const styles = StyleSheet.create({
   listSelectorArrow: { fontSize: 10 },
   gearBtn: {
     position: 'absolute',
-    left: 260,
-    top: 20,
-    width: 24,
-    height: 24,
+    left: 258,
+    top: 18,
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },
   helpBtn: {
     position: 'absolute',
-    right: 21,
-    top: 20,
-    width: 24,
-    height: 24,
+    right: 19,
+    top: 18,
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -455,7 +503,7 @@ const styles = StyleSheet.create({
   listPickerTextActive: { fontWeight: '600' },
 
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollArea: { flex: 1 },
+  scrollArea: { flex: 1, borderWidth: 1, borderRadius: 2, marginHorizontal: 6 },
   scrollContent: { paddingBottom: 8 },
   section: {
     margin: 8,

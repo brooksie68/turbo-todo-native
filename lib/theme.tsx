@@ -52,8 +52,8 @@ export const themes: Record<string, Theme> = {
     checkboxBg: '#fffdf5',
     checkboxDone: '#6a3f1f',
     separator: '#d9ccb4',
-    gradientColors: null,
-    gradientLocations: null,
+    gradientColors: ['#ffcb58', '#eeddba', '#ffbe30'],
+    gradientLocations: [0, 0.5, 1],
   },
   'bimini-breeze': {
     id: 'bimini-breeze',

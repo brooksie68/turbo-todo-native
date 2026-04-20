@@ -15,7 +15,7 @@ type Props = {
   onSync: () => void;
   onClearCompleted: () => void;
   onClearAll: () => void;
-  onSignOut: () => void;
+  onImport: () => void;
   onSort: (by: 'status' | 'date' | 'alpha') => void;
 };
 
@@ -25,7 +25,7 @@ export default function ToolbarOptionsMenu({
   onSync,
   onClearCompleted,
   onClearAll,
-  onSignOut,
+  onImport,
   onSort,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -40,7 +40,7 @@ export default function ToolbarOptionsMenu({
   function handleSync() { onSync(); handleClose(); }
   function handleClearCompleted() { onClearCompleted(); handleClose(); }
   function handleClearAll() { setConfirmClear(false); onClearAll(); handleClose(); }
-  function handleSignOut() { onSignOut(); handleClose(); }
+  function handleImport() { onImport(); handleClose(); }
 
   const t = theme;
 
@@ -110,8 +110,8 @@ export default function ToolbarOptionsMenu({
 
             <View style={[styles.divider, { backgroundColor: t.border }]} />
 
-            <TouchableOpacity style={styles.item} onPress={handleSignOut}>
-              <Text style={[styles.itemText, { color: t.text }]}>Sign out</Text>
+            <TouchableOpacity style={styles.item} onPress={handleImport}>
+              <Text style={[styles.itemText, { color: t.text }]}>Import from Supabase</Text>
             </TouchableOpacity>
           </>
         )}

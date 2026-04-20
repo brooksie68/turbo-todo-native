@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Vibration } from 'react-native';
-import { supabase } from '../lib/supabase/client';
+import db from '../lib/db';
 import type { Todo, List } from '../lib/types';
-import { deleteImagesForTodo } from '../lib/imageStore';
+import { deleteImagesForTodo, getAllImages, type TaskImage } from '../lib/imageStore';
+import { getAllLinks, type TaskLink } from '../lib/linkStore';
 
 // ── Tree helpers ────────────────────────────────────────────────────────────
 
@@ -85,6 +86,21 @@ function getSubtreeIds(id: number, nodes: Todo[]): number[] {
   return ids;
 }
 
+// Optimistic tree helpers
+function updateTodoInTree(todos: Todo[], id: number, updates: Partial<Todo>): Todo[] {
+  return todos.map(todo => {
+    if (todo.id === id) return { ...todo, ...updates };
+    if (todo.children?.length) return { ...todo, children: updateTodoInTree(todo.children, id, updates) };
+    return todo;
+  });
+}
+
+function removeTodoFromTree(todos: Todo[], id: number): Todo[] {
+  return todos
+    .filter(t => t.id !== id)
+    .map(t => ({ ...t, children: t.children ? removeTodoFromTree(t.children, id) : [] }));
+}
+
 export function formatItemTree(node: Todo, d: number): string {
   const indent = '  '.repeat(d);
   const label = d === 0 ? `- **${node.task}**` : `${indent}- ${node.task}`;
@@ -101,8 +117,10 @@ export function useTodoData() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
-  const [userId, setUserId] = useState<string | null>(null);
   const [dragExpandedId, setDragExpandedId] = useState<number | null>(null);
+  const [imageMap, setImageMap] = useState<Record<number, TaskImage[]>>({});
+  const [linkMap, setLinkMap] = useState<Record<number, TaskLink[]>>({});
+  const rawTodosRef = useRef<Todo[]>([]);
 
   // CRUD modal
   const [modalVisible, setModalVisible] = useState(false);
@@ -113,40 +131,63 @@ export function useTodoData() {
   const [addParentId, setAddParentId] = useState<number | null>(null);
   const [insertPosition, setInsertPosition] = useState<'top' | 'bottom'>('bottom');
 
+  // ── Media maps ───────────────────────────────────────────────────────────
+
+  const loadAllMedia = useCallback(async (rawTodos: Todo[]) => {
+    const rootIds = new Set(rawTodos.filter(t => t.parent_id === null).map(t => t.id));
+    const depth1Ids = rawTodos
+      .filter(t => t.parent_id !== null && rootIds.has(t.parent_id))
+      .map(t => t.id);
+    if (depth1Ids.length === 0) {
+      setImageMap({});
+      setLinkMap({});
+      return;
+    }
+    const [images, links] = await Promise.all([
+      getAllImages(depth1Ids),
+      getAllLinks(depth1Ids),
+    ]);
+    setImageMap(images);
+    setLinkMap(links);
+  }, []);
+
+  const refreshMedia = useCallback(async () => {
+    await loadAllMedia(rawTodosRef.current);
+  }, [loadAllMedia]);
+
   // ── Fetch ────────────────────────────────────────────────────────────────
 
   const fetchTodos = useCallback(async (listId: number, showLoading = true) => {
     if (showLoading) setLoading(true);
-    const { data } = await supabase
-      .from('todos')
-      .select('*')
-      .eq('list_id', listId)
-      .order('sort_order', { ascending: true })
-      .order('inserted_at', { ascending: true });
-    if (data) setTodos(buildTree(data as Todo[]));
+    const rows = await db.getAllAsync<Todo>(
+      'SELECT * FROM todos WHERE list_id = ? ORDER BY sort_order, inserted_at',
+      [listId],
+    );
+    // SQLite returns is_complete as 0/1 integers — cast to boolean
+    const data = rows.map(t => ({ ...t, is_complete: !!t.is_complete }));
+    rawTodosRef.current = data;
+    setTodos(buildTree(data));
+    loadAllMedia(data);
     if (showLoading) setLoading(false);
-  }, []);
+  }, [loadAllMedia]);
 
   const fetchLists = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    setUserId(user.id);
-
-    const { data } = await supabase
-      .from('lists')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .order('inserted_at', { ascending: true });
-
-    let loadedLists = (data as List[]) || [];
+    let loadedLists = await db.getAllAsync<List>(
+      'SELECT * FROM lists ORDER BY sort_order, inserted_at',
+      [],
+    );
 
     if (loadedLists.length === 0) {
-      const { data: newList } = await supabase
-        .from('lists')
-        .insert({ user_id: user.id, name: 'My ToDo List', sort_order: 0 })
-        .select()
-        .single();
-      if (newList) loadedLists = [newList as List];
+      const result = await db.runAsync(
+        'INSERT INTO lists (name, sort_order) VALUES (?, ?)',
+        ['My ToDo List', 0],
+      );
+      loadedLists = [{
+        id: result.lastInsertRowId,
+        name: 'My ToDo List',
+        sort_order: 0,
+        inserted_at: new Date().toISOString(),
+      }];
     }
 
     setLists(loadedLists);
@@ -201,7 +242,6 @@ export function useTodoData() {
     });
   }, []);
 
-  // Persist collapse changes — separate effect to avoid stale activeListId closure
   useEffect(() => {
     saveCollapsedIds(collapsedIds, activeListId);
   }, [collapsedIds, activeListId, saveCollapsedIds]);
@@ -219,70 +259,80 @@ export function useTodoData() {
 
   // ── CRUD ─────────────────────────────────────────────────────────────────
 
-  const toggleComplete = useCallback(async (id: number, current: boolean) => {
-    await supabase.from('todos').update({ is_complete: !current }).eq('id', id);
-    setActiveListId(prev => { if (prev !== null) fetchTodos(prev, false); return prev; });
-  }, [fetchTodos]);
+  const toggleComplete = useCallback((id: number, current: boolean) => {
+    const newValue = !current;
+    setTodos(prev => updateTodoInTree(prev, id, { is_complete: newValue }));
+    db.runAsync('UPDATE todos SET is_complete = ? WHERE id = ?', [newValue ? 1 : 0, id]);
+  }, []);
 
-  async function getSortOrderForInsert(parentId: number | null, position: 'top' | 'bottom', listId: number): Promise<number> {
-    let query = supabase.from('todos').select('sort_order').eq('list_id', listId);
-    if (parentId === null) query = query.is('parent_id', null);
-    else query = query.eq('parent_id', parentId);
-    const { data } = await query;
-    if (!data || data.length === 0) return 0;
-    const orders = data.map((r: { sort_order: number }) => r.sort_order);
+  async function getSortOrderForInsert(
+    parentId: number | null,
+    position: 'top' | 'bottom',
+    listId: number,
+  ): Promise<number> {
+    const rows = await db.getAllAsync<{ sort_order: number }>(
+      parentId === null
+        ? 'SELECT sort_order FROM todos WHERE list_id = ? AND parent_id IS NULL'
+        : 'SELECT sort_order FROM todos WHERE parent_id = ?',
+      parentId === null ? [listId] : [parentId],
+    );
+    if (rows.length === 0) return 0;
+    const orders = rows.map(r => r.sort_order);
     return position === 'top' ? Math.min(...orders) - 1 : Math.max(...orders) + 1;
   }
 
-  const addTask = useCallback(async (task: string, note: string, parentId: number | null, position: 'top' | 'bottom', listId: number, uid: string) => {
+  const addTask = useCallback(async (
+    task: string,
+    note: string,
+    parentId: number | null,
+    position: 'top' | 'bottom',
+    listId: number,
+  ) => {
     const sort_order = await getSortOrderForInsert(parentId, position, listId);
-    await supabase.from('todos').insert({
-      user_id: uid,
-      list_id: listId,
-      parent_id: parentId,
-      task,
-      note: note || null,
-      is_complete: false,
-      sort_order,
-    });
+    await db.runAsync(
+      'INSERT INTO todos (list_id, parent_id, task, note, is_complete, sort_order) VALUES (?, ?, ?, ?, 0, ?)',
+      [listId, parentId, task, note || null, sort_order],
+    );
     fetchTodos(listId, false);
   }, [fetchTodos]);
 
-  const updateTask = useCallback(async (id: number, task: string, note: string, listId: number) => {
-    await supabase.from('todos').update({ task, note: note || null }).eq('id', id);
-    fetchTodos(listId, false);
-  }, [fetchTodos]);
+  const updateTask = useCallback((id: number, task: string, note: string, _listId: number) => {
+    setTodos(prev => updateTodoInTree(prev, id, { task, note: note || null }));
+    db.runAsync('UPDATE todos SET task = ?, note = ? WHERE id = ?', [task, note || null, id]);
+  }, []);
 
-  const deleteTask = useCallback(async (id: number, currentTodos: Todo[], listId: number) => {
+  const deleteTask = useCallback(async (id: number, currentTodos: Todo[], _listId: number) => {
     const subtreeIds = getSubtreeIds(id, currentTodos);
-    await supabase.from('todos').delete().eq('id', id);
+    setTodos(prev => removeTodoFromTree(prev, id));
     await Promise.all(subtreeIds.map(tid => deleteImagesForTodo(tid)));
-    fetchTodos(listId, false);
-  }, [fetchTodos]);
+    // CASCADE in schema handles deleting subtree rows
+    db.runAsync('DELETE FROM todos WHERE id = ?', [id]);
+  }, []);
 
-  const setStatus = useCallback(async (id: number, status: string | null, listId: number) => {
-    await supabase.from('todos').update({ status }).eq('id', id);
-    fetchTodos(listId, false);
-  }, [fetchTodos]);
+  const setStatus = useCallback((id: number, status: string | null, _listId: number) => {
+    setTodos(prev => updateTodoInTree(prev, id, { status }));
+    db.runAsync('UPDATE todos SET status = ? WHERE id = ?', [status, id]);
+  }, []);
 
-  const handleClearCompleted = useCallback(async (currentTodos: Todo[], listId: number) => {
+  const handleClearCompleted = useCallback(async (currentTodos: Todo[], _listId: number) => {
     const flat = flattenAll(currentTodos);
     const completedIds = flat.filter(t => t.is_complete).map(t => t.id);
     if (completedIds.length === 0) return;
-    await supabase.from('todos').delete().in('id', completedIds);
+    setTodos(prev => prev.filter(t => !t.is_complete));
     await Promise.all(completedIds.map(id => deleteImagesForTodo(id)));
-    fetchTodos(listId, false);
-  }, [fetchTodos]);
+    const placeholders = completedIds.map(() => '?').join(',');
+    db.runAsync(`DELETE FROM todos WHERE id IN (${placeholders})`, completedIds);
+  }, []);
 
   const handleClearAll = useCallback(async (currentTodos: Todo[], listId: number) => {
     const flat = flattenAll(currentTodos);
     const allIds = flat.map(t => t.id);
-    await supabase.from('todos').delete().eq('list_id', listId);
+    setTodos([]);
     await Promise.all(allIds.map(id => deleteImagesForTodo(id)));
-    fetchTodos(listId, false);
-  }, [fetchTodos]);
+    db.runAsync('DELETE FROM todos WHERE list_id = ?', [listId]);
+  }, []);
 
-  const handleSort = useCallback((criterion: string, listId: number) => {
+  const handleSort = useCallback((criterion: string, _listId: number) => {
     setTodos(prev => {
       const incomplete = prev.filter(t => !t.is_complete);
       const complete = prev.filter(t => t.is_complete);
@@ -295,11 +345,16 @@ export function useTodoData() {
       } else {
         sorted.sort((a, b) => a.task.localeCompare(b.task, undefined, { sensitivity: 'base' }));
       }
-      Promise.all(sorted.map((t, idx) =>
-        supabase.from('todos').update({ sort_order: idx * 10 }).eq('id', t.id),
-      ));
+      sorted.forEach((t, idx) => {
+        db.runAsync('UPDATE todos SET sort_order = ? WHERE id = ?', [idx * 10, t.id]);
+      });
       return [...sorted, ...complete];
     });
+  }, []);
+
+  const saveNote = useCallback(async (id: number, note: string | null, _listId: number) => {
+    setTodos(prev => updateTodoInTree(prev, id, { note }));
+    db.runAsync('UPDATE todos SET note = ? WHERE id = ?', [note, id]);
   }, []);
 
   // ── CRUD modal helpers ───────────────────────────────────────────────────
@@ -335,6 +390,15 @@ export function useTodoData() {
     }
   }, [collapsedIds]);
 
+  const handleDragBeginById = useCallback((id: number, incompleteFlat: FlatItem[]) => {
+    Vibration.vibrate(40);
+    const item = incompleteFlat.find(fi => fi.todo.id === id);
+    if (item && item.todo.children && item.todo.children.length > 0 && !collapsedIds.has(id)) {
+      setDragExpandedId(id);
+      setCollapsedIds(prev => { const next = new Set(prev); next.add(id); return next; });
+    }
+  }, [collapsedIds]);
+
   const handleDragEnd = useCallback(async (
     newFlat: FlatItem[],
     from: number,
@@ -353,7 +417,7 @@ export function useTodoData() {
     const siblings = newFlat.filter(fi => fi.parentId === draggedItem.parentId);
     await Promise.all(
       siblings.map((fi, idx) =>
-        supabase.from('todos').update({ sort_order: idx * 10 }).eq('id', fi.todo.id),
+        db.runAsync('UPDATE todos SET sort_order = ? WHERE id = ?', [idx * 10, fi.todo.id]),
       ),
     );
     fetchTodos(listId, false);
@@ -377,7 +441,7 @@ export function useTodoData() {
 
   return {
     // state
-    lists, activeListId, todos, loading, userId, collapsedIds,
+    lists, activeListId, todos, loading, collapsedIds,
     // derived
     activeList, incomplete, complete, incompleteFlat, completeFlat, allExpanded,
     // list management
@@ -386,13 +450,15 @@ export function useTodoData() {
     toggleCollapse, toggleAll,
     // CRUD
     toggleComplete, addTask, updateTask, deleteTask, setStatus,
-    handleClearCompleted, handleClearAll, handleSort,
+    handleClearCompleted, handleClearAll, handleSort, saveNote,
     // CRUD modal
     modalVisible, setModalVisible,
     modalTitle, modalInitialTask, modalInitialNote, editingId, addParentId, insertPosition,
     openAdd, openEdit,
     // drag
-    handleDragBegin, handleDragEnd,
+    handleDragBegin, handleDragBeginById, handleDragEnd,
+    // media maps
+    imageMap, linkMap, refreshMedia,
   };
 }
 

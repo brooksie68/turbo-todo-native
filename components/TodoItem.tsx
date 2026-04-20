@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
+import React, { useCallback, useRef, memo } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,8 @@ import {
 } from 'react-native';
 import type { Todo } from '../lib/types';
 import { IconOptions, IconAddBottom, IconClose } from './Icons';
-import { getImages, deleteImage, type TaskImage } from '../lib/imageStore';
-import { getLinks, deleteLink, type TaskLink } from '../lib/linkStore';
-import ImageViewer from './ImageViewer';
+import { deleteImage, type TaskImage } from '../lib/imageStore';
+import { deleteLink, type TaskLink } from '../lib/linkStore';
 import type { ButtonLayout } from './ItemOptionsMenu';
 import { useTheme } from '../lib/theme';
 
@@ -26,8 +25,10 @@ type Props = {
   onToggleComplete: (id: number, current: boolean) => void;
   onOptions: (todo: Todo, depth: number, layout: ButtonLayout) => void;
   onAddSubtask: (parentId: number) => void;
-  imageRefreshToken?: number;
-  linkRefreshToken?: number;
+  images?: TaskImage[];
+  links?: TaskLink[];
+  onViewImage?: (uri: string) => void;
+  onMediaChanged?: () => void;
   onDrag?: () => void;
   isBeingDragged?: boolean;
 };
@@ -39,8 +40,10 @@ const TodoItem = memo(function TodoItem({
   onToggleComplete,
   onOptions,
   onAddSubtask,
-  imageRefreshToken,
-  linkRefreshToken,
+  images = [],
+  links = [],
+  onViewImage,
+  onMediaChanged,
   onDrag,
   isBeingDragged,
 }: Props) {
@@ -51,31 +54,15 @@ const TodoItem = memo(function TodoItem({
   const canAddChild = depth < MAX_DEPTH - 1;
   const showMedia = depth === 1;
 
-  const [images, setImages] = useState<TaskImage[]>([]);
-  const [links, setLinks] = useState<TaskLink[]>([]);
-  const [viewerUri, setViewerUri] = useState<string | null>(null);
+  const handleDeleteImage = useCallback(async (id: string) => {
+    await deleteImage(todo.id, id);
+    onMediaChanged?.();
+  }, [todo.id, onMediaChanged]);
 
-  const loadImages = useCallback(async () => {
-    if (!showMedia) return;
-    setImages(await getImages(todo.id));
-  }, [todo.id, showMedia]);
-
-  const loadLinks = useCallback(async () => {
-    if (!showMedia) return;
-    setLinks(await getLinks(todo.id));
-  }, [todo.id, showMedia]);
-
-  useEffect(() => { loadImages(); }, [loadImages, imageRefreshToken]);
-  useEffect(() => { loadLinks(); }, [loadLinks, linkRefreshToken]);
-
-  async function handleDeleteImage(id: string) {
-    setImages(await deleteImage(todo.id, id));
-  }
-
-  async function handleDeleteLink(id: number) {
+  const handleDeleteLink = useCallback(async (id: number) => {
     await deleteLink(id);
-    loadLinks();
-  }
+    onMediaChanged?.();
+  }, [onMediaChanged]);
 
   function getLabelColor() {
     if (todo.is_complete) return theme.textDone;
@@ -89,7 +76,18 @@ const TodoItem = memo(function TodoItem({
   const indentLeft = 12 + depth * INDENT_PX;
 
   return (
-    <View style={isBeingDragged ? styles.dragging : undefined}>
+    <View style={isBeingDragged ? {
+      elevation: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      borderWidth: 1.5,
+      borderColor: theme.accent,
+      borderRadius: 4,
+      backgroundColor: theme.surface,
+      zIndex: 999,
+    } : undefined}>
       <TouchableOpacity
         style={[styles.row, { paddingLeft: indentLeft }]}
         activeOpacity={0.7}
@@ -162,7 +160,7 @@ const TodoItem = memo(function TodoItem({
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
             {images.map(img => (
               <View key={img.id} style={styles.thumbWrap}>
-                <TouchableOpacity onPress={() => setViewerUri(img.localPath)}>
+                <TouchableOpacity onPress={() => onViewImage?.(img.localPath)}>
                   <Image source={{ uri: img.localPath }} style={[styles.thumb, { backgroundColor: theme.border }]} />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -201,13 +199,6 @@ const TodoItem = memo(function TodoItem({
           ))}
         </View>
       )}
-
-      {/* Full-screen image viewer */}
-      <ImageViewer
-        visible={viewerUri !== null}
-        uri={viewerUri}
-        onClose={() => setViewerUri(null)}
-      />
 
       {/* Row separator */}
       <View style={[styles.separator, { marginLeft: indentLeft, backgroundColor: theme.separator }]} />
@@ -308,13 +299,5 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-  },
-  dragging: {
-    opacity: 0.85,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
   },
 });

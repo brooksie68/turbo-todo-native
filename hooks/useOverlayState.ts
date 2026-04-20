@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Alert, Share, ToastAndroid } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { supabase } from '../lib/supabase/client';
 import type { Todo } from '../lib/types';
 import { getImages, addImages, MAX_IMAGES } from '../lib/imageStore';
 import { addLink, getLinks } from '../lib/linkStore';
@@ -11,8 +10,8 @@ import { formatItemTree } from './useTodoData';
 
 export function useOverlayState(data: TodoData) {
   const {
-    deleteTask, updateTask, fetchTodos,
-    activeListId, activeList, userId, todos, openEdit,
+    deleteTask, saveNote,
+    activeListId, activeList, todos, openEdit, refreshMedia,
   } = data;
 
   // Item options menu
@@ -31,10 +30,6 @@ export function useOverlayState(data: TodoData) {
   // Link modal
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkTargetTodo, setLinkTargetTodo] = useState<Todo | null>(null);
-
-  // Per-item refresh tokens — only the affected item sees a token bump
-  const [imageTokens, setImageTokens] = useState<Record<number, number>>({});
-  const [linkTokens, setLinkTokens] = useState<Record<number, number>>({});
 
   // ── Item menu ────────────────────────────────────────────────────────────
 
@@ -73,7 +68,7 @@ export function useOverlayState(data: TodoData) {
 
     const uris = result.assets.map(a => a.uri);
     await addImages(todo.id, uris);
-    setImageTokens(prev => ({ ...prev, [todo.id]: (prev[todo.id] ?? 0) + 1 }));
+    refreshMedia();
 
     if (uris.length < result.assets.length) {
       ToastAndroid.show(
@@ -81,7 +76,7 @@ export function useOverlayState(data: TodoData) {
         ToastAndroid.SHORT,
       );
     }
-  }, []);
+  }, [refreshMedia]);
 
   const handleAddUrl = useCallback((todo: Todo) => {
     setLinkTargetTodo(todo);
@@ -90,12 +85,12 @@ export function useOverlayState(data: TodoData) {
 
   const handleSaveLink = useCallback(async (url: string, name: string) => {
     setShowLinkModal(false);
-    if (!linkTargetTodo || !userId) return;
+    if (!linkTargetTodo) return;
     const existing = await getLinks(linkTargetTodo.id);
-    await addLink(userId, linkTargetTodo.id, url, name || null, existing.length);
-    setLinkTokens(prev => ({ ...prev, [linkTargetTodo.id]: (prev[linkTargetTodo.id] ?? 0) + 1 }));
+    await addLink(linkTargetTodo.id, url, name || null, existing.length);
+    refreshMedia();
     setLinkTargetTodo(null);
-  }, [linkTargetTodo, userId]);
+  }, [linkTargetTodo, refreshMedia]);
 
   // ── Note ─────────────────────────────────────────────────────────────────
 
@@ -108,16 +103,14 @@ export function useOverlayState(data: TodoData) {
   const handleSaveNote = useCallback(async (_task: string, note: string) => {
     setNoteModalVisible(false);
     if (!noteEditingTodo || !activeListId) return;
-    await supabase.from('todos').update({ note: note || null }).eq('id', noteEditingTodo.id);
-    fetchTodos(activeListId, false);
+    await saveNote(noteEditingTodo.id, note || null, activeListId);
     setNoteEditingTodo(null);
-  }, [noteEditingTodo, activeListId, fetchTodos]);
+  }, [noteEditingTodo, activeListId, saveNote]);
 
   const handleDeleteNote = useCallback(async () => {
     if (!itemMenuTodo || !activeListId) return;
-    await supabase.from('todos').update({ note: null }).eq('id', itemMenuTodo.id);
-    fetchTodos(activeListId, false);
-  }, [itemMenuTodo, activeListId, fetchTodos]);
+    await saveNote(itemMenuTodo.id, null, activeListId);
+  }, [itemMenuTodo, activeListId, saveNote]);
 
   // ── Export / delete ──────────────────────────────────────────────────────
 
@@ -178,7 +171,5 @@ export function useOverlayState(data: TodoData) {
     // link modal
     showLinkModal, setShowLinkModal, linkTargetTodo, setLinkTargetTodo,
     handleSaveLink,
-    // per-item refresh tokens
-    imageTokens, linkTokens,
   };
 }

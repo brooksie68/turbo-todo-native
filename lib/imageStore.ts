@@ -29,6 +29,22 @@ export async function getImages(todoId: number): Promise<TaskImage[]> {
   catch { return []; }
 }
 
+export async function getAllImages(todoIds: number[]): Promise<Record<number, TaskImage[]>> {
+  if (todoIds.length === 0) return {};
+  const keys = todoIds.map(storageKey);
+  const pairs = await AsyncStorage.multiGet(keys);
+  const result: Record<number, TaskImage[]> = {};
+  pairs.forEach(([, value], i) => {
+    const id = todoIds[i];
+    if (value) {
+      try { result[id] = JSON.parse(value); } catch { result[id] = []; }
+    } else {
+      result[id] = [];
+    }
+  });
+  return result;
+}
+
 export async function addImages(todoId: number, uris: string[]): Promise<TaskImage[]> {
   const existing = await getImages(todoId);
   const slots = MAX_IMAGES - existing.length;
