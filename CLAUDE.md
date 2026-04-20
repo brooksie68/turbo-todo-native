@@ -24,7 +24,11 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - ✅ Phase 6 — Theme system (Default + Bimini Breeze, gradient bg, ThemeContext)
 - ✅ Phase 7 — Drag-and-drop reorder (live, long-press to drag, parent auto-collapse)
 - ✅ Phase 9 — EAS dev build complete, APK installed, using dev build not Expo Go
-- ✅ Local storage migration — SQLite schema, data layer rewrite, Supabase export + import (79 todos, 3 lists live on device)
+- ✅ Local storage migration — SQLite local-first, Supabase data imported (79 todos, 3 lists live on device)
+- ✅ TodoList.tsx split into TodoListHeader, TodoListToolbar, useImport hook
+- ✅ Child count badge — collapsed parents show "- N" inline after task text
+- ✅ Pin to top — depth-0 items, pin icon, float to top, drag blocked, Unpin in menu
+- ✅ Row UI polish — + button replaces add-subtask icon (18px bold), kebab 18px, gap 14px
 - ⬜ Phase 8 — Polish (pixel-perfect header/toolbar, performance)
 
 ## Key decisions
@@ -47,10 +51,8 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Active
-- [ ] QA pass: expand/collapse, drag-and-drop, menus, images, links, themes
+- [ ] QA pass: expand/collapse, drag-and-drop, menus, images, links, themes, pin
 - [ ] Phase 8: pixel-perfect header/toolbar polish
-- [ ] Fix child count indicator: not showing; show number of direct children instead of +
-- [ ] Pin item to top (depth 0 only): pin icon after text, blocks drag/drop, "Unpin item" in options menu
 - [ ] Production EAS build
 - [ ] Supabase sync as optional paid backup feature (long-term)
 
