@@ -160,3 +160,11 @@ export function IconClose({ size = 24, color = '#025f96' }: IconProps) {
     </Svg>
   );
 }
+
+export function IconPin({ size = 24, color = '#025f96' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M16 3H8v7l-2 3h5v7l1 2 1-2v-7h5l-2-3V3z" fill={color} />
+    </Svg>
+  );
+}

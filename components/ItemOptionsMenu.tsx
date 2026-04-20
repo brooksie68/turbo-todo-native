@@ -26,6 +26,7 @@ type Props = {
   onEdit: () => void;
   onDelete: () => void;
   onSetStatus: (status: string | null) => void;
+  onPin: () => void;
   onAddImage?: () => void;
   onAddUrl?: () => void;
   onEditNote: () => void;
@@ -44,6 +45,7 @@ export default function ItemOptionsMenu({
   onEdit,
   onDelete,
   onSetStatus,
+  onPin,
   onAddImage,
   onAddUrl,
   onEditNote,
@@ -134,6 +136,14 @@ export default function ItemOptionsMenu({
         {depth <= 1 && (
           <TouchableOpacity style={styles.item} onPress={() => handle(onExportForAI)}>
             <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>
+          </TouchableOpacity>
+        )}
+
+        {depth === 0 && (
+          <TouchableOpacity style={styles.item} onPress={() => handle(onPin)}>
+            <Text style={[styles.itemText, { color: theme.text }]}>
+              {todo.pinned ? 'Unpin item' : 'Pin to top'}
+            </Text>
           </TouchableOpacity>
         )}
 

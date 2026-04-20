@@ -163,8 +163,8 @@ export function useTodoData() {
       'SELECT * FROM todos WHERE list_id = ? ORDER BY sort_order, inserted_at',
       [listId],
     );
-    // SQLite returns is_complete as 0/1 integers — cast to boolean
-    const data = rows.map(t => ({ ...t, is_complete: !!t.is_complete }));
+    // SQLite returns booleans as 0/1 integers — cast them
+    const data = rows.map(t => ({ ...t, is_complete: !!t.is_complete, pinned: !!t.pinned }));
     rawTodosRef.current = data;
     setTodos(buildTree(data));
     loadAllMedia(data);
@@ -314,6 +314,11 @@ export function useTodoData() {
     db.runAsync('UPDATE todos SET status = ? WHERE id = ?', [status, id]);
   }, []);
 
+  const setPinned = useCallback((id: number, pinned: boolean) => {
+    setTodos(prev => updateTodoInTree(prev, id, { pinned }));
+    db.runAsync('UPDATE todos SET pinned = ? WHERE id = ?', [pinned ? 1 : 0, id]);
+  }, []);
+
   const handleClearCompleted = useCallback(async (currentTodos: Todo[], _listId: number) => {
     const flat = flattenAll(currentTodos);
     const completedIds = flat.filter(t => t.is_complete).map(t => t.id);
@@ -414,6 +419,11 @@ export function useTodoData() {
     Vibration.vibrate(25);
     const draggedItem = newFlat[to];
     if (!draggedItem) return;
+    // Prevent dropping above a pinned item at depth 0
+    if (draggedItem.depth === 0) {
+      const pinnedCount = newFlat.filter(fi => fi.depth === 0 && fi.todo.pinned).length;
+      if (to < pinnedCount) return;
+    }
     const siblings = newFlat.filter(fi => fi.parentId === draggedItem.parentId);
     await Promise.all(
       siblings.map((fi, idx) =>
@@ -426,7 +436,14 @@ export function useTodoData() {
   // ── Derived ──────────────────────────────────────────────────────────────
 
   const activeList = useMemo(() => lists.find(l => l.id === activeListId) ?? null, [lists, activeListId]);
-  const incomplete = useMemo(() => todos.filter(t => !t.is_complete), [todos]);
+  const incomplete = useMemo(
+    () => [...todos.filter(t => !t.is_complete)].sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return 0;
+    }),
+    [todos],
+  );
   const complete = useMemo(() => todos.filter(t => t.is_complete), [todos]);
   const allExpanded = collapsedIds.size === 0;
 
@@ -449,7 +466,7 @@ export function useTodoData() {
     // collapse
     toggleCollapse, toggleAll,
     // CRUD
-    toggleComplete, addTask, updateTask, deleteTask, setStatus,
+    toggleComplete, addTask, updateTask, deleteTask, setStatus, setPinned,
     handleClearCompleted, handleClearAll, handleSort, saveNote,
     // CRUD modal
     modalVisible, setModalVisible,

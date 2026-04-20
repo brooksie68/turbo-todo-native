@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconOptions, IconAddBottom, IconClose } from './Icons';
+import { IconOptions, IconAddBottom, IconClose, IconPin } from './Icons';
 import { deleteImage, type TaskImage } from '../lib/imageStore';
 import { deleteLink, type TaskLink } from '../lib/linkStore';
 import type { ButtonLayout } from './ItemOptionsMenu';
@@ -21,6 +21,7 @@ const MAX_DEPTH = 3;
 type Props = {
   todo: Todo;
   depth: number;
+  isCollapsed?: boolean;
   onToggleCollapse: (id: number) => void;
   onToggleComplete: (id: number, current: boolean) => void;
   onOptions: (todo: Todo, depth: number, layout: ButtonLayout) => void;
@@ -36,6 +37,7 @@ type Props = {
 const TodoItem = memo(function TodoItem({
   todo,
   depth,
+  isCollapsed = false,
   onToggleCollapse,
   onToggleComplete,
   onOptions,
@@ -92,7 +94,7 @@ const TodoItem = memo(function TodoItem({
         style={[styles.row, { paddingLeft: indentLeft }]}
         activeOpacity={0.7}
         onPress={() => { if (hasChildren) onToggleCollapse(todo.id); }}
-        onLongPress={onDrag}
+        onLongPress={todo.pinned ? undefined : onDrag}
         delayLongPress={300}
       >
         {/* Checkbox */}
@@ -108,17 +110,29 @@ const TodoItem = memo(function TodoItem({
           {todo.is_complete && <Text style={styles.checkmark}>✓</Text>}
         </TouchableOpacity>
 
-        {/* Label */}
-        <Text
-          style={[
-            styles.label,
-            { color: labelColor, fontSize },
-            todo.is_complete && styles.labelDone,
-          ]}
-          numberOfLines={0}
-        >
-          {todo.task}
-        </Text>
+        {/* Label + child count */}
+        <View style={styles.labelRow}>
+          <Text
+            style={[
+              styles.label,
+              { color: labelColor, fontSize },
+              todo.is_complete && styles.labelDone,
+            ]}
+            numberOfLines={0}
+          >
+            {todo.task}
+          </Text>
+          {hasChildren && isCollapsed && (
+            <Text style={[styles.childCount, { color: theme.textSub, marginLeft: 4 }]}>
+              {'- '}{todo.children!.length}
+            </Text>
+          )}
+        </View>
+
+        {/* Pin indicator */}
+        {todo.pinned && (
+          <IconPin size={12} color={theme.accent} />
+        )}
 
         {/* Row actions */}
         <View style={styles.rowActions}>
@@ -128,7 +142,7 @@ const TodoItem = memo(function TodoItem({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.rowActionBtn}
             >
-              <IconAddBottom size={16} color={theme.iconColor} />
+              <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
             </TouchableOpacity>
           )}
           <View ref={optionsBtnRef} collapsable={false}>
@@ -141,7 +155,7 @@ const TodoItem = memo(function TodoItem({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.rowActionBtn}
             >
-              <IconOptions size={16} color={theme.iconColor} />
+              <IconOptions size={18} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         </View>
@@ -231,8 +245,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 13,
   },
-  label: {
+  labelRow: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    flexWrap: 'wrap',
+  },
+  label: {
     fontWeight: '400',
   },
   labelDone: {
@@ -241,12 +260,22 @@ const styles = StyleSheet.create({
   rowActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     flexShrink: 0,
   },
   rowActionBtn: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  addPlus: {
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 18,
+  },
+  childCount: {
+    fontSize: 12,
+    fontWeight: '500',
+    flexShrink: 0,
   },
   note: {
     fontSize: 12,

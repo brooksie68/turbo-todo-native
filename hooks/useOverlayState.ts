@@ -10,7 +10,7 @@ import { formatItemTree } from './useTodoData';
 
 export function useOverlayState(data: TodoData) {
   const {
-    deleteTask, saveNote,
+    deleteTask, saveNote, setPinned,
     activeListId, activeList, todos, openEdit, refreshMedia,
   } = data;
 
@@ -157,6 +157,10 @@ export function useOverlayState(data: TodoData) {
     if (itemMenuTodo) handleAddUrl(itemMenuTodo);
   }, [itemMenuTodo, handleAddUrl]);
 
+  const handleMenuPin = useCallback(() => {
+    if (itemMenuTodo) setPinned(itemMenuTodo.id, !itemMenuTodo.pinned);
+  }, [itemMenuTodo, setPinned]);
+
   return {
     // menu
     showToolbarMenu, setShowToolbarMenu,
@@ -164,6 +168,7 @@ export function useOverlayState(data: TodoData) {
     handleOptions, closeItemMenu,
     // item menu actions (pre-bound to itemMenuTodo)
     handleMenuEdit, handleMenuSetStatus, handleMenuAddImage, handleMenuAddUrl,
+    handleMenuPin,
     handleEditNote, handleDeleteNote, handleExportForAI, handleItemDelete,
     // note modal
     noteModalVisible, setNoteModalVisible, noteEditingTodo, setNoteEditingTodo,

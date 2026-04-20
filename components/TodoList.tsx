@@ -103,6 +103,7 @@ export default function TodoList() {
       <TodoItem
         todo={item.todo}
         depth={item.depth}
+        isCollapsed={data.collapsedIds.has(item.todo.id)}
         onToggleCollapse={data.toggleCollapse}
         onToggleComplete={data.toggleComplete}
         onOptions={overlay.handleOptions}
@@ -118,13 +119,14 @@ export default function TodoList() {
   ), [
     data.toggleCollapse, data.toggleComplete,
     data.imageMap, data.linkMap, data.refreshMedia,
-    overlay.handleOptions, handleAddSubtask,
+    data.collapsedIds, overlay.handleOptions, handleAddSubtask,
   ]);
 
   const renderCompletedItem = useCallback(({ item }: { item: FlatItem }) => (
     <TodoItem
       todo={item.todo}
       depth={item.depth}
+      isCollapsed={data.collapsedIds.has(item.todo.id)}
       onToggleCollapse={data.toggleCollapse}
       onToggleComplete={data.toggleComplete}
       onOptions={overlay.handleOptions}
@@ -137,7 +139,7 @@ export default function TodoList() {
   ), [
     data.toggleCollapse, data.toggleComplete,
     data.imageMap, data.linkMap, data.refreshMedia,
-    overlay.handleOptions, handleAddSubtask,
+    data.collapsedIds, overlay.handleOptions, handleAddSubtask,
   ]);
 
   const listFooter = data.completeFlat.length > 0 ? (
@@ -191,6 +193,7 @@ export default function TodoList() {
           onEdit={overlay.handleMenuEdit}
           onDelete={overlay.handleItemDelete}
           onSetStatus={overlay.handleMenuSetStatus}
+          onPin={overlay.handleMenuPin}
           onAddImage={overlay.handleMenuAddImage}
           onAddUrl={overlay.handleMenuAddUrl}
           onEditNote={overlay.handleEditNote}

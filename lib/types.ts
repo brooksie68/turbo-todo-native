@@ -15,5 +15,6 @@ export type Todo = {
   inserted_at: string;
   note?: string | null;
   status?: string | null;
+  pinned?: boolean;
   children?: Todo[];
 };
