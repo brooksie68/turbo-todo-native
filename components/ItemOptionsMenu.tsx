@@ -89,7 +89,7 @@ export default function ItemOptionsMenu({
         { backgroundColor: theme.surface, borderColor: theme.border },
         flipAbove ? { bottom, right } : { top, right },
       ]}>
-        {/* Priority row */}
+        {/* Priority row — always shown */}
         <View style={styles.priorityRow}>
           <TouchableOpacity
             style={styles.priorityBtn}
@@ -107,51 +107,65 @@ export default function ItemOptionsMenu({
 
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
-        <TouchableOpacity style={styles.item} onPress={() => handle(onEdit)}>
-          <Text style={[styles.itemText, { color: theme.text }]}>Edit</Text>
-        </TouchableOpacity>
+        {depth === 0 ? (
+          <>
+            <TouchableOpacity style={styles.item} onPress={() => handle(onPin)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>
+                {todo.pinned ? 'Unpin item' : 'Pin to top'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.item} onPress={() => handle(onExportForAI)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.item} onPress={() => handle(onEdit)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>Edit</Text>
+            </TouchableOpacity>
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
+              <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity style={styles.item} onPress={() => handle(onEdit)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>Edit</Text>
+            </TouchableOpacity>
 
-        {depth === 1 && onAddImage && imageCount < 5 && (
-          <TouchableOpacity style={styles.item} onPress={() => handle(onAddImage)}>
-            <Text style={[styles.itemText, { color: theme.text }]}>Add image</Text>
-          </TouchableOpacity>
+            {depth === 1 && onAddImage && imageCount < 5 && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onAddImage)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Add image</Text>
+              </TouchableOpacity>
+            )}
+
+            {depth === 1 && onAddUrl && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onAddUrl)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Add URL</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity style={styles.item} onPress={() => handle(onEditNote)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>{hasNote ? 'Edit note' : 'Add note'}</Text>
+            </TouchableOpacity>
+
+            {hasNote && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onDeleteNote)}>
+                <Text style={[styles.itemText, { color: theme.danger }]}>Delete note</Text>
+              </TouchableOpacity>
+            )}
+
+            {depth === 1 && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onExportForAI)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>
+              </TouchableOpacity>
+            )}
+
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
+            <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
+              <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>
+            </TouchableOpacity>
+          </>
         )}
-
-        {depth === 1 && onAddUrl && (
-          <TouchableOpacity style={styles.item} onPress={() => handle(onAddUrl)}>
-            <Text style={[styles.itemText, { color: theme.text }]}>Add URL</Text>
-          </TouchableOpacity>
-        )}
-
-        <TouchableOpacity style={styles.item} onPress={() => handle(onEditNote)}>
-          <Text style={[styles.itemText, { color: theme.text }]}>{hasNote ? 'Edit note' : 'Add note'}</Text>
-        </TouchableOpacity>
-
-        {hasNote && (
-          <TouchableOpacity style={styles.item} onPress={() => handle(onDeleteNote)}>
-            <Text style={[styles.itemText, { color: theme.danger }]}>Delete note</Text>
-          </TouchableOpacity>
-        )}
-
-        {depth <= 1 && (
-          <TouchableOpacity style={styles.item} onPress={() => handle(onExportForAI)}>
-            <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>
-          </TouchableOpacity>
-        )}
-
-        {depth === 0 && (
-          <TouchableOpacity style={styles.item} onPress={() => handle(onPin)}>
-            <Text style={[styles.itemText, { color: theme.text }]}>
-              {todo.pinned ? 'Unpin item' : 'Pin to top'}
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-        <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
-          <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>
-        </TouchableOpacity>
       </View>
     </Modal>
   );

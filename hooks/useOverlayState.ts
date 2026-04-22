@@ -20,6 +20,10 @@ export function useOverlayState(data: TodoData) {
   const [itemMenuLayout, setItemMenuLayout] = useState<ButtonLayout | null>(null);
   const [itemMenuImageCount, setItemMenuImageCount] = useState(0);
 
+  // Add-child menu (depth-0 + button)
+  const [addMenuTodo, setAddMenuTodo] = useState<Todo | null>(null);
+  const [addMenuLayout, setAddMenuLayout] = useState<ButtonLayout | null>(null);
+
   // Toolbar menu
   const [showToolbarMenu, setShowToolbarMenu] = useState(false);
 
@@ -30,6 +34,40 @@ export function useOverlayState(data: TodoData) {
   // Link modal
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkTargetTodo, setLinkTargetTodo] = useState<Todo | null>(null);
+
+  // ── Add-child menu ───────────────────────────────────────────────────────
+
+  const handleShowAddMenu = useCallback((todo: Todo, _depth: number, layout: ButtonLayout) => {
+    setAddMenuTodo(todo);
+    setAddMenuLayout(layout);
+  }, []);
+
+  const closeAddMenu = useCallback(() => {
+    setAddMenuTodo(null);
+    setAddMenuLayout(null);
+  }, []);
+
+  const handleAddMenuSubtask = useCallback(() => {
+    if (addMenuTodo) data.openAdd(addMenuTodo.id, 'bottom');
+  }, [addMenuTodo, data.openAdd]);
+
+  const handleAddMenuImage = useCallback(() => {
+    if (addMenuTodo) handleAddImage(addMenuTodo);
+    // handleAddImage defined later in this scope — stable useCallback ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addMenuTodo]);
+
+  const handleAddMenuUrl = useCallback(() => {
+    if (addMenuTodo) handleAddUrl(addMenuTodo);
+    // handleAddUrl defined later in this scope — stable useCallback ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addMenuTodo]);
+
+  const handleAddMenuNote = useCallback(() => {
+    if (!addMenuTodo) return;
+    setNoteEditingTodo(addMenuTodo);
+    setNoteModalVisible(true);
+  }, [addMenuTodo]);
 
   // ── Item menu ────────────────────────────────────────────────────────────
 
@@ -166,6 +204,10 @@ export function useOverlayState(data: TodoData) {
     showToolbarMenu, setShowToolbarMenu,
     itemMenuTodo, itemMenuDepth, itemMenuLayout, itemMenuImageCount,
     handleOptions, closeItemMenu,
+    // add-child menu
+    addMenuTodo, addMenuLayout,
+    handleShowAddMenu, closeAddMenu,
+    handleAddMenuSubtask, handleAddMenuImage, handleAddMenuUrl, handleAddMenuNote,
     // item menu actions (pre-bound to itemMenuTodo)
     handleMenuEdit, handleMenuSetStatus, handleMenuAddImage, handleMenuAddUrl,
     handleMenuPin,

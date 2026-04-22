@@ -2,20 +2,18 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/theme';
-import { IconOptions, IconAddBottom, IconAddTop, IconExpandDown, IconExpandUp } from './Icons';
+import { IconOptions, IconExpandDown, IconExpandUp } from './Icons';
 
 type Props = {
   onOpenMenu: () => void;
-  onAddBottom: () => void;
-  onAddTop: () => void;
+  onAddNew: () => void;
   onToggleAll: () => void;
   allExpanded: boolean;
 };
 
 export default function TodoListToolbar({
   onOpenMenu,
-  onAddBottom,
-  onAddTop,
+  onAddNew,
   onToggleAll,
   allExpanded,
 }: Props) {
@@ -29,15 +27,9 @@ export default function TodoListToolbar({
           <IconOptions size={24} color={theme.iconColor} />
         </TouchableOpacity>
 
-        <View style={styles.toolbarCenter}>
-          <TouchableOpacity style={styles.toolbarIconBtn} onPress={onAddBottom}>
-            <IconAddBottom size={18} color={theme.iconColor} />
-          </TouchableOpacity>
-          <Text style={[styles.newLabel, { color: theme.iconColor }]}>new</Text>
-          <TouchableOpacity style={styles.toolbarIconBtn} onPress={onAddTop}>
-            <IconAddTop size={18} color={theme.iconColor} />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.toolbarCenter} onPress={onAddNew}>
+          <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarRight} onPress={onToggleAll}>
           {allExpanded
@@ -62,7 +54,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingLeft: 24,
-    paddingRight: 0,
   },
   toolbarCenter: {
     position: 'absolute',
@@ -70,16 +61,13 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     height: 42,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
   },
-  toolbarIconBtn: { padding: 4 },
-  newLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+  addPlus: {
+    fontSize: 36,
+    fontWeight: '900',
+    lineHeight: 40,
   },
   toolbarRight: {
     position: 'absolute',

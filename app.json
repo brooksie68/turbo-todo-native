@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "turbo-todo-native",
+    "name": "Turbo Todo",
     "slug": "turbo-todo-native",
     "scheme": "turbotodo",
     "version": "1.0.0",
@@ -11,15 +11,15 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFBE30"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/adaptive-icon-fg.png",
+        "backgroundImage": "./assets/adaptive-icon-bg.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -30,13 +30,20 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-document-picker"
     ],
     "extra": {
       "router": {},
       "eas": {
         "projectId": "75fb98de-78e4-4c86-9adf-0d651c3e3213"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/75fb98de-78e4-4c86-9adf-0d651c3e3213"
     }
   }
 }

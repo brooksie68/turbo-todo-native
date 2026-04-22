@@ -7,13 +7,13 @@ import type { TodoData } from './useTodoData';
 export function useImport(data: Pick<TodoData, 'fetchLists' | 'fetchTodos'>) {
   const handleImport = useCallback(async () => {
     const done = await isMigrationDone();
-    if (done) {
-      Alert.alert('Already imported', 'Supabase data has already been imported.');
-      return;
-    }
+    const msg = done
+      ? `Re-import will overwrite all current data. Load ${migrationData.lists.length} lists and ${migrationData.todos.length} tasks?`
+      : `This will load ${migrationData.lists.length} lists and ${migrationData.todos.length} tasks into the app.`;
+
     Alert.alert(
-      'Import from Supabase?',
-      `This will load ${migrationData.lists.length} lists and ${migrationData.todos.length} tasks into the app.`,
+      done ? 'Re-import from Supabase?' : 'Import from Supabase?',
+      msg,
       [
         { text: 'Cancel', style: 'cancel' },
         {

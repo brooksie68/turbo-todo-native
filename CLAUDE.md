@@ -3,76 +3,114 @@
 React Native + Expo conversion of TurboTodo web app. Target: native Android. **Local-first storage (SQLite on device).** Supabase is optional future sync feature only.
 
 **Project dir:** `C:/Users/brook/ai-projects/turbo-todo-native/`
-**Dev:** `npx expo start` (use dev build APK, not Expo Go)
-**EAS:** `eas build --profile development --platform android`
+**JS-only changes:** `eas update --channel production --message "..."` — no build needed, OTA to device
+**New native package:** `eas build --profile production --platform android` — required when adding native packages or changing app.json plugins
 
 ## Stack
 - Expo SDK 54, Expo Router, TypeScript
-- expo-sqlite (local SQLite DB — primary data store, no Supabase required)
+- expo-sqlite (local SQLite DB — primary data store)
 - AsyncStorage for local persistence (images, preferences)
 - expo-image-picker (gallery + camera)
+- expo-file-system (image storage + backup I/O)
+- expo-document-picker (backup restore — file picker)
+- expo-sharing (backup export — share sheet)
 - expo-linear-gradient (gradient bg)
 - react-native-draggable-flatlist + reanimated 4.1.1 + gesture-handler
-- `.npmrc` has `legacy-peer-deps=true` (peer dep conflict workaround)
+- react-native-zip-archive@7.0.2 (backup zip — pinned to 7.0.2, 7.1.0 has Gradle bug)
 
-## Phase status
-- ✅ Phase 1 — Scaffold (Expo + Router + TypeScript)
-- ✅ Phase 2 — Auth gate removed; app routes directly to todo list
-- ✅ Phase 3 — Core data + tree render
-- ✅ Phase 4 — CRUD (add/edit/delete/complete, toolbar, menus)
-- ✅ Phase 5 — Images (local via expo-file-system) + Links (SQLite task_links)
-- ✅ Phase 6 — Theme system (Default + Bimini Breeze, gradient bg, ThemeContext)
-- ✅ Phase 7 — Drag-and-drop reorder (live, long-press to drag, parent auto-collapse)
-- ✅ Phase 9 — EAS dev build complete, APK installed, using dev build not Expo Go
-- ✅ Local storage migration — SQLite local-first, Supabase data imported (79 todos, 3 lists live on device)
-- ✅ TodoList.tsx split into TodoListHeader, TodoListToolbar, useImport hook
-- ✅ Child count badge — collapsed parents show "- N" inline after task text
-- ✅ Pin to top — depth-0 items, pin icon, float to top, drag blocked, Unpin in menu
-- ✅ Row UI polish — + button replaces add-subtask icon (18px bold), kebab 18px, gap 14px
-- ⬜ Phase 8 — Polish (pixel-perfect header/toolbar, performance)
+## Production build
+- APK sideloaded on James's Android device
+- OTA updates via expo-updates, channel: production
+- runtimeVersion policy: appVersion (currently "1.0.0")
+- **Workflow: edit code → `eas update` → kill + relaunch app. No Metro server needed.**
 
-## Key decisions
-- **Local-first**: All data in SQLite on device. No Supabase dependency for core use.
-- Supabase sync = future paid feature (not built yet)
-- Auth removed — single user, no login screen
-- Options menus: positioned dropdowns (not bottom sheets) — matches web app exactly
-- Theme picker: logo button dropdown (same as web app)
-- No drag handles — long-press row body to initiate drag
-- Parent auto-collapses on drag start, re-expands on drop
-- Images stored locally (expo-file-system + AsyncStorage)
-- Links stored in SQLite `task_links` table
+## App icon
+- Adaptive icon: `assets/adaptive-icon-fg.png` (1024x1024, logo centered in safe zone, transparent bg) + `assets/adaptive-icon-bg.png` (1024x1024, gold gradient)
+- Fallback: `assets/icon.png` (1024x1024, composed flat icon)
+- Source files: `C:/Users/brook/ai-projects/turbo-todo/images/native-icons/`
 
-## Data migration
-- Export script: `scripts/export-supabase.js` — pulls from Supabase, writes `scripts/migration-data.json`
-- In-app: toolbar menu → **Import from Supabase** — one-time import, guarded by AsyncStorage flag
-- Migration data bundled at: `lib/migration-data.json`
-- Migration function: `lib/migration.ts`
+## Features (all shipped as of 2026-04-22)
+- 3 lists, todos fully loaded from original Supabase migration
+- Add/edit/delete tasks at all depths (3 levels max)
+- Complete/uncomplete with optimistic updates
+- Drag-and-drop reorder (long-press, siblings only, parent auto-collapse)
+- Collapse/expand individual items and all at once
+- Status: elevated (bolt icon), top-priority (exclamation icon)
+- Notes on any item
+- Images on depth-1 items (local file system, up to 5)
+- Links on depth-1 items (SQLite task_links table)
+- Export for AI (share sheet, markdown outline)
+- 2 themes: Default (gold gradient), Bimini Breeze (teal gradient)
+- Theme picker via logo button dropdown
+- Child count badge on collapsed parents ("- N")
+- Pin to top: depth-0 only, floats above incomplete list, blocks drag
+- Row UI: + button (add subtask) + kebab (options), 14px gap
+- **Gear menu (header):** New list / Rename / Delete list with confirm
+- **Help modal:** Full scrollable help, all features documented, themed
+- **Backup system:** zip archive containing JSON (all lists/todos/links) + image files organized by todo ID. Export via share sheet, restore via file picker. One zip = complete backup.
+  - Export: toolbar options → Back up → share sheet → save zip to Google Drive
+  - Restore: toolbar options → Restore → confirm → file picker → pick zip → full restore
+  - lib/backup.ts: `exportBackup()` and `importBackup()`
+  - react-native-zip-archive@7.0.2 for zip/unzip, expo-sharing for share sheet, expo-document-picker for file picker
+
+## Toolbar options menu (bottom sheet)
+1. Back up | Restore (split row, top)
+2. Sort by: Status | Date | Alpha
+3. Clear all completed
+4. Clear entire list (with confirm)
+
+## Key files
+- `lib/db.ts` — SQLite init, schema, WAL mode
+- `lib/types.ts` — List, Todo types
+- `lib/theme.tsx` — ThemeContext, themes, ThemeBg
+- `lib/backup.ts` — exportBackup, importBackup
+- `lib/imageStore.ts` — AsyncStorage image helpers
+- `lib/linkStore.ts` — SQLite link helpers
+- `hooks/useTodoData.ts` — all data logic, CRUD, list management (createList/renameList/deleteList)
+- `hooks/useOverlayState.ts` — menu/modal state
+- `components/TodoList.tsx` — main shell
+- `components/TodoListHeader.tsx` — header bar, list picker, gear menu, theme picker
+- `components/TodoListToolbar.tsx` — bottom toolbar
+- `components/TodoItem.tsx` — row renderer
+- `components/ToolbarOptionsMenu.tsx` — bottom sheet options
+- `components/ItemOptionsMenu.tsx` — per-item dropdown
+- `components/HelpModal.tsx` — full-screen help overlay
+- `components/Icons.tsx` — all SVG icons
+
+## Data model (SQLite)
+- `lists`: id, name, sort_order, inserted_at
+- `todos`: id, list_id, parent_id, task, note, is_complete, status, sort_order, inserted_at, pinned
+- `task_links`: id, todo_id, url, name, sort_order
+- Images: expo-file-system at `task-images/{todoId}/{filename}` + AsyncStorage metadata keys `turbotodo-images-{todoId}`
+
+## Important notes
+- react-native-zip-archive must stay at 7.0.2 — 7.1.0 has a Java switch/double type mismatch compile error
+- SQLite returns booleans as 0/1 integers — cast with `!!` on fetch
+- No drag handles — long-press row body initiates drag
+- Pinned items float to top of incomplete list, cannot be dragged
 
 ## Todo
 
 ### Active
-- [ ] QA pass: expand/collapse, drag-and-drop, menus, images, links, themes, pin
+- [ ] QA pass: expand/collapse, drag-and-drop, menus, images, links, themes, pin, gear menu, help
 - [ ] Phase 8: pixel-perfect header/toolbar polish
-- [ ] Production EAS build
-- [ ] Supabase sync as optional paid backup feature (long-term)
 
 ### Backlog
-- [ ] Move item to another list (e.g. daily list)
-- [ ] Print export to a thin paper list with checkboxes
+- [ ] Move item to another list
+- [ ] Print export to thin paper list with checkboxes
 - [ ] Close up indenting
 - [ ] Archive completed items — stored, downloadable as JSON
 - [ ] Animate logo in splash screen
-- [ ] Row level add: menu of choices (Subtask, Image, URL); add URL and images to parent items directly
-- [ ] Image and URL rows should be able to be checked off with checkboxes
+- [ ] Row level add: menu of choices (Subtask, Image, URL)
+- [ ] Image and URL rows checked off with checkboxes
 - [ ] App top bar color changes when theme switches
 - [ ] Add "send to top or bottom" to options menu
-- [ ] Make Add Subtask just a plus icon; simplify bottom toolbar
+- [ ] Simplify bottom toolbar
 - [ ] Export to CSV and XLSX
-- [ ] Spellchecker (or OS function?)
-- [ ] Add OK check to new items as well as Enter
+- [ ] Spellchecker
 - [ ] Magic meal machine integration
-- [ ] Gardening app integration — planting windows
-- [ ] List row alert level icons (need SVGs)
-- [ ] Investigate keyboard options (à la Google Keep)
+- [ ] Gardening app integration
+- [ ] List row alert level icons
 - [ ] Categories
 - [ ] Alerts
+- [ ] Supabase sync as optional paid backup feature (long-term)

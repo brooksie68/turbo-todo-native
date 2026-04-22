@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
+  ToastAndroid,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
@@ -13,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { FlatItem } from '../hooks/useTodoData';
 import { useTodoData } from '../hooks/useTodoData';
 import { useOverlayState } from '../hooks/useOverlayState';
-import { useImport } from '../hooks/useImport';
 import TodoItem from './TodoItem';
 import TodoListHeader from './TodoListHeader';
 import TodoListToolbar from './TodoListToolbar';
@@ -22,7 +22,10 @@ import AddEditModal from './AddEditModal';
 import AddLinkModal from './AddLinkModal';
 import ToolbarOptionsMenu from './ToolbarOptionsMenu';
 import ItemOptionsMenu from './ItemOptionsMenu';
+import AddChildMenu from './AddChildMenu';
 import { useTheme, useThemeContext } from '../lib/theme';
+import { exportBackup, importBackup } from '../lib/backup';
+import HelpModal from './HelpModal';
 
 // Renders LinearGradient for themes that define gradientColors, plain View otherwise.
 function ThemeBg({ style, children }: { style: object; children: React.ReactNode }) {
@@ -47,9 +50,10 @@ export default function TodoList() {
 
   const data = useTodoData();
   const overlay = useOverlayState(data);
-  const { handleImport } = useImport(data);
+
 
   const [viewerUri, setViewerUri] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   // ── Callbacks ────────────────────────────────��───────────────────────────
 
@@ -68,13 +72,31 @@ export default function TodoList() {
     }
   }, [data]);
 
-  const handleSync = useCallback(() => {
-    if (data.activeListId) data.fetchTodos(data.activeListId, false);
-  }, [data.activeListId, data.fetchTodos]);
-
   const handleSort = useCallback((criterion: string) => {
     if (data.activeListId) data.handleSort(criterion, data.activeListId);
   }, [data.activeListId, data.handleSort]);
+
+  const handleBackup = useCallback(async () => {
+    try {
+      ToastAndroid.show('Preparing backup…', ToastAndroid.SHORT);
+      await exportBackup();
+    } catch {
+      ToastAndroid.show('Backup failed', ToastAndroid.SHORT);
+    }
+  }, []);
+
+  const handleRestore = useCallback(async () => {
+    try {
+      const ok = await importBackup();
+      if (ok) {
+        await data.fetchLists();
+        if (data.activeListId !== null) await data.fetchTodos(data.activeListId, false);
+        ToastAndroid.show('Restored from backup', ToastAndroid.SHORT);
+      }
+    } catch {
+      ToastAndroid.show('Restore failed — invalid backup file', ToastAndroid.SHORT);
+    }
+  }, [data.fetchLists, data.activeListId, data.fetchTodos]);
 
   const handleClearCompleted = useCallback(() => {
     if (data.activeListId) data.handleClearCompleted(data.todos, data.activeListId);
@@ -108,6 +130,7 @@ export default function TodoList() {
         onToggleComplete={data.toggleComplete}
         onOptions={overlay.handleOptions}
         onAddSubtask={handleAddSubtask}
+        onShowAddMenu={overlay.handleShowAddMenu}
         images={data.imageMap[item.todo.id]}
         links={data.linkMap[item.todo.id]}
         onViewImage={setViewerUri}
@@ -119,7 +142,7 @@ export default function TodoList() {
   ), [
     data.toggleCollapse, data.toggleComplete,
     data.imageMap, data.linkMap, data.refreshMedia,
-    data.collapsedIds, overlay.handleOptions, handleAddSubtask,
+    data.collapsedIds, overlay.handleOptions, handleAddSubtask, overlay.handleShowAddMenu,
   ]);
 
   const renderCompletedItem = useCallback(({ item }: { item: FlatItem }) => (
@@ -131,6 +154,7 @@ export default function TodoList() {
       onToggleComplete={data.toggleComplete}
       onOptions={overlay.handleOptions}
       onAddSubtask={handleAddSubtask}
+      onShowAddMenu={overlay.handleShowAddMenu}
       images={data.imageMap[item.todo.id]}
       links={data.linkMap[item.todo.id]}
       onViewImage={setViewerUri}
@@ -139,7 +163,7 @@ export default function TodoList() {
   ), [
     data.toggleCollapse, data.toggleComplete,
     data.imageMap, data.linkMap, data.refreshMedia,
-    data.collapsedIds, overlay.handleOptions, handleAddSubtask,
+    data.collapsedIds, overlay.handleOptions, handleAddSubtask, overlay.handleShowAddMenu,
   ]);
 
   const listFooter = data.completeFlat.length > 0 ? (
@@ -164,6 +188,10 @@ export default function TodoList() {
           activeListId={data.activeListId}
           activeList={data.activeList}
           onSwitchList={data.switchToList}
+          onCreateList={data.createList}
+          onRenameList={data.renameList}
+          onDeleteList={data.deleteList}
+          onHelp={() => setShowHelp(true)}
         />
 
         {/* Modals */}
@@ -178,11 +206,11 @@ export default function TodoList() {
         <ToolbarOptionsMenu
           visible={overlay.showToolbarMenu}
           onClose={() => overlay.setShowToolbarMenu(false)}
-          onSync={handleSync}
           onSort={handleSort}
           onClearCompleted={handleClearCompleted}
           onClearAll={handleClearAll}
-          onImport={handleImport}
+          onBackup={handleBackup}
+          onRestore={handleRestore}
         />
         <ItemOptionsMenu
           visible={overlay.itemMenuTodo !== null}
@@ -216,6 +244,15 @@ export default function TodoList() {
           onClose={() => { overlay.setShowLinkModal(false); overlay.setLinkTargetTodo(null); }}
           onSave={overlay.handleSaveLink}
         />
+        <AddChildMenu
+          visible={overlay.addMenuTodo !== null}
+          buttonLayout={overlay.addMenuLayout}
+          onClose={overlay.closeAddMenu}
+          onAddSubtask={overlay.handleAddMenuSubtask}
+          onAddImage={overlay.handleAddMenuImage}
+          onAddUrl={overlay.handleAddMenuUrl}
+          onAddNote={overlay.handleAddMenuNote}
+        />
 
         {/* Todo list */}
         {data.loading ? (
@@ -243,8 +280,7 @@ export default function TodoList() {
 
         <TodoListToolbar
           onOpenMenu={() => overlay.setShowToolbarMenu(true)}
-          onAddBottom={() => data.openAdd(null, 'bottom')}
-          onAddTop={() => data.openAdd(null, 'top')}
+          onAddNew={() => data.openAdd(null, 'top')}
           onToggleAll={handleToggleAll}
           allExpanded={data.allExpanded}
         />
@@ -254,6 +290,8 @@ export default function TodoList() {
           uri={viewerUri}
           onClose={() => setViewerUri(null)}
         />
+
+        <HelpModal visible={showHelp} onClose={() => setShowHelp(false)} />
 
       </ThemeBg>
     </SafeAreaView>

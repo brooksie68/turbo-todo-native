@@ -12,35 +12,35 @@ import { useThemeContext } from '../lib/theme';
 type Props = {
   visible: boolean;
   onClose: () => void;
-  onSync: () => void;
+  onBackup: () => void;
+  onRestore: () => void;
   onClearCompleted: () => void;
   onClearAll: () => void;
-  onImport: () => void;
   onSort: (by: 'status' | 'date' | 'alpha') => void;
 };
 
 export default function ToolbarOptionsMenu({
   visible,
   onClose,
-  onSync,
+  onBackup,
+  onRestore,
   onClearCompleted,
   onClearAll,
-  onImport,
   onSort,
 }: Props) {
   const insets = useSafeAreaInsets();
   const { theme } = useThemeContext();
-  const [confirmClear, setConfirmClear] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'clear' | 'restore' | null>(null);
 
   function handleClose() {
-    setConfirmClear(false);
+    setConfirmAction(null);
     onClose();
   }
 
-  function handleSync() { onSync(); handleClose(); }
   function handleClearCompleted() { onClearCompleted(); handleClose(); }
-  function handleClearAll() { setConfirmClear(false); onClearAll(); handleClose(); }
-  function handleImport() { onImport(); handleClose(); }
+  function handleClearAll() { setConfirmAction(null); onClearAll(); handleClose(); }
+  function handleBackup() { onBackup(); handleClose(); }
+  function handleRestore() { setConfirmAction(null); onRestore(); handleClose(); }
 
   const t = theme;
 
@@ -57,33 +57,56 @@ export default function ToolbarOptionsMenu({
         onPress={handleClose}
       />
       <View style={[styles.sheet, { backgroundColor: t.surface, borderColor: t.border, paddingBottom: insets.bottom + 8 }]}>
-        {confirmClear ? (
+        {confirmAction === 'clear' ? (
           <View style={styles.confirmBox}>
             <Text style={[styles.confirmMsg, { color: t.accent }]}>This cannot be undone</Text>
             <View style={styles.confirmActions}>
               <TouchableOpacity
-                style={[styles.confirmCancelBtn, { backgroundColor: t.border }]}
-                onPress={() => setConfirmClear(false)}
+                style={[styles.confirmBtn, { backgroundColor: t.border }]}
+                onPress={() => setConfirmAction(null)}
               >
-                <Text style={[styles.confirmCancelText, { color: t.text }]}>Cancel</Text>
+                <Text style={[styles.confirmBtnText, { color: t.text }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.confirmClearBtn, { backgroundColor: t.danger }]}
+                style={[styles.confirmBtn, { backgroundColor: t.danger }]}
                 onPress={handleClearAll}
               >
-                <Text style={styles.confirmClearText}>Clear</Text>
+                <Text style={[styles.confirmBtnText, { color: '#fff' }]}>Clear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : confirmAction === 'restore' ? (
+          <View style={styles.confirmBox}>
+            <Text style={[styles.confirmMsg, { color: t.accent }]}>This will replace all your current data. This cannot be undone.</Text>
+            <View style={styles.confirmActions}>
+              <TouchableOpacity
+                style={[styles.confirmBtn, { backgroundColor: t.border }]}
+                onPress={() => setConfirmAction(null)}
+              >
+                <Text style={[styles.confirmBtnText, { color: t.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmBtn, { backgroundColor: t.danger }]}
+                onPress={handleRestore}
+              >
+                <Text style={[styles.confirmBtnText, { color: '#fff' }]}>Restore</Text>
               </TouchableOpacity>
             </View>
           </View>
         ) : (
           <>
-            <TouchableOpacity style={styles.item} onPress={handleSync}>
-              <Text style={[styles.itemText, { color: t.text }]}>Sync</Text>
-            </TouchableOpacity>
+            <View style={styles.splitRow}>
+              <TouchableOpacity style={styles.splitBtn} onPress={handleBackup}>
+                <Text style={[styles.splitBtnText, { color: t.text }]}>Back up</Text>
+              </TouchableOpacity>
+              <View style={[styles.splitDivider, { backgroundColor: t.border }]} />
+              <TouchableOpacity style={styles.splitBtn} onPress={() => setConfirmAction('restore')}>
+                <Text style={[styles.splitBtnText, { color: t.text }]}>Restore</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={[styles.divider, { backgroundColor: t.border }]} />
 
-            {/* Sort by */}
             <Text style={[styles.sectionLabel, { color: t.accent }]}>Sort by:</Text>
             <View style={styles.sortRow}>
               <TouchableOpacity style={styles.sortBtn} onPress={() => { onSort('status'); handleClose(); }}>
@@ -104,14 +127,8 @@ export default function ToolbarOptionsMenu({
             <TouchableOpacity style={styles.item} onPress={handleClearCompleted}>
               <Text style={[styles.itemText, { color: t.text }]}>Clear all completed</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.item} onPress={() => setConfirmClear(true)}>
-              <Text style={[styles.itemText, { color: t.text }]}>Clear entire list</Text>
-            </TouchableOpacity>
-
-            <View style={[styles.divider, { backgroundColor: t.border }]} />
-
-            <TouchableOpacity style={styles.item} onPress={handleImport}>
-              <Text style={[styles.itemText, { color: t.text }]}>Import from Supabase</Text>
+            <TouchableOpacity style={styles.item} onPress={() => setConfirmAction('clear')}>
+              <Text style={[styles.itemText, { color: t.danger }]}>Clear entire list</Text>
             </TouchableOpacity>
           </>
         )}
@@ -168,40 +185,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
   },
-  sortBtnText: {
-    fontSize: 16,
+  sortBtnText: { fontSize: 16 },
+  sortPipe: { fontSize: 16, flexShrink: 0 },
+  splitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  sortPipe: {
-    fontSize: 16,
-    flexShrink: 0,
+  splitBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  splitBtnText: { fontSize: 16 },
+  splitDivider: {
+    width: 1,
+    height: 20,
   },
   confirmBox: {
     padding: 12,
     gap: 8,
   },
-  confirmMsg: {
-    fontSize: 15,
-  },
+  confirmMsg: { fontSize: 15 },
   confirmActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 8,
   },
-  confirmCancelBtn: {
+  confirmBtn: {
     borderRadius: 4,
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
-  confirmCancelText: {
-    fontSize: 15,
-  },
-  confirmClearBtn: {
-    borderRadius: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  confirmClearText: {
-    fontSize: 15,
-    color: '#fff',
-  },
+  confirmBtnText: { fontSize: 15 },
 });

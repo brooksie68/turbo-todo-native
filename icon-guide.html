@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Adaptive Icon Safe Zone</title>
+<style>
+  body {
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+    gap: 24px;
+  }
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: #aaa;
+    text-transform: uppercase;
+  }
+  .diagram-wrap {
+    display: flex;
+    gap: 60px;
+    align-items: flex-start;
+  }
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .label {
+    font-size: 13px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .canvas {
+    position: relative;
+    width: 512px;
+    height: 512px;
+  }
+
+  /* Full asset area */
+  .full-area {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #ffcb58, #eeddba, #ffbe30);
+    border: 2px dashed rgba(255,255,255,0.3);
+    box-sizing: border-box;
+  }
+
+  /* Bleed zone label areas */
+  .bleed-label {
+    position: absolute;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Safe zone — center 66.7% = 341x341 of 512 */
+  /* (512 - 341) / 2 = 85.5 → 86px offset */
+  .safe-zone {
+    position: absolute;
+    top: 86px;
+    left: 86px;
+    width: 340px;
+    height: 340px;
+    border: 2.5px solid rgba(255,255,255,0.9);
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .safe-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+  .safe-label strong {
+    font-size: 18px;
+    display: block;
+    color: #fff;
+  }
+
+  /* Corner mask preview — circle */
+  .mask-circle {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px dashed rgba(100,200,255,0.5);
+    box-sizing: border-box;
+    pointer-events: none;
+  }
+
+  /* Dimension arrows */
+  .arrow-h {
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+  }
+  .arrow-h::before, .arrow-h::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  .arrow-safe-h {
+    position: absolute;
+    bottom: -28px;
+    left: 86px;
+    width: 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+  }
+  .arrow-safe-h::before, .arrow-safe-h::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.4);
+  }
+
+  /* Padding callout */
+  .pad-line {
+    position: absolute;
+    background: rgba(255, 180, 0, 0.7);
+  }
+  .pad-top {
+    top: 0; left: 86px; width: 340px; height: 86px;
+    background: rgba(255,100,100,0.15);
+    border-bottom: 1px dashed rgba(255,100,100,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: rgba(255,160,160,0.9);
+    letter-spacing: 0.04em;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #aaa;
+  }
+  .legend-swatch {
+    width: 20px;
+    height: 3px;
+  }
+  .sw-safe { background: rgba(255,255,255,0.9); }
+  .sw-mask { background: rgba(100,200,255,0.6); border-top: 2px dashed rgba(100,200,255,0.6); height: 0; }
+  .sw-bleed { background: rgba(255,255,255,0.25); border-top: 2px dashed rgba(255,255,255,0.3); height: 0; }
+</style>
+</head>
+<body>
+
+<h2>Android Adaptive Icon — Safe Zone</h2>
+
+<div class="diagram-wrap">
+  <div class="diagram">
+    <div class="label">Your 1024 × 1024 PNG</div>
+    <div class="canvas">
+      <!-- Background gradient fill -->
+      <div class="full-area"></div>
+
+      <!-- Padding zone top callout -->
+      <div class="pad-top">← 86px padding (bleed zone) →</div>
+
+      <!-- Safe zone box -->
+      <div class="safe-zone">
+        <div class="safe-label">
+          <strong>SAFE ZONE</strong>
+          340 × 340<br>
+          <span style="font-size:11px; color:rgba(255,255,255,0.6)">Put your icon here</span>
+        </div>
+      </div>
+
+      <!-- Circle mask hint -->
+      <div class="mask-circle"></div>
+
+      <!-- Bottom dimension -->
+      <div class="arrow-h">512 px (display) / 1024 px (export)</div>
+      <div class="arrow-safe-h">66% — safe zone</div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch sw-safe"></div> Safe zone (always visible)</div>
+      <div class="legend-item"><div class="legend-swatch sw-mask"></div> Circle mask example</div>
+      <div class="legend-item"><div class="legend-swatch sw-bleed"></div> Bleed (may be clipped)</div>
+    </div>
+  </div>
+</div>
+
+<p style="color:#555; font-size:12px; max-width:520px; text-align:center; line-height:1.6;">
+  Android clips adaptive icons to various shapes (circle, squircle, rounded square) depending on the device launcher.
+  Keep your logo inside the safe zone. The gradient background can fill the entire 1024×1024 — it'll show through whatever shape Android uses.
+</p>
+
+</body>
+</html>

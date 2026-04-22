@@ -135,17 +135,18 @@ export function useTodoData() {
 
   const loadAllMedia = useCallback(async (rawTodos: Todo[]) => {
     const rootIds = new Set(rawTodos.filter(t => t.parent_id === null).map(t => t.id));
-    const depth1Ids = rawTodos
-      .filter(t => t.parent_id !== null && rootIds.has(t.parent_id))
+    // include depth-0 (root) and depth-1 items so both can have images/links
+    const mediaIds = rawTodos
+      .filter(t => t.parent_id === null || rootIds.has(t.parent_id))
       .map(t => t.id);
-    if (depth1Ids.length === 0) {
+    if (mediaIds.length === 0) {
       setImageMap({});
       setLinkMap({});
       return;
     }
     const [images, links] = await Promise.all([
-      getAllImages(depth1Ids),
-      getAllLinks(depth1Ids),
+      getAllImages(mediaIds),
+      getAllLinks(mediaIds),
     ]);
     setImageMap(images);
     setLinkMap(links);
@@ -433,6 +434,42 @@ export function useTodoData() {
     fetchTodos(listId, false);
   }, [dragExpandedId, fetchTodos]);
 
+  // ── List management ─────────────────────────────────────────────────────
+
+  const createList = useCallback(async (name: string) => {
+    const result = await db.runAsync(
+      'INSERT INTO lists (name, sort_order) VALUES (?, ?)',
+      [name.trim(), lists.length],
+    );
+    const newList: List = {
+      id: result.lastInsertRowId,
+      name: name.trim(),
+      sort_order: lists.length,
+      inserted_at: new Date().toISOString(),
+    };
+    setLists(prev => [...prev, newList]);
+    switchToList(newList.id);
+  }, [lists.length, switchToList]);
+
+  const renameList = useCallback(async (id: number, name: string) => {
+    await db.runAsync('UPDATE lists SET name = ? WHERE id = ?', [name.trim(), id]);
+    setLists(prev => prev.map(l => l.id === id ? { ...l, name: name.trim() } : l));
+  }, []);
+
+  const deleteList = useCallback(async (id: number) => {
+    const todosInList = await db.getAllAsync<Todo>('SELECT * FROM todos WHERE list_id = ?', [id]);
+    const allIds = flattenAll(buildTree(todosInList)).map(t => t.id);
+    await Promise.all(allIds.map(tid => deleteImagesForTodo(tid)));
+    await db.runAsync('DELETE FROM lists WHERE id = ?', [id]);
+    const remaining = lists.filter(l => l.id !== id);
+    if (remaining.length > 0) {
+      setLists(remaining);
+      switchToList(remaining[0].id);
+    } else {
+      await fetchLists();
+    }
+  }, [lists, switchToList, fetchLists]);
+
   // ── Derived ──────────────────────────────────────────────────────────────
 
   const activeList = useMemo(() => lists.find(l => l.id === activeListId) ?? null, [lists, activeListId]);
@@ -462,7 +499,7 @@ export function useTodoData() {
     // derived
     activeList, incomplete, complete, incompleteFlat, completeFlat, allExpanded,
     // list management
-    fetchTodos, fetchLists, switchToList,
+    fetchTodos, fetchLists, switchToList, createList, renameList, deleteList,
     // collapse
     toggleCollapse, toggleAll,
     // CRUD

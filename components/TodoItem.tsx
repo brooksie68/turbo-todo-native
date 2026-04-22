@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconOptions, IconAddBottom, IconClose, IconPin } from './Icons';
+import { IconOptions, IconClose, IconPin } from './Icons';
 import { deleteImage, type TaskImage } from '../lib/imageStore';
 import { deleteLink, type TaskLink } from '../lib/linkStore';
 import type { ButtonLayout } from './ItemOptionsMenu';
@@ -26,6 +26,7 @@ type Props = {
   onToggleComplete: (id: number, current: boolean) => void;
   onOptions: (todo: Todo, depth: number, layout: ButtonLayout) => void;
   onAddSubtask: (parentId: number) => void;
+  onShowAddMenu?: (todo: Todo, depth: number, layout: ButtonLayout) => void;
   images?: TaskImage[];
   links?: TaskLink[];
   onViewImage?: (uri: string) => void;
@@ -42,6 +43,7 @@ const TodoItem = memo(function TodoItem({
   onToggleComplete,
   onOptions,
   onAddSubtask,
+  onShowAddMenu,
   images = [],
   links = [],
   onViewImage,
@@ -51,10 +53,11 @@ const TodoItem = memo(function TodoItem({
 }: Props) {
   const theme = useTheme();
   const optionsBtnRef = useRef<View>(null);
+  const addBtnRef = useRef<View>(null);
 
   const hasChildren = (todo.children?.length ?? 0) > 0;
   const canAddChild = depth < MAX_DEPTH - 1;
-  const showMedia = depth === 1;
+  const showMedia = depth <= 1;
 
   const handleDeleteImage = useCallback(async (id: string) => {
     await deleteImage(todo.id, id);
@@ -137,13 +140,29 @@ const TodoItem = memo(function TodoItem({
         {/* Row actions */}
         <View style={styles.rowActions}>
           {canAddChild && !todo.is_complete && (
-            <TouchableOpacity
-              onPress={() => onAddSubtask(todo.id)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              style={styles.rowActionBtn}
-            >
-              <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
-            </TouchableOpacity>
+            depth === 0 ? (
+              <View ref={addBtnRef} collapsable={false}>
+                <TouchableOpacity
+                  onPress={() => {
+                    addBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
+                      onShowAddMenu?.(todo, depth, { pageX, pageY, width: w, height: h });
+                    });
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={styles.rowActionBtn}
+                >
+                  <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => onAddSubtask(todo.id)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.rowActionBtn}
+              >
+                <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
+              </TouchableOpacity>
+            )
           )}
           <View ref={optionsBtnRef} collapsable={false}>
             <TouchableOpacity
