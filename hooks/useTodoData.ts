@@ -410,7 +410,7 @@ export function useTodoData() {
     from: number,
     to: number,
     listId: number,
-  ) => {
+  ): Promise<boolean> => {
     if (dragExpandedId !== null) {
       const expandId = dragExpandedId;
       setDragExpandedId(null);
@@ -454,6 +454,7 @@ export function useTodoData() {
     }
     // Always re-fetch — triggers onLayout which clears the library's heldTranslate
     fetchTodos(listId, false);
+    return dropValid;
   }, [dragExpandedId, fetchTodos]);
 
   // ── List management ─────────────────────────────────────────────────────

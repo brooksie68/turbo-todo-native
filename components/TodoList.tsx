@@ -54,6 +54,7 @@ export default function TodoList() {
 
   const [viewerUri, setViewerUri] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [listKey, setListKey] = useState(0);
   const dragFromIndexRef = useRef<number | null>(null);
   const [dragTargetIndex, setDragTargetIndex] = useState<number | null>(null);
 
@@ -136,10 +137,13 @@ export default function TodoList() {
     data.handleDragBegin(index, data.incompleteFlat);
   }, [data.handleDragBegin, data.incompleteFlat]);
 
-  const handleDragEnd = useCallback(({ data: newFlat, from, to }: { data: FlatItem[]; from: number; to: number }) => {
+  const handleDragEnd = useCallback(async ({ data: newFlat, from, to }: { data: FlatItem[]; from: number; to: number }) => {
     dragFromIndexRef.current = null;
     setDragTargetIndex(null);
-    if (data.activeListId) data.handleDragEnd(newFlat, from, to, data.activeListId);
+    if (data.activeListId) {
+      const valid = await data.handleDragEnd(newFlat, from, to, data.activeListId);
+      if (!valid) setListKey(k => k + 1);
+    }
   }, [data.activeListId, data.handleDragEnd]);
 
   // ── Renderers ────────────────────���──────────────────────────────���────────
@@ -286,6 +290,7 @@ export default function TodoList() {
             </View>
           ) : (
             <DraggableFlatList
+              key={listKey}
               data={data.incompleteFlat}
               keyExtractor={item => String(item.todo.id)}
               containerStyle={[styles.scrollArea, { backgroundColor: themeCtx.surface, borderColor: themeCtx.listSelectorBorder }]}
