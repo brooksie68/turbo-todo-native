@@ -420,17 +420,39 @@ export function useTodoData() {
     Vibration.vibrate(25);
     const draggedItem = newFlat[to];
     if (!draggedItem) return;
-    // Prevent dropping above a pinned item at depth 0
+
+    // Validate the drop. fetchTodos is called on both valid AND invalid drops so
+    // the library's heldTranslate shared value gets cleared via onLayout.
+    let dropValid = true;
     if (draggedItem.depth === 0) {
-      const pinnedCount = newFlat.filter(fi => fi.depth === 0 && fi.todo.pinned).length;
-      if (to < pinnedCount) return;
+      const pinnedRootCount = newFlat.filter(fi => fi.depth === 0 && fi.todo.pinned).length;
+      const rootBefore = newFlat.slice(0, to).filter(fi => fi.depth === 0).length;
+      if (draggedItem.todo.pinned) {
+        if (rootBefore >= pinnedRootCount) dropValid = false;
+      } else {
+        if (rootBefore < pinnedRootCount) dropValid = false;
+      }
     }
-    const siblings = newFlat.filter(fi => fi.parentId === draggedItem.parentId);
-    await Promise.all(
-      siblings.map((fi, idx) =>
-        db.runAsync('UPDATE todos SET sort_order = ? WHERE id = ?', [idx * 10, fi.todo.id]),
-      ),
-    );
+    if (dropValid && draggedItem.depth > 0) {
+      const parentPos = newFlat.findIndex(fi => fi.todo.id === draggedItem.parentId);
+      if (parentPos === -1 || parentPos >= to) {
+        dropValid = false;
+      } else {
+        for (let i = parentPos + 1; i < to; i++) {
+          if (newFlat[i].depth < draggedItem.depth) { dropValid = false; break; }
+        }
+      }
+    }
+
+    if (dropValid) {
+      const siblings = newFlat.filter(fi => fi.parentId === draggedItem.parentId);
+      await Promise.all(
+        siblings.map((fi, idx) =>
+          db.runAsync('UPDATE todos SET sort_order = ? WHERE id = ?', [idx * 10, fi.todo.id]),
+        ),
+      );
+    }
+    // Always re-fetch — triggers onLayout which clears the library's heldTranslate
     fetchTodos(listId, false);
   }, [dragExpandedId, fetchTodos]);
 

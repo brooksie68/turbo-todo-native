@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -54,11 +54,32 @@ export default function TodoList() {
 
   const [viewerUri, setViewerUri] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const dragFromIndexRef = useRef<number | null>(null);
+  const [dragTargetIndex, setDragTargetIndex] = useState<number | null>(null);
 
-  // ── Callbacks ────────────────────────────────��───────────────────────────
+  // ── Drop validity ────────────────────────────────────────────────────────
+
+  const isDropValid = useCallback((fromIdx: number, toIdx: number): boolean => {
+    const flat = data.incompleteFlat;
+    const dragged = flat[fromIdx];
+    if (!dragged) return true;
+    if (dragged.depth === 0) {
+      const pinnedCount = flat.filter((fi, i) => i !== fromIdx && fi.depth === 0 && fi.todo.pinned).length;
+      return toIdx >= pinnedCount;
+    }
+    const parentPos = flat.findIndex(fi => fi.todo.id === dragged.parentId);
+    if (parentPos === -1 || toIdx <= parentPos) return false;
+    for (let i = parentPos + 1; i < toIdx; i++) {
+      if (i === fromIdx) continue;
+      if (flat[i].depth < dragged.depth) return false;
+    }
+    return true;
+  }, [data.incompleteFlat]);
+
+  // ── Callbacks ────────────────────────────────────────────────────────────
 
   const handleAddSubtask = useCallback((id: number) => {
-    data.openAdd(id, 'bottom');
+    data.openAdd(id, 'top');
   }, [data.openAdd]);
 
   const handleModalSave = useCallback((task: string, note: string) => {
@@ -111,10 +132,13 @@ export default function TodoList() {
   }, [data.allExpanded, data.toggleAll]);
 
   const handleDragBegin = useCallback((index: number) => {
+    dragFromIndexRef.current = index;
     data.handleDragBegin(index, data.incompleteFlat);
   }, [data.handleDragBegin, data.incompleteFlat]);
 
   const handleDragEnd = useCallback(({ data: newFlat, from, to }: { data: FlatItem[]; from: number; to: number }) => {
+    dragFromIndexRef.current = null;
+    setDragTargetIndex(null);
     if (data.activeListId) data.handleDragEnd(newFlat, from, to, data.activeListId);
   }, [data.activeListId, data.handleDragEnd]);
 
@@ -255,28 +279,49 @@ export default function TodoList() {
         />
 
         {/* Todo list */}
-        {data.loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator color={themeCtx.iconColor} />
-          </View>
-        ) : (
-          <DraggableFlatList
-            data={data.incompleteFlat}
-            keyExtractor={item => String(item.todo.id)}
-            containerStyle={[styles.scrollArea, { backgroundColor: themeCtx.surface, borderColor: themeCtx.listSelectorBorder }]}
-            contentContainerStyle={styles.scrollContent}
-            onDragBegin={handleDragBegin}
-            onDragEnd={handleDragEnd}
-            renderItem={renderItem}
-            renderPlaceholder={() => (
-              <View style={[styles.dropIndicator, { backgroundColor: themeCtx.accent }]} />
-            )}
-            ListHeaderComponent={data.incompleteFlat.length === 0 ? (
-              <Text style={[styles.emptyState, { color: themeCtx.textSub }]}>No tasks yet.</Text>
-            ) : null}
-            ListFooterComponent={listFooter}
+        <View style={styles.scrollWrapper}>
+          {data.loading ? (
+            <View style={[styles.loadingContainer, styles.scrollArea, { backgroundColor: themeCtx.surface, borderColor: themeCtx.listSelectorBorder }]}>
+              <ActivityIndicator color={themeCtx.iconColor} />
+            </View>
+          ) : (
+            <DraggableFlatList
+              data={data.incompleteFlat}
+              keyExtractor={item => String(item.todo.id)}
+              containerStyle={[styles.scrollArea, { backgroundColor: themeCtx.surface, borderColor: themeCtx.listSelectorBorder }]}
+              contentContainerStyle={styles.scrollContent}
+              onDragBegin={handleDragBegin}
+              onDragEnd={handleDragEnd}
+              onPlaceholderIndexChange={i => { setDragTargetIndex(i); }}
+              renderItem={renderItem}
+              renderPlaceholder={() => {
+                const from = dragFromIndexRef.current;
+                const to = dragTargetIndex;
+                const valid = from === null || to === null || isDropValid(from, to);
+                return (
+                  <View style={[
+                    styles.dropIndicator,
+                    { backgroundColor: valid ? themeCtx.accent : '#cc3300', height: valid ? 2 : 3 },
+                  ]} />
+                );
+              }}
+              ListHeaderComponent={data.incompleteFlat.length === 0 ? (
+                <Text style={[styles.emptyState, { color: themeCtx.textSub }]}>No tasks yet.</Text>
+              ) : null}
+              ListFooterComponent={listFooter}
+            />
+          )}
+          <LinearGradient
+            colors={['rgba(0,0,0,0.10)', 'rgba(0,0,0,0)']}
+            style={styles.shadowTop}
+            pointerEvents="none"
           />
-        )}
+          <LinearGradient
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.10)']}
+            style={styles.shadowBottom}
+            pointerEvents="none"
+          />
+        </View>
 
         <TodoListToolbar
           onOpenMenu={() => overlay.setShowToolbarMenu(true)}
@@ -301,7 +346,22 @@ export default function TodoList() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollArea: { flex: 1, borderWidth: 1, borderRadius: 2, marginHorizontal: 6 },
+  scrollWrapper: { flex: 1, marginHorizontal: 6, position: 'relative' },
+  scrollArea: { flex: 1, borderWidth: 1, borderRadius: 2 },
+  shadowTop: {
+    position: 'absolute',
+    top: 1,
+    left: 1,
+    right: 1,
+    height: 8,
+  },
+  shadowBottom: {
+    position: 'absolute',
+    bottom: 1,
+    left: 1,
+    right: 1,
+    height: 8,
+  },
   scrollContent: { paddingBottom: 8 },
   section: { margin: 8, borderRadius: 4, borderWidth: 1 },
   sectionDone: { opacity: 0.75 },
