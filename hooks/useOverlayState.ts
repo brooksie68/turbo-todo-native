@@ -48,7 +48,7 @@ export function useOverlayState(data: TodoData) {
   }, []);
 
   const handleAddMenuSubtask = useCallback(() => {
-    if (addMenuTodo) data.openAdd(addMenuTodo.id, 'bottom');
+    if (addMenuTodo) data.openAdd(addMenuTodo.id, 'top');
   }, [addMenuTodo, data.openAdd]);
 
   const handleAddMenuImage = useCallback(() => {

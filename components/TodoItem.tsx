@@ -127,42 +127,32 @@ const TodoItem = memo(function TodoItem({
           </Text>
           {hasChildren && isCollapsed && (
             <Text style={[styles.childCount, { color: theme.textSub, marginLeft: 4 }]}>
-              {'- '}{todo.children!.length}
+              {'('}{todo.children!.length}{')'}
             </Text>
           )}
         </View>
 
         {/* Pin indicator */}
         {todo.pinned && (
-          <IconPin size={12} color={theme.accent} />
+          <IconPin size={18} color={theme.accent} />
         )}
 
         {/* Row actions */}
         <View style={styles.rowActions}>
           {canAddChild && !todo.is_complete && (
-            depth === 0 ? (
-              <View ref={addBtnRef} collapsable={false}>
-                <TouchableOpacity
-                  onPress={() => {
-                    addBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
-                      onShowAddMenu?.(todo, depth, { pageX, pageY, width: w, height: h });
-                    });
-                  }}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  style={styles.rowActionBtn}
-                >
-                  <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
+            <View ref={addBtnRef} collapsable={false}>
               <TouchableOpacity
-                onPress={() => onAddSubtask(todo.id)}
+                onPress={() => {
+                  addBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
+                    onShowAddMenu?.(todo, depth, { pageX, pageY, width: w, height: h });
+                  });
+                }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 style={styles.rowActionBtn}
               >
                 <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
               </TouchableOpacity>
-            )
+            </View>
           )}
           <View ref={optionsBtnRef} collapsable={false}>
             <TouchableOpacity
@@ -190,7 +180,7 @@ const TodoItem = memo(function TodoItem({
       {/* Image strip — depth 1 only */}
       {showMedia && images.length > 0 && (
         <View style={[styles.imageStrip, { paddingLeft: indentLeft + 26 }]}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll} contentContainerStyle={styles.imageScrollContent}>
             {images.map(img => (
               <View key={img.id} style={styles.thumbWrap}>
                 <TouchableOpacity onPress={() => onViewImage?.(img.localPath)}>
@@ -308,10 +298,16 @@ const styles = StyleSheet.create({
   },
   imageScroll: {
     flexDirection: 'row',
+    overflow: 'visible',
+  },
+  imageScrollContent: {
+    paddingTop: 5,
+    paddingRight: 5,
   },
   thumbWrap: {
     marginRight: 6,
     position: 'relative',
+    overflow: 'visible',
   },
   thumb: {
     width: 48,

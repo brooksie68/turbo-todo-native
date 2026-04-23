@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   View,
@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/theme';
 
 type Props = {
@@ -31,13 +32,16 @@ export default function AddEditModal({
   onSave,
 }: Props) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const [task, setTask] = useState(initialTask);
   const [note, setNote] = useState(initialNote);
+  const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (visible) {
       setTask(initialTask);
       setNote(initialNote);
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [visible, initialTask, initialNote]);
 
@@ -60,17 +64,17 @@ export default function AddEditModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-        <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
+        <View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(20, insets.bottom + 8) }]}>
           <Text style={[styles.title, { color: theme.accent }]}>{title}</Text>
 
           {!noteMode && (
             <TextInput
+              ref={inputRef}
               style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
               placeholder="Task"
               placeholderTextColor={theme.textSub}
               value={task}
               onChangeText={setTask}
-              autoFocus
               returnKeyType="next"
               maxLength={500}
             />
@@ -114,7 +118,6 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheet: {
     borderTopLeftRadius: 12,

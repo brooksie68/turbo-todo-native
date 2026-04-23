@@ -57,8 +57,8 @@ const styles = StyleSheet.create({
   },
   toolbarCenter: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: 80,
+    right: 80,
     top: 0,
     height: 42,
     alignItems: 'center',
