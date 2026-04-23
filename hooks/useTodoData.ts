@@ -432,6 +432,9 @@ export function useTodoData() {
       } else {
         if (rootBefore < pinnedRootCount) dropValid = false;
       }
+      // Can't land between a root and its children
+      const nextItem = newFlat[to + 1];
+      if (dropValid && nextItem && nextItem.depth > 0) dropValid = false;
     }
     if (dropValid && draggedItem.depth > 0) {
       const parentPos = newFlat.findIndex(fi => fi.todo.id === draggedItem.parentId);
@@ -441,6 +444,11 @@ export function useTodoData() {
         for (let i = parentPos + 1; i < to; i++) {
           if (newFlat[i].depth < draggedItem.depth) { dropValid = false; break; }
         }
+      }
+      // Can't land between another item and its deeper children
+      const nextItem = newFlat[to + 1];
+      if (dropValid && nextItem && nextItem.depth > draggedItem.depth && nextItem.parentId !== draggedItem.todo.id) {
+        dropValid = false;
       }
     }
 

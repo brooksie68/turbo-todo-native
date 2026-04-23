@@ -64,9 +64,18 @@ export default function TodoList() {
     const flat = data.incompleteFlat;
     const dragged = flat[fromIdx];
     if (!dragged) return true;
+
+    // Simulate what's immediately after the dragged item post-move.
+    // When dragging down (fromIdx < toIdx): items shift left, so flat[toIdx+1] stays.
+    // When dragging up (fromIdx > toIdx): flat[toIdx] shifts right, becoming toIdx+1.
+    const nextItem = fromIdx < toIdx ? flat[toIdx + 1] : flat[toIdx];
+
     if (dragged.depth === 0) {
       const pinnedCount = flat.filter((fi, i) => i !== fromIdx && fi.depth === 0 && fi.todo.pinned).length;
-      return toIdx >= pinnedCount;
+      if (toIdx < pinnedCount) return false;
+      // Can't land between a root and its children
+      if (nextItem && nextItem.depth > 0) return false;
+      return true;
     }
     const parentPos = flat.findIndex(fi => fi.todo.id === dragged.parentId);
     if (parentPos === -1 || toIdx <= parentPos) return false;
@@ -74,6 +83,8 @@ export default function TodoList() {
       if (i === fromIdx) continue;
       if (flat[i].depth < dragged.depth) return false;
     }
+    // Can't land between another item and its deeper children
+    if (nextItem && nextItem.depth > dragged.depth && nextItem.parentId !== dragged.todo.id) return false;
     return true;
   }, [data.incompleteFlat]);
 
