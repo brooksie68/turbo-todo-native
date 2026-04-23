@@ -9,11 +9,11 @@ import {
   StyleSheet,
 } from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconOptions, IconClose, IconPin } from './Icons';
+import { IconOptions, IconClose, IconPin, IconBell } from './Icons';
 import { deleteImage, type TaskImage } from '../lib/imageStore';
 import { deleteLink, type TaskLink } from '../lib/linkStore';
 import type { ButtonLayout } from './ItemOptionsMenu';
-import { useTheme } from '../lib/theme';
+import { useTheme, useThemeContext } from '../lib/theme';
 
 const INDENT_PX = 20;
 const MAX_DEPTH = 3;
@@ -52,6 +52,7 @@ const TodoItem = memo(function TodoItem({
   isBeingDragged,
 }: Props) {
   const theme = useTheme();
+  const { fontSizes } = useThemeContext();
   const optionsBtnRef = useRef<View>(null);
   const addBtnRef = useRef<View>(null);
 
@@ -77,7 +78,7 @@ const TodoItem = memo(function TodoItem({
   }
 
   const labelColor = getLabelColor();
-  const fontSize = depth === 0 ? 16 : depth === 1 ? 15 : 14;
+  const fontSize = depth === 0 ? fontSizes.d0 : depth === 1 ? fontSizes.d1 : fontSizes.d2;
   const indentLeft = 12 + depth * INDENT_PX;
 
   return (
@@ -132,9 +133,11 @@ const TodoItem = memo(function TodoItem({
           )}
         </View>
 
-        {/* Pin indicator */}
         {todo.pinned && (
           <IconPin size={18} color={theme.accent} />
+        )}
+        {todo.alarm_time && (
+          <IconBell size={14} color={theme.textSub} />
         )}
 
         {/* Row actions */}
@@ -178,7 +181,7 @@ const TodoItem = memo(function TodoItem({
       ) : null}
 
       {/* Image strip — depth 1 only */}
-      {showMedia && images.length > 0 && (
+      {showMedia && !(depth === 0 && isCollapsed) && images.length > 0 && (
         <View style={[styles.imageStrip, { paddingLeft: indentLeft + 26 }]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll} contentContainerStyle={styles.imageScrollContent}>
             {images.map(img => (
@@ -200,7 +203,7 @@ const TodoItem = memo(function TodoItem({
       )}
 
       {/* Link strip — depth 1 only */}
-      {showMedia && links.length > 0 && (
+      {showMedia && !(depth === 0 && isCollapsed) && links.length > 0 && (
         <View style={[styles.linkStrip, { paddingLeft: indentLeft + 26 }]}>
           {links.map(link => (
             <View key={link.id} style={styles.linkRow}>

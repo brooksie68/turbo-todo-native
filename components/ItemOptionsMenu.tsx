@@ -32,9 +32,17 @@ type Props = {
   onEditNote: () => void;
   onDeleteNote: () => void;
   onExportForAI: () => void;
+  onSetAlarm: () => void;
   imageCount?: number;
   hasNote: boolean;
 };
+
+function formatAlarmTime(time24: string): string {
+  const [h, m] = time24.split(':').map(Number);
+  const ampm = h < 12 ? 'AM' : 'PM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
 
 export default function ItemOptionsMenu({
   visible,
@@ -51,6 +59,7 @@ export default function ItemOptionsMenu({
   onEditNote,
   onDeleteNote,
   onExportForAI,
+  onSetAlarm,
   imageCount = 0,
   hasNote,
 }: Props) {
@@ -109,6 +118,11 @@ export default function ItemOptionsMenu({
 
         {depth === 0 ? (
           <>
+            <TouchableOpacity style={styles.item} onPress={() => handle(onSetAlarm)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>
+                {todo.alarm_time ? `Edit alarm (${formatAlarmTime(todo.alarm_time)})` : 'Set alarm'}
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.item} onPress={() => handle(onPin)}>
               <Text style={[styles.itemText, { color: theme.text }]}>
                 {todo.pinned ? 'Unpin item' : 'Pin to top'}
@@ -127,6 +141,11 @@ export default function ItemOptionsMenu({
           </>
         ) : (
           <>
+            <TouchableOpacity style={styles.item} onPress={() => handle(onSetAlarm)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>
+                {todo.alarm_time ? `Edit alarm (${formatAlarmTime(todo.alarm_time)})` : 'Set alarm'}
+              </Text>
+            </TouchableOpacity>
             {depth === 1 && (
               <TouchableOpacity style={styles.item} onPress={() => handle(onExportForAI)}>
                 <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>

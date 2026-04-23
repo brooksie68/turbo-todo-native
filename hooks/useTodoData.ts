@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Vibration } from 'react-native';
 import db from '../lib/db';
 import type { Todo, List } from '../lib/types';
+import { cancelAlarm } from '../lib/alarms';
 import { deleteImagesForTodo, getAllImages, type TaskImage } from '../lib/imageStore';
 import { getAllLinks, type TaskLink } from '../lib/linkStore';
 
@@ -262,7 +263,17 @@ export function useTodoData() {
 
   const toggleComplete = useCallback((id: number, current: boolean) => {
     const newValue = !current;
-    setTodos(prev => updateTodoInTree(prev, id, { is_complete: newValue }));
+    if (newValue) {
+      const raw = rawTodosRef.current.find(t => t.id === id);
+      if (raw?.notification_id) {
+        cancelAlarm(raw.notification_id);
+        db.runAsync('UPDATE todos SET alarm_time = NULL, notification_id = NULL WHERE id = ?', [id]);
+      }
+    }
+    setTodos(prev => updateTodoInTree(prev, id, {
+      is_complete: newValue,
+      ...(newValue ? { alarm_time: null, notification_id: null } : {}),
+    }));
     db.runAsync('UPDATE todos SET is_complete = ? WHERE id = ?', [newValue ? 1 : 0, id]);
   }, []);
 
@@ -304,9 +315,12 @@ export function useTodoData() {
 
   const deleteTask = useCallback(async (id: number, currentTodos: Todo[], _listId: number) => {
     const subtreeIds = getSubtreeIds(id, currentTodos);
+    const subtreeRaw = rawTodosRef.current.filter(t => subtreeIds.includes(t.id));
+    for (const t of subtreeRaw) {
+      if (t.notification_id) cancelAlarm(t.notification_id);
+    }
     setTodos(prev => removeTodoFromTree(prev, id));
     await Promise.all(subtreeIds.map(tid => deleteImagesForTodo(tid)));
-    // CASCADE in schema handles deleting subtree rows
     db.runAsync('DELETE FROM todos WHERE id = ?', [id]);
   }, []);
 
@@ -416,10 +430,10 @@ export function useTodoData() {
       setDragExpandedId(null);
       setCollapsedIds(prev => { const next = new Set(prev); next.delete(expandId); return next; });
     }
-    if (from === to) return;
+    if (from === to) return true;
     Vibration.vibrate(25);
     const draggedItem = newFlat[to];
-    if (!draggedItem) return;
+    if (!draggedItem) return true;
 
     // Validate the drop. fetchTodos is called on both valid AND invalid drops so
     // the library's heldTranslate shared value gets cleared via onLayout.
@@ -501,6 +515,28 @@ export function useTodoData() {
     }
   }, [lists, switchToList, fetchLists]);
 
+  // ── Alarms ───────────────────────────────────────────────────────────────
+
+  const setAlarmOnTodo = useCallback((id: number, alarmTime: string, notificationId: string) => {
+    rawTodosRef.current = rawTodosRef.current.map(t =>
+      t.id === id ? { ...t, alarm_time: alarmTime, notification_id: notificationId } : t,
+    );
+    setTodos(prev => updateTodoInTree(prev, id, { alarm_time: alarmTime, notification_id: notificationId }));
+    db.runAsync(
+      'UPDATE todos SET alarm_time = ?, notification_id = ? WHERE id = ?',
+      [alarmTime, notificationId, id],
+    );
+  }, []);
+
+  const clearAlarmOnTodo = useCallback(async (id: number, notificationId: string) => {
+    await cancelAlarm(notificationId);
+    rawTodosRef.current = rawTodosRef.current.map(t =>
+      t.id === id ? { ...t, alarm_time: null, notification_id: null } : t,
+    );
+    setTodos(prev => updateTodoInTree(prev, id, { alarm_time: null, notification_id: null }));
+    db.runAsync('UPDATE todos SET alarm_time = NULL, notification_id = NULL WHERE id = ?', [id]);
+  }, []);
+
   // ── Derived ──────────────────────────────────────────────────────────────
 
   const activeList = useMemo(() => lists.find(l => l.id === activeListId) ?? null, [lists, activeListId]);
@@ -513,7 +549,10 @@ export function useTodoData() {
     [todos],
   );
   const complete = useMemo(() => todos.filter(t => t.is_complete), [todos]);
-  const allExpanded = collapsedIds.size === 0;
+  const anyDepth0Expanded = useMemo(
+    () => incomplete.some(t => (t.children?.length ?? 0) > 0 && !collapsedIds.has(t.id)),
+    [incomplete, collapsedIds],
+  );
 
   const incompleteFlat = useMemo(
     () => flattenVisible(incomplete, collapsedIds),
@@ -528,7 +567,7 @@ export function useTodoData() {
     // state
     lists, activeListId, todos, loading, collapsedIds,
     // derived
-    activeList, incomplete, complete, incompleteFlat, completeFlat, allExpanded,
+    activeList, incomplete, complete, incompleteFlat, completeFlat, anyDepth0Expanded,
     // list management
     fetchTodos, fetchLists, switchToList, createList, renameList, deleteList,
     // collapse
@@ -536,6 +575,8 @@ export function useTodoData() {
     // CRUD
     toggleComplete, addTask, updateTask, deleteTask, setStatus, setPinned,
     handleClearCompleted, handleClearAll, handleSort, saveNote,
+    // Alarms
+    setAlarmOnTodo, clearAlarmOnTodo,
     // CRUD modal
     modalVisible, setModalVisible,
     modalTitle, modalInitialTask, modalInitialNote, editingId, addParentId, insertPosition,

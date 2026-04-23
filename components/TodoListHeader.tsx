@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 60,
     top: 15,
-    width: 190,
+    width: 214,
     height: 34,
     flexDirection: 'row',
     alignItems: 'center',
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   listSelectorArrow: { fontSize: 10 },
   gearBtn: {
     position: 'absolute',
-    left: 259,
+    left: 283,
     top: 18,
     width: 28,
     height: 28,

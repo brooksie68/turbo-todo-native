@@ -161,6 +161,14 @@ export function IconClose({ size = 24, color = '#025f96' }: IconProps) {
   );
 }
 
+export function IconBell({ size = 24, color = '#025f96' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <Path d="M12 2a1 1 0 0 0-1 1v.5A6 6 0 0 0 6 9v4l-1.5 2.5A1 1 0 0 0 5.4 17H9a3 3 0 0 0 6 0h3.6a1 1 0 0 0 .9-1.5L18 13V9a6 6 0 0 0-5-5.5V3a1 1 0 0 0-1-1z" />
+    </Svg>
+  );
+}
+
 export function IconPin({ size = 24, color = '#025f96' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">

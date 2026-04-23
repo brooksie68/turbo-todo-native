@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useThemeContext } from '../lib/theme';
+import { useThemeContext, TEXT_SIZE_COUNT } from '../lib/theme';
 
 type Props = {
   visible: boolean;
@@ -29,7 +29,7 @@ export default function ToolbarOptionsMenu({
   onSort,
 }: Props) {
   const insets = useSafeAreaInsets();
-  const { theme } = useThemeContext();
+  const { theme, textSizeIndex, setTextSizeIndex } = useThemeContext();
   const [confirmAction, setConfirmAction] = useState<'clear' | 'restore' | null>(null);
 
   function handleClose() {
@@ -119,6 +119,26 @@ export default function ToolbarOptionsMenu({
               <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
               <TouchableOpacity style={styles.sortBtn} onPress={() => { onSort('alpha'); handleClose(); }}>
                 <Text style={[styles.sortBtnText, { color: t.text }]}>Alpha</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.divider, { backgroundColor: t.border }]} />
+
+            <View style={styles.textSizeRow}>
+              <TouchableOpacity
+                style={styles.textSizeBtn}
+                onPress={() => setTextSizeIndex(textSizeIndex + 1)}
+                disabled={textSizeIndex >= TEXT_SIZE_COUNT - 1}
+              >
+                <Text style={[styles.textSizeBtnText, { color: textSizeIndex >= TEXT_SIZE_COUNT - 1 ? t.border : t.text }]}>+</Text>
+              </TouchableOpacity>
+              <Text style={[styles.textSizeLabel, { color: t.text }]}>Text size</Text>
+              <TouchableOpacity
+                style={styles.textSizeBtn}
+                onPress={() => setTextSizeIndex(textSizeIndex - 1)}
+                disabled={textSizeIndex <= 0}
+              >
+                <Text style={[styles.textSizeBtnText, { color: textSizeIndex <= 0 ? t.border : t.text }]}>−</Text>
               </TouchableOpacity>
             </View>
 
@@ -216,4 +236,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   confirmBtnText: { fontSize: 15 },
+  textSizeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  textSizeBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  textSizeBtnText: {
+    fontSize: 22,
+    fontWeight: '300',
+    lineHeight: 26,
+  },
+  textSizeLabel: {
+    flex: 2,
+    textAlign: 'center',
+    fontSize: 16,
+  },
 });

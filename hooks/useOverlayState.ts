@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Alert, Share, ToastAndroid } from 'react-native';
+import { requestNotificationPermission, scheduleAlarm, cancelAlarm } from '../lib/alarms';
 import * as ImagePicker from 'expo-image-picker';
 import type { Todo } from '../lib/types';
 import { getImages, addImages, MAX_IMAGES } from '../lib/imageStore';
@@ -34,6 +35,10 @@ export function useOverlayState(data: TodoData) {
   // Link modal
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkTargetTodo, setLinkTargetTodo] = useState<Todo | null>(null);
+
+  // Alarm modal
+  const [alarmModalVisible, setAlarmModalVisible] = useState(false);
+  const [alarmModalTodo, setAlarmModalTodo] = useState<Todo | null>(null);
 
   // ── Add-child menu ───────────────────────────────────────────────────────
 
@@ -199,6 +204,39 @@ export function useOverlayState(data: TodoData) {
     if (itemMenuTodo) setPinned(itemMenuTodo.id, !itemMenuTodo.pinned);
   }, [itemMenuTodo, setPinned]);
 
+  const handleMenuSetAlarm = useCallback(() => {
+    if (!itemMenuTodo) return;
+    setAlarmModalTodo(itemMenuTodo);
+    setAlarmModalVisible(true);
+  }, [itemMenuTodo]);
+
+  const handleAlarmSave = useCallback(async (time: string) => {
+    setAlarmModalVisible(false);
+    if (!alarmModalTodo) return;
+    const granted = await requestNotificationPermission();
+    if (!granted) {
+      Alert.alert('Permission needed', 'Allow notifications to set alarms.');
+      setAlarmModalTodo(null);
+      return;
+    }
+    if (alarmModalTodo.notification_id) {
+      await cancelAlarm(alarmModalTodo.notification_id);
+    }
+    const notifId = await scheduleAlarm(alarmModalTodo, time);
+    data.setAlarmOnTodo(alarmModalTodo.id, time, notifId);
+    setAlarmModalTodo(null);
+  }, [alarmModalTodo, data]);
+
+  const handleAlarmRemove = useCallback(async () => {
+    setAlarmModalVisible(false);
+    if (!alarmModalTodo?.notification_id) {
+      setAlarmModalTodo(null);
+      return;
+    }
+    await data.clearAlarmOnTodo(alarmModalTodo.id, alarmModalTodo.notification_id);
+    setAlarmModalTodo(null);
+  }, [alarmModalTodo, data]);
+
   return {
     // menu
     showToolbarMenu, setShowToolbarMenu,
@@ -218,5 +256,9 @@ export function useOverlayState(data: TodoData) {
     // link modal
     showLinkModal, setShowLinkModal, linkTargetTodo, setLinkTargetTodo,
     handleSaveLink,
+    // alarm modal
+    alarmModalVisible, alarmModalTodo,
+    handleMenuSetAlarm, handleAlarmSave, handleAlarmRemove,
+    closeAlarmModal: () => { setAlarmModalVisible(false); setAlarmModalTodo(null); },
   };
 }

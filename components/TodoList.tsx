@@ -26,6 +26,7 @@ import AddChildMenu from './AddChildMenu';
 import { useTheme, useThemeContext } from '../lib/theme';
 import { exportBackup, importBackup } from '../lib/backup';
 import HelpModal from './HelpModal';
+import AlarmModal from './AlarmModal';
 
 // Renders LinearGradient for themes that define gradientColors, plain View otherwise.
 function ThemeBg({ style, children }: { style: object; children: React.ReactNode }) {
@@ -140,8 +141,8 @@ export default function TodoList() {
   }, [data.todos, data.activeListId, data.handleClearAll]);
 
   const handleToggleAll = useCallback(() => {
-    data.toggleAll(data.allExpanded);
-  }, [data.allExpanded, data.toggleAll]);
+    data.toggleAll(data.anyDepth0Expanded);
+  }, [data.anyDepth0Expanded, data.toggleAll]);
 
   const handleDragBegin = useCallback((index: number) => {
     dragFromIndexRef.current = index;
@@ -266,6 +267,7 @@ export default function TodoList() {
           onEditNote={overlay.handleEditNote}
           onDeleteNote={overlay.handleDeleteNote}
           onExportForAI={overlay.handleExportForAI}
+          onSetAlarm={overlay.handleMenuSetAlarm}
           imageCount={overlay.itemMenuImageCount}
           hasNote={!!(overlay.itemMenuTodo?.note)}
         />
@@ -343,13 +345,21 @@ export default function TodoList() {
           onOpenMenu={() => overlay.setShowToolbarMenu(true)}
           onAddNew={() => data.openAdd(null, 'top')}
           onToggleAll={handleToggleAll}
-          allExpanded={data.allExpanded}
+          allExpanded={data.anyDepth0Expanded}
         />
 
         <ImageViewer
           visible={viewerUri !== null}
           uri={viewerUri}
           onClose={() => setViewerUri(null)}
+        />
+
+        <AlarmModal
+          visible={overlay.alarmModalVisible}
+          initialTime={overlay.alarmModalTodo?.alarm_time}
+          onSave={overlay.handleAlarmSave}
+          onRemove={overlay.handleAlarmRemove}
+          onClose={overlay.closeAlarmModal}
         />
 
         <HelpModal visible={showHelp} onClose={() => setShowHelp(false)} />

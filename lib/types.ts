@@ -16,5 +16,7 @@ export type Todo = {
   note?: string | null;
   status?: string | null;
   pinned?: boolean;
+  alarm_time?: string | null;
+  notification_id?: string | null;
   children?: Todo[];
 };

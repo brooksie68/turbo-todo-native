@@ -1,6 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// index 0 = small, 1 = normal (default), 2 = large, 3 = xlarge, 4 = xxlarge
+const TEXT_SIZES = [
+  { d0: 14, d1: 13, d2: 12 }, // small
+  { d0: 16, d1: 15, d2: 14 }, // normal
+  { d0: 18, d1: 17, d2: 16 }, // large
+  { d0: 20, d1: 19, d2: 18 }, // xlarge
+  { d0: 22, d1: 21, d2: 20 }, // xxlarge
+];
+export const TEXT_SIZE_COUNT = TEXT_SIZES.length;
+
 export type Theme = {
   id: string;
   name: string;
@@ -87,20 +97,33 @@ type ThemeContextType = {
   theme: Theme;
   themeId: string;
   setThemeId: (id: string) => void;
+  textSizeIndex: number;
+  setTextSizeIndex: (index: number) => void;
+  fontSizes: { d0: number; d1: number; d2: number };
 };
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: themes.default,
   themeId: 'default',
   setThemeId: () => {},
+  textSizeIndex: 1,
+  setTextSizeIndex: () => {},
+  fontSizes: TEXT_SIZES[1],
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [themeId, setThemeIdState] = useState('default');
+  const [textSizeIndex, setTextSizeIndexState] = useState(1);
 
   useEffect(() => {
     AsyncStorage.getItem('turbotodo-theme').then(saved => {
       if (saved && themes[saved]) setThemeIdState(saved);
+    });
+    AsyncStorage.getItem('turbotodo-text-size').then(saved => {
+      if (saved !== null) {
+        const idx = parseInt(saved, 10);
+        if (!isNaN(idx)) setTextSizeIndexState(Math.max(0, Math.min(TEXT_SIZE_COUNT - 1, idx)));
+      }
     });
   }, []);
 
@@ -110,8 +133,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     AsyncStorage.setItem('turbotodo-theme', id);
   }
 
+  function setTextSizeIndex(index: number) {
+    const clamped = Math.max(0, Math.min(TEXT_SIZE_COUNT - 1, index));
+    setTextSizeIndexState(clamped);
+    AsyncStorage.setItem('turbotodo-text-size', String(clamped));
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme: themes[themeId], themeId, setThemeId }}>
+    <ThemeContext.Provider value={{
+      theme: themes[themeId],
+      themeId,
+      setThemeId,
+      textSizeIndex,
+      setTextSizeIndex,
+      fontSizes: TEXT_SIZES[textSizeIndex],
+    }}>
       {children}
     </ThemeContext.Provider>
   );

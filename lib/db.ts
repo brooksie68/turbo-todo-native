@@ -51,12 +51,15 @@ export function initDB(): void {
     CREATE INDEX IF NOT EXISTS idx_links_todo_id   ON task_links(todo_id);
   `);
 
-  // Add pinned column if it doesn't exist (migration for existing DBs)
   try {
     db.execSync('ALTER TABLE todos ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0');
-  } catch {
-    // Column already exists — safe to ignore
-  }
+  } catch { /* already exists */ }
+  try {
+    db.execSync('ALTER TABLE todos ADD COLUMN alarm_time TEXT');
+  } catch { /* already exists */ }
+  try {
+    db.execSync('ALTER TABLE todos ADD COLUMN notification_id TEXT');
+  } catch { /* already exists */ }
 }
 
 export default db;
