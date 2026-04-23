@@ -12,7 +12,7 @@ import { formatItemTree } from './useTodoData';
 export function useOverlayState(data: TodoData) {
   const {
     deleteTask, saveNote, setPinned,
-    activeListId, activeList, todos, openEdit, refreshMedia,
+    activeListId, activeList, todos, openEdit, refreshMedia, expandItem,
   } = data;
 
   // Item options menu
@@ -112,6 +112,7 @@ export function useOverlayState(data: TodoData) {
     const uris = result.assets.map(a => a.uri);
     await addImages(todo.id, uris);
     refreshMedia();
+    expandItem(todo.parent_id ?? todo.id);
 
     if (uris.length < result.assets.length) {
       ToastAndroid.show(
@@ -132,6 +133,7 @@ export function useOverlayState(data: TodoData) {
     const existing = await getLinks(linkTargetTodo.id);
     await addLink(linkTargetTodo.id, url, name || null, existing.length);
     refreshMedia();
+    expandItem(linkTargetTodo.parent_id ?? linkTargetTodo.id);
     setLinkTargetTodo(null);
   }, [linkTargetTodo, refreshMedia]);
 
@@ -147,6 +149,7 @@ export function useOverlayState(data: TodoData) {
     setNoteModalVisible(false);
     if (!noteEditingTodo || !activeListId) return;
     await saveNote(noteEditingTodo.id, note || null, activeListId);
+    expandItem(noteEditingTodo.parent_id ?? noteEditingTodo.id);
     setNoteEditingTodo(null);
   }, [noteEditingTodo, activeListId, saveNote]);
 

@@ -167,7 +167,7 @@ const TodoItem = memo(function TodoItem({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.rowActionBtn}
             >
-              <IconOptions size={18} color={theme.iconColor} />
+              <IconOptions size={20} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         </View>
@@ -238,15 +238,15 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 7,
     paddingRight: 12,
     gap: 8,
   },
   checkbox: {
-    width: 18,
-    height: 18,
-    borderWidth: 1.5,
-    borderRadius: 3,
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderRadius: 2,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -280,9 +280,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addPlus: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
-    lineHeight: 18,
+    lineHeight: 20,
+    marginLeft: 2,
   },
   childCount: {
     fontSize: 12,

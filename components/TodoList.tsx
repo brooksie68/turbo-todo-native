@@ -102,6 +102,7 @@ export default function TodoList() {
     } else {
       if (data.activeListId) {
         data.addTask(task, note, data.addParentId, data.insertPosition, data.activeListId);
+        if (data.addParentId !== null) data.expandItem(data.addParentId);
       }
     }
   }, [data]);

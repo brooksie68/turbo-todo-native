@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
+  Animated,
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,12 +37,30 @@ export default function AddEditModal({
   const [task, setTask] = useState(initialTask);
   const [note, setNote] = useState(initialNote);
   const inputRef = useRef<TextInput>(null);
+  const noteInputRef = useRef<TextInput>(null);
+  const [internalVisible, setInternalVisible] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setInternalVisible(true);
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 260, useNativeDriver: true }).start();
+      setTimeout(() => {
+        if (noteMode) noteInputRef.current?.focus();
+        else inputRef.current?.focus();
+      }, 100);
+    } else {
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+        setInternalVisible(false);
+      });
+    }
+  }, [visible]);
 
   useEffect(() => {
     if (visible) {
       setTask(initialTask);
       setNote(initialNote);
-      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [visible, initialTask, initialNote]);
 
@@ -58,13 +77,18 @@ export default function AddEditModal({
   const canSave = noteMode ? note.trim().length > 0 : task.trim().length > 0;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={internalVisible} transparent animationType="none" onRequestClose={onClose}>
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-        <View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(20, insets.bottom + 8) }]}>
+        {/* Backdrop — behind sheet in z-order (rendered first) */}
+        <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim, backgroundColor: 'rgba(0,0,0,0.15)' }]}>
+          <TouchableOpacity style={StyleSheet.absoluteFillObject} activeOpacity={1} onPress={onClose} />
+        </Animated.View>
+
+        {/* Sheet — above backdrop in z-order (rendered second) */}
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(12, insets.bottom), opacity: fadeAnim }]}>
           <Text style={[styles.title, { color: theme.accent }]}>{title}</Text>
 
           {!noteMode && (
@@ -81,12 +105,12 @@ export default function AddEditModal({
           )}
 
           <TextInput
+            ref={noteInputRef}
             style={[styles.input, noteMode ? null : styles.noteInput, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
             placeholder={noteMode ? 'Note' : 'Note (optional)'}
             placeholderTextColor={theme.textSub}
             value={note}
             onChangeText={setNote}
-            autoFocus={noteMode}
             returnKeyType="done"
             onSubmitEditing={handleSave}
             maxLength={500}
@@ -105,7 +129,7 @@ export default function AddEditModal({
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -115,9 +139,6 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     borderTopLeftRadius: 12,

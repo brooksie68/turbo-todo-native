@@ -160,6 +160,7 @@ export default function ToolbarOptionsMenu({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.15)',
   },
   sheet: {
     borderTopLeftRadius: 12,
@@ -167,10 +168,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderBottomWidth: 0,
     paddingTop: 4,
-    elevation: 8,
+    elevation: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 10,
   },
   item: {

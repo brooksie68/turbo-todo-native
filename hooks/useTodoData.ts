@@ -515,6 +515,17 @@ export function useTodoData() {
     }
   }, [lists, switchToList, fetchLists]);
 
+  // ── Expand helpers ───────────────────────────────────────────────────────
+
+  const expandItem = useCallback((id: number) => {
+    setCollapsedIds(prev => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
   // ── Alarms ───────────────────────────────────────────────────────────────
 
   const setAlarmOnTodo = useCallback((id: number, alarmTime: string, notificationId: string) => {
@@ -575,6 +586,8 @@ export function useTodoData() {
     // CRUD
     toggleComplete, addTask, updateTask, deleteTask, setStatus, setPinned,
     handleClearCompleted, handleClearAll, handleSort, saveNote,
+    // Expand
+    expandItem,
     // Alarms
     setAlarmOnTodo, clearAlarmOnTodo,
     // CRUD modal

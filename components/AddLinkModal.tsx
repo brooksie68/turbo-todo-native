@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../lib/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Modal,
   View,
@@ -8,6 +9,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
+  Animated,
   Platform,
 } from 'react-native';
 
@@ -19,11 +21,26 @@ type Props = {
 
 export default function AddLinkModal({ visible, onClose, onSave }: Props) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const [url, setUrl] = useState('');
   const [name, setName] = useState('');
+  const urlInputRef = useRef<TextInput>(null);
+  const [internalVisible, setInternalVisible] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (visible) { setUrl(''); setName(''); }
+    if (visible) {
+      setUrl('');
+      setName('');
+      setInternalVisible(true);
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, { toValue: 1, duration: 260, useNativeDriver: true }).start();
+      setTimeout(() => urlInputRef.current?.focus(), 100);
+    } else {
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
+        setInternalVisible(false);
+      });
+    }
   }, [visible]);
 
   function handleSave() {
@@ -34,22 +51,27 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={internalVisible} transparent animationType="none" onRequestClose={onClose}>
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-        <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
+        {/* Backdrop */}
+        <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim, backgroundColor: 'rgba(0,0,0,0.4)' }]}>
+          <TouchableOpacity style={StyleSheet.absoluteFillObject} activeOpacity={1} onPress={onClose} />
+        </Animated.View>
+
+        {/* Sheet */}
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(12, insets.bottom), opacity: fadeAnim }]}>
           <Text style={[styles.title, { color: theme.accent }]}>Add URL</Text>
 
           <TextInput
+            ref={urlInputRef}
             style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
             placeholder="URL (required)"
             placeholderTextColor={theme.textSub}
             value={url}
             onChangeText={setUrl}
-            autoFocus
             autoCapitalize="none"
             keyboardType="url"
             returnKeyType="next"
@@ -79,7 +101,7 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -87,7 +109,6 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end' },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
