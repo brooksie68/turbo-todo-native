@@ -33,6 +33,8 @@ type Props = {
   onMediaChanged?: () => void;
   onDrag?: () => void;
   isBeingDragged?: boolean;
+  positionLabel?: string;
+  onDeleteNote?: (id: number) => void;
 };
 
 const TodoItem = memo(function TodoItem({
@@ -50,6 +52,8 @@ const TodoItem = memo(function TodoItem({
   onMediaChanged,
   onDrag,
   isBeingDragged,
+  positionLabel: _positionLabel,
+  onDeleteNote,
 }: Props) {
   const theme = useTheme();
   const { fontSizes } = useThemeContext();
@@ -98,7 +102,7 @@ const TodoItem = memo(function TodoItem({
         style={[styles.row, { paddingLeft: indentLeft }]}
         activeOpacity={0.7}
         onPress={() => { if (hasChildren) onToggleCollapse(todo.id); }}
-        onLongPress={todo.pinned ? undefined : onDrag}
+        onLongPress={todo.pinned || todo.is_complete ? undefined : onDrag}
         delayLongPress={300}
       >
         {/* Checkbox */}
@@ -175,9 +179,25 @@ const TodoItem = memo(function TodoItem({
 
       {/* Note */}
       {todo.note ? (
-        <Text style={[styles.note, { paddingLeft: indentLeft + 26, color: theme.textSub }]}>
-          {todo.note}
-        </Text>
+        <View style={[styles.noteRow, { paddingLeft: indentLeft + 26 }]}>
+          <Text
+            style={[
+              styles.note,
+              { color: todo.is_complete ? theme.textDone : theme.textSub },
+              todo.is_complete && styles.noteDone,
+            ]}
+            numberOfLines={0}
+          >
+            {todo.note}
+          </Text>
+          <TouchableOpacity
+            onPress={() => onDeleteNote?.(todo.id)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={styles.noteDeleteBtn}
+          >
+            <IconClose size={14} color={theme.textSub} />
+          </TouchableOpacity>
+        </View>
       ) : null}
 
       {/* Image strip — depth 1 only */}
@@ -290,11 +310,26 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     flexShrink: 0,
   },
-  note: {
-    fontSize: 12,
-    paddingBottom: 4,
+  noteRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     paddingRight: 12,
+    paddingBottom: 4,
+  },
+  note: {
+    flex: 1,
+    fontSize: 12,
     fontStyle: 'italic',
+  },
+  noteDone: {
+    textDecorationLine: 'line-through',
+  },
+  noteDeleteBtn: {
+    width: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 1,
+    flexShrink: 0,
   },
   imageStrip: {
     paddingBottom: 6,

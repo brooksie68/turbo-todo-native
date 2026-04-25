@@ -29,43 +29,51 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Fallback: `assets/icon.png` (1024x1024, composed flat icon)
 - Source files: `C:/Users/brook/ai-projects/turbo-todo/images/native-icons/`
 
-## Features (all shipped as of 2026-04-22)
-- 3 lists, todos fully loaded from original Supabase migration
+## Features (all shipped as of 2026-04-25)
+- 3+ lists, todos fully loaded from original Supabase migration
 - Add/edit/delete tasks at all depths (3 levels max)
 - Complete/uncomplete with optimistic updates
-- Drag-and-drop reorder (long-press, siblings only, parent auto-collapse)
+- Drag-and-drop reorder (long-press, siblings only, parent auto-collapse); checked items cannot be dragged
 - Collapse/expand individual items and all at once
 - Status: elevated (bolt icon), top-priority (exclamation icon)
-- Notes on any item
-- Images on depth-1 items (local file system, up to 5)
-- Links on depth-1 items (SQLite task_links table)
+- Notes on any item; inline delete X right-aligned under kebab; note strikethrough when item checked
+- Images on depth-0 and depth-1 items (local file system, up to 5)
+- Links on depth-0 and depth-1 items (SQLite task_links table)
 - Export for AI (share sheet, markdown outline)
 - 2 themes: Default (gold gradient), Bimini Breeze (teal gradient)
 - Theme picker via logo button dropdown
 - Child count badge on collapsed parents ("- N")
 - Pin to top: depth-0 only, floats above incomplete list, blocks drag
-- Row UI: + button (add subtask) + kebab (options), 14px gap
-- **Gear menu (header):** New list / Rename / Delete list with confirm
+- Row UI: + button (add subtask) + kebab (options)
+- **Gear menu (header):** New list / Rename / Delete list with confirm; Rename + Delete hidden for Daily List
 - **Help modal:** Full scrollable help, all features documented, themed
 - **Backup system:** zip archive containing JSON (all lists/todos/links) + image files organized by todo ID. Export via share sheet, restore via file picker. One zip = complete backup.
   - Export: toolbar options → Back up → share sheet → save zip to Google Drive
   - Restore: toolbar options → Restore → confirm → file picker → pick zip → full restore
   - lib/backup.ts: `exportBackup()` and `importBackup()`
   - react-native-zip-archive@7.0.2 for zip/unzip, expo-sharing for share sheet, expo-document-picker for file picker
+- **Daily List:** On/Off toggle in toolbar options. Daily list sorted to front of list picker. Items sent from any list land at top of Daily List as depth-0 singletons. At midnight (checked before first render), items with a source list restore to their origin list as depth-0 orphans above completed items; natively-added daily items are deleted. Daily List hides Subtask in AddChildMenu; gear menu shows only New List.
+- **Alarms:** daily repeating notifications via expo-notifications; "Set alarm" in depth-0/1 kebab menus; bell icon on row; auto-cancel on complete/delete
+- **Text size:** 5 steps (small/normal/large/xlarge/xxlarge), toolbar options +/− control, persisted to AsyncStorage
+- **Clear completed per group:** "Clear completed" in depth-0 kebab (conditional on having completed children); recursively removes all completed descendants
+- **Computed position labels:** FlatItem carries `positionLabel` string ("1", "2.3", "1.1.2") — internal, not displayed; foundation for future features
 
 ## Toolbar options menu (bottom sheet)
 1. Back up | Restore (split row, top)
 2. Sort by: Status | Date | Alpha
-3. Clear all completed
-4. Clear entire list (with confirm)
+3. Daily List: On | Off (active option bold)
+4. Clear all completed (recursive — removes completed at all depths)
+5. Clear entire list (with confirm)
 
 ## Key files
-- `lib/db.ts` — SQLite init, schema, WAL mode
-- `lib/types.ts` — List, Todo types
+- `lib/db.ts` — SQLite init, schema, WAL mode, migrations
+- `lib/types.ts` — List, Todo types (includes daily_source_* fields)
 - `lib/theme.tsx` — ThemeContext, themes, ThemeBg
 - `lib/backup.ts` — exportBackup, importBackup
 - `lib/imageStore.ts` — AsyncStorage image helpers
 - `lib/linkStore.ts` — SQLite link helpers
+- `lib/dailyList.ts` — getDailySettings, saveDailySettings, restoreAllDailyItems, runMidnightCheck, getDailyDateString
+- `lib/alarms.ts` — scheduleAlarm, cancelAlarm, requestNotificationPermission
 - `hooks/useTodoData.ts` — all data logic, CRUD, list management (createList/renameList/deleteList)
 - `hooks/useOverlayState.ts` — menu/modal state
 - `components/TodoList.tsx` — main shell
@@ -79,38 +87,32 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ## Data model (SQLite)
 - `lists`: id, name, sort_order, inserted_at
-- `todos`: id, list_id, parent_id, task, note, is_complete, status, sort_order, inserted_at, pinned
+- `todos`: id, list_id, parent_id, task, note, is_complete, status, sort_order, inserted_at, pinned, alarm_time, notification_id, daily_source_list_id, daily_source_parent_id, daily_source_sort_order
 - `task_links`: id, todo_id, url, name, sort_order
 - Images: expo-file-system at `task-images/{todoId}/{filename}` + AsyncStorage metadata keys `turbotodo-images-{todoId}`
+- Daily settings: AsyncStorage key `turbotodo-daily` → `{ enabled: boolean; listId: number | null; date: string }`
 
 ## Important notes
 - react-native-zip-archive must stay at 7.0.2 — 7.1.0 has a Java switch/double type mismatch compile error
 - SQLite returns booleans as 0/1 integers — cast with `!!` on fetch
 - No drag handles — long-press row body initiates drag
 - Pinned items float to top of incomplete list, cannot be dragged
+- Checked items cannot be dragged (onLongPress returns undefined if is_complete)
+- Daily list midnight check runs in `_layout.tsx` before first render — `useState(false)` for `ready`, returns null until resolved
+- DB migrations are idempotent try/catch ALTER TABLE calls — safe to re-run
+- `removeCompletedRecursive` is a module-level pure helper in useTodoData.ts — used by both clearCompleted and clearCompletedInGroup
 
 ## Todo
 
 ### Active
-- [ ] QA pass: expand/collapse, drag-and-drop, menus, images, links, themes, pin, gear menu, help
-- [ ] Phase 8: pixel-perfect header/toolbar polish
+_(none — all 2026-04-25 items complete)_
 
 ### Backlog
-- [ ] Move item to another list
+- [ ] Android emulator autonomous debug workflow
 - [ ] Print export to thin paper list with checkboxes
-- [ ] Close up indenting
 - [ ] Archive completed items — stored, downloadable as JSON
 - [ ] Animate logo in splash screen
-- [ ] Row level add: menu of choices (Subtask, Image, URL)
-- [ ] Image and URL rows checked off with checkboxes
-- [ ] App top bar color changes when theme switches
-- [ ] Add "send to top or bottom" to options menu
-- [ ] Simplify bottom toolbar
 - [ ] Export to CSV and XLSX
-- [ ] Spellchecker
 - [ ] Magic meal machine integration
-- [ ] Gardening app integration
-- [ ] List row alert level icons
 - [ ] Categories
-- [ ] Alerts
 - [ ] Supabase sync as optional paid backup feature (long-term)

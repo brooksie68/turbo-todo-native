@@ -14,6 +14,7 @@ export const TEXT_SIZE_COUNT = TEXT_SIZES.length;
 export type Theme = {
   id: string;
   name: string;
+  enabled?: boolean;
   bg: string;
   headerBg: string;
   headerBorder: string;
@@ -34,6 +35,7 @@ export type Theme = {
   checkboxBg: string;
   checkboxDone: string;
   separator: string;
+  menuBg: string;
   gradientColors: string[] | null;
   gradientLocations: number[] | null;
 };
@@ -62,7 +64,64 @@ export const themes: Record<string, Theme> = {
     checkboxBg: '#fffdf5',
     checkboxDone: '#6a3f1f',
     separator: '#d9ccb4',
+    menuBg: '#f0e8d5',
     gradientColors: ['#ffcb58', '#eeddba', '#ffbe30'],
+    gradientLocations: [0, 0.5, 1],
+  },
+  'dark-slate': {
+    id: 'dark-slate',
+    name: 'Dark Slate',
+    enabled: true,
+    bg: '#1c1a18',
+    headerBg: '#2e2b27',
+    headerBorder: '#3e3a36',
+    surface: '#272421',
+    border: '#3e3a36',
+    text: '#e6e2dc',
+    textSub: '#968e84',
+    textDone: '#524e4a',
+    textDepth: ['#e6e2dc', '#c8c4be', '#a8a49e'],
+    accent: '#c4beb6',
+    danger: '#e05040',
+    priorityElevated: '#e08030',
+    priorityTop: '#e04030',
+    iconColor: '#7aa0b8',
+    listSelectorBg: '#322f2b',
+    listSelectorText: '#e6e2dc',
+    listSelectorBorder: '#5a5652',
+    checkboxBg: '#2e2b27',
+    checkboxDone: '#7aa0b8',
+    separator: '#363230',
+    menuBg: '#302d29',
+    gradientColors: ['#2e2b27', '#272421', '#2a2724'],
+    gradientLocations: [0, 0.5, 1],
+  },
+  slate: {
+    id: 'slate',
+    name: 'Slate',
+    enabled: true,
+    bg: '#48453f',
+    headerBg: '#d6d2cc',
+    headerBorder: '#bfbbb4',
+    surface: '#eceae7',
+    border: '#c8c4be',
+    text: '#201e1b',
+    textSub: '#6e6a65',
+    textDone: '#aaa7a2',
+    textDepth: ['#201e1b', '#3c3935', '#5a5652'],
+    accent: '#3c3935',
+    danger: '#8c2e26',
+    priorityElevated: '#b06018',
+    priorityTop: '#982018',
+    iconColor: '#4e6878',
+    listSelectorBg: '#e4e0da',
+    listSelectorText: '#201e1b',
+    listSelectorBorder: '#3c3935',
+    checkboxBg: '#f4f3f1',
+    checkboxDone: '#48453f',
+    separator: '#d2cec8',
+    menuBg: '#f2f0ed',
+    gradientColors: ['#d6d2cc', '#e4e0da', '#ccc8c2'],
     gradientLocations: [0, 0.5, 1],
   },
   'bimini-breeze': {
@@ -88,6 +147,7 @@ export const themes: Record<string, Theme> = {
     checkboxBg: '#f0fbf7',
     checkboxDone: '#007766',
     separator: '#b0ddd4',
+    menuBg: '#f5fdfb',
     gradientColors: ['#fdf5e0', '#c8f0e8', '#7dd8cc'],
     gradientLocations: [0, 0.6, 1],
   },

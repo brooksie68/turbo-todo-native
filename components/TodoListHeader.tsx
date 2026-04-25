@@ -18,6 +18,7 @@ type Props = {
   lists: List[];
   activeListId: number | null;
   activeList: List | null;
+  isDailyList: boolean;
   onSwitchList: (id: number) => void;
   onCreateList: (name: string) => void;
   onRenameList: (id: number, name: string) => void;
@@ -29,6 +30,7 @@ export default function TodoListHeader({
   lists,
   activeListId,
   activeList,
+  isDailyList,
   onSwitchList,
   onCreateList,
   onRenameList,
@@ -177,7 +179,7 @@ export default function TodoListHeader({
             styles.dropdown,
             { backgroundColor: theme.surface, borderColor: theme.border, top: themePickerLayout.top, left: themePickerLayout.left },
           ]}>
-            {Object.values(themes).map((th, i, arr) => (
+            {Object.values(themes).filter(th => th.enabled !== false).map((th, i, arr) => (
               <TouchableOpacity
                 key={th.id}
                 style={[styles.dropdownItem, i < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.border }]}
@@ -215,18 +217,22 @@ export default function TodoListHeader({
             >
               <Text style={[styles.dropdownItemText, { color: theme.text }]}>New list</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
-              onPress={handleRename}
-            >
-              <Text style={[styles.dropdownItemText, { color: theme.text }]}>Rename</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.dropdownItem}
-              onPress={handleDelete}
-            >
-              <Text style={[styles.dropdownItemText, { color: theme.danger }]}>Delete list</Text>
-            </TouchableOpacity>
+            {!isDailyList && (
+              <TouchableOpacity
+                style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
+                onPress={handleRename}
+              >
+                <Text style={[styles.dropdownItemText, { color: theme.text }]}>Rename</Text>
+              </TouchableOpacity>
+            )}
+            {!isDailyList && (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={handleDelete}
+              >
+                <Text style={[styles.dropdownItemText, { color: theme.danger }]}>Delete list</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </Modal>
       )}
@@ -296,7 +302,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 60,
     top: 15,
-    width: 214,
+    width: 202,
     height: 34,
     flexDirection: 'row',
     alignItems: 'center',
@@ -309,7 +315,7 @@ const styles = StyleSheet.create({
   listSelectorArrow: { fontSize: 10 },
   gearBtn: {
     position: 'absolute',
-    left: 283,
+    left: 271,
     top: 18,
     width: 28,
     height: 28,

@@ -18,5 +18,8 @@ export type Todo = {
   pinned?: boolean;
   alarm_time?: string | null;
   notification_id?: string | null;
+  daily_source_list_id?: number | null;
+  daily_source_parent_id?: number | null;
+  daily_source_sort_order?: number | null;
   children?: Todo[];
 };

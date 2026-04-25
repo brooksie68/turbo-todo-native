@@ -33,8 +33,16 @@ type Props = {
   onDeleteNote: () => void;
   onExportForAI: () => void;
   onSetAlarm: () => void;
+  onClearCompletedInGroup: () => void;
+  onSendToDaily: () => void;
+  onRestoreFromDaily: () => void;
   imageCount?: number;
   hasNote: boolean;
+  hasCompletedChildren: boolean;
+  dailyEnabled: boolean;
+  isDailyList: boolean;
+  isSingleton: boolean;
+  hasSource: boolean;
 };
 
 function formatAlarmTime(time24: string): string {
@@ -60,8 +68,16 @@ export default function ItemOptionsMenu({
   onDeleteNote,
   onExportForAI,
   onSetAlarm,
+  onClearCompletedInGroup,
+  onSendToDaily,
+  onRestoreFromDaily,
   imageCount = 0,
   hasNote,
+  hasCompletedChildren,
+  dailyEnabled,
+  isDailyList,
+  isSingleton,
+  hasSource,
 }: Props) {
   const theme = useTheme();
 
@@ -95,7 +111,7 @@ export default function ItemOptionsMenu({
       />
       <View style={[
         styles.dropdown,
-        { backgroundColor: theme.surface, borderColor: theme.border },
+        { backgroundColor: theme.menuBg, borderColor: theme.border },
         flipAbove ? { bottom, right } : { top, right },
       ]}>
         {/* Priority row — always shown */}
@@ -131,9 +147,29 @@ export default function ItemOptionsMenu({
             <TouchableOpacity style={styles.item} onPress={() => handle(onExportForAI)}>
               <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>
             </TouchableOpacity>
+            {hasNote && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onEditNote)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Edit note</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.item} onPress={() => handle(onEdit)}>
               <Text style={[styles.itemText, { color: theme.text }]}>Edit</Text>
             </TouchableOpacity>
+            {hasCompletedChildren && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onClearCompletedInGroup)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Clear completed</Text>
+              </TouchableOpacity>
+            )}
+            {isDailyList && hasSource && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onRestoreFromDaily)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Restore item</Text>
+              </TouchableOpacity>
+            )}
+            {!isDailyList && dailyEnabled && isSingleton && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onSendToDaily)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Send to Daily List</Text>
+              </TouchableOpacity>
+            )}
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
               <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>
@@ -151,10 +187,24 @@ export default function ItemOptionsMenu({
                 <Text style={[styles.itemText, { color: theme.text }]}>Export for AI</Text>
               </TouchableOpacity>
             )}
+            {hasNote && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onEditNote)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Edit note</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.item} onPress={() => handle(onEdit)}>
               <Text style={[styles.itemText, { color: theme.text }]}>Edit</Text>
             </TouchableOpacity>
-
+            {isDailyList && hasSource && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onRestoreFromDaily)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Restore item</Text>
+              </TouchableOpacity>
+            )}
+            {!isDailyList && dailyEnabled && isSingleton && (
+              <TouchableOpacity style={styles.item} onPress={() => handle(onSendToDaily)}>
+                <Text style={[styles.itemText, { color: theme.text }]}>Send to Daily List</Text>
+              </TouchableOpacity>
+            )}
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
             <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
@@ -170,17 +220,15 @@ export default function ItemOptionsMenu({
 const styles = StyleSheet.create({
   dropdown: {
     position: 'absolute',
-    backgroundColor: '#e6dac8',
     borderWidth: 1,
-    borderColor: '#c7ba9b',
     borderRadius: 4,
     minWidth: 220,
     overflow: 'hidden',
-    elevation: 8,
+    elevation: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
   },
   priorityRow: {
     flexDirection: 'row',

@@ -3,6 +3,7 @@ import {
   View,
   Text,
   ActivityIndicator,
+  Alert,
   FlatList,
   StyleSheet,
   ToastAndroid,
@@ -137,9 +138,35 @@ export default function TodoList() {
     if (data.activeListId) data.handleClearCompleted(data.todos, data.activeListId);
   }, [data.todos, data.activeListId, data.handleClearCompleted]);
 
+  const handleDeleteNoteInline = useCallback((id: number) => {
+    if (data.activeListId) data.saveNote(id, null, data.activeListId);
+  }, [data.saveNote, data.activeListId]);
+
   const handleClearAll = useCallback(() => {
     if (data.activeListId) data.handleClearAll(data.todos, data.activeListId);
   }, [data.todos, data.activeListId, data.handleClearAll]);
+
+  const handleDailyOn = useCallback(() => {
+    if (!data.dailyEnabled) data.enableDaily();
+  }, [data.dailyEnabled, data.enableDaily]);
+
+  const handleDailyOff = useCallback(async () => {
+    if (!data.dailyEnabled) return;
+    const count = await data.getDailyItemCount();
+    if (count > 0) {
+      Alert.alert(
+        'Daily List has items',
+        'What would you like to do?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Restore & Turn Off', onPress: () => data.disableDaily(true) },
+          { text: 'Turn Off', style: 'destructive', onPress: () => data.disableDaily(false) },
+        ],
+      );
+    } else {
+      data.disableDaily(false);
+    }
+  }, [data.dailyEnabled, data.getDailyItemCount, data.disableDaily]);
 
   const handleToggleAll = useCallback(() => {
     data.toggleAll(data.anyDepth0Expanded);
@@ -178,6 +205,8 @@ export default function TodoList() {
         onMediaChanged={data.refreshMedia}
         onDrag={drag}
         isBeingDragged={isActive}
+        positionLabel={item.positionLabel}
+        onDeleteNote={handleDeleteNoteInline}
       />
     </ScaleDecorator>
   ), [
@@ -200,6 +229,7 @@ export default function TodoList() {
       links={data.linkMap[item.todo.id]}
       onViewImage={setViewerUri}
       onMediaChanged={data.refreshMedia}
+      onDeleteNote={handleDeleteNoteInline}
     />
   ), [
     data.toggleCollapse, data.toggleComplete,
@@ -228,6 +258,7 @@ export default function TodoList() {
           lists={data.lists}
           activeListId={data.activeListId}
           activeList={data.activeList}
+          isDailyList={data.isDailyList}
           onSwitchList={data.switchToList}
           onCreateList={data.createList}
           onRenameList={data.renameList}
@@ -252,6 +283,9 @@ export default function TodoList() {
           onClearAll={handleClearAll}
           onBackup={handleBackup}
           onRestore={handleRestore}
+          dailyEnabled={data.dailyEnabled}
+          onDailyOn={handleDailyOn}
+          onDailyOff={handleDailyOff}
         />
         <ItemOptionsMenu
           visible={overlay.itemMenuTodo !== null}
@@ -269,8 +303,16 @@ export default function TodoList() {
           onDeleteNote={overlay.handleDeleteNote}
           onExportForAI={overlay.handleExportForAI}
           onSetAlarm={overlay.handleMenuSetAlarm}
+          onClearCompletedInGroup={overlay.handleMenuClearCompletedInGroup}
+          onSendToDaily={overlay.handleMenuSendToDaily}
+          onRestoreFromDaily={overlay.handleMenuRestoreFromDaily}
           imageCount={overlay.itemMenuImageCount}
           hasNote={!!(overlay.itemMenuTodo?.note)}
+          hasCompletedChildren={overlay.itemMenuHasCompletedChildren}
+          dailyEnabled={data.dailyEnabled}
+          isDailyList={data.isDailyList}
+          isSingleton={overlay.itemMenuIsSingleton}
+          hasSource={overlay.itemMenuHasSource}
         />
         <AddEditModal
           visible={overlay.noteModalVisible}
@@ -294,6 +336,7 @@ export default function TodoList() {
           onAddImage={overlay.handleAddMenuImage}
           onAddUrl={overlay.handleAddMenuUrl}
           onAddNote={overlay.handleAddMenuNote}
+          hideSubtask={data.isDailyList}
         />
 
         {/* Todo list */}

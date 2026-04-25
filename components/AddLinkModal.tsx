@@ -8,9 +8,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  KeyboardAvoidingView,
+  Keyboard,
   Animated,
-  Platform,
 } from 'react-native';
 
 type Props = {
@@ -43,6 +42,13 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
     }
   }, [visible]);
 
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
+
   function handleSave() {
     let finalUrl = url.trim();
     if (!finalUrl) return;
@@ -52,17 +58,14 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
 
   return (
     <Modal visible={internalVisible} transparent animationType="none" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <View style={styles.overlay}>
         {/* Backdrop */}
         <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim, backgroundColor: 'rgba(0,0,0,0.4)' }]}>
           <TouchableOpacity style={StyleSheet.absoluteFillObject} activeOpacity={1} onPress={onClose} />
         </Animated.View>
 
         {/* Sheet */}
-        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(12, insets.bottom), opacity: fadeAnim }]}>
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(12, insets.bottom), marginBottom: keyboardHeight, opacity: fadeAnim }]}>
           <Text style={[styles.title, { color: theme.accent }]}>Add URL</Text>
 
           <TextInput
@@ -102,7 +105,7 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
             </TouchableOpacity>
           </View>
         </Animated.View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }

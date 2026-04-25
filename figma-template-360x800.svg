@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="800" viewBox="0 0 360 800" font-family="sans-serif">
+
+  <!-- Zone fills -->
+  <rect x="0" y="0"   width="360" height="28"  fill="#dce8f2"/><!-- status bar -->
+  <rect x="0" y="28"  width="360" height="64"  fill="#fef6e0"/><!-- header -->
+  <rect x="0" y="92"  width="360" height="618" fill="#f0f0ec"/><!-- scroll area -->
+  <rect x="0" y="710" width="360" height="42"  fill="#fef6e0"/><!-- toolbar -->
+  <rect x="0" y="752" width="360" height="48"  fill="#dce8f2"/><!-- nav bar -->
+
+  <!-- Divider lines (dashed) -->
+  <line x1="0" y1="28"  x2="360" y2="28"  stroke="#aab" stroke-width="0.75" stroke-dasharray="5,3"/>
+  <line x1="0" y1="92"  x2="360" y2="92"  stroke="#aab" stroke-width="0.75" stroke-dasharray="5,3"/>
+  <line x1="0" y1="710" x2="360" y2="710" stroke="#aab" stroke-width="0.75" stroke-dasharray="5,3"/>
+  <line x1="0" y1="752" x2="360" y2="752" stroke="#aab" stroke-width="0.75" stroke-dasharray="5,3"/>
+
+  <!-- Outer frame border -->
+  <rect x="0" y="0" width="360" height="800" fill="none" stroke="#889" stroke-width="1"/>
+
+  <!-- ── STATUS BAR ── -->
+  <text x="180" y="11" text-anchor="middle" font-size="8" font-weight="700" fill="#445566">STATUS BAR</text>
+  <text x="180" y="22" text-anchor="middle" font-size="7" fill="#667788">360 × 28 — system chrome, no token</text>
+
+  <!-- ── APP HEADER ── -->
+  <text x="180" y="49" text-anchor="middle" font-size="8" font-weight="700" fill="#445566">APP HEADER</text>
+  <text x="180" y="60" text-anchor="middle" font-size="7" fill="#667788">360 × 64</text>
+  <text x="180" y="72" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">headerBg · headerBorder · iconColor</text>
+  <text x="180" y="83" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">listSelectorBg · listSelectorText · listSelectorBorder</text>
+
+  <!-- ── SCROLL AREA ── -->
+  <text x="180" y="392" text-anchor="middle" font-size="8" font-weight="700" fill="#445566">SCROLL AREA</text>
+  <text x="180" y="404" text-anchor="middle" font-size="7" fill="#667788">360 × 618</text>
+  <text x="180" y="416" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">surface · gradientColors · gradientLocations</text>
+  <text x="180" y="428" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">separator · border · text · textSub · textDone</text>
+  <text x="180" y="440" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">textDepth[0] · textDepth[1] · textDepth[2]</text>
+  <text x="180" y="452" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">checkboxBg · checkboxDone · priorityElevated · priorityTop</text>
+  <text x="180" y="464" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">menuBg · accent · danger</text>
+
+  <!-- ── APP TOOLBAR ── -->
+  <text x="180" y="726" text-anchor="middle" font-size="8" font-weight="700" fill="#445566">APP TOOLBAR</text>
+  <text x="180" y="737" text-anchor="middle" font-size="7" fill="#667788">360 × 42</text>
+  <text x="180" y="748" text-anchor="middle" font-size="7" fill="#667788" font-family="monospace">headerBg · iconColor</text>
+
+  <!-- ── ANDROID NAV BAR ── -->
+  <text x="180" y="769" text-anchor="middle" font-size="8" font-weight="700" fill="#445566">ANDROID NAV BAR</text>
+  <text x="180" y="780" text-anchor="middle" font-size="7" fill="#667788">360 × 48 — system chrome, no token</text>
+  <text x="180" y="791" text-anchor="middle" font-size="7" fill="#667788">|||  ○  &lt;</text>
+
+</svg>

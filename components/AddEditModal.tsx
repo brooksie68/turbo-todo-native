@@ -6,9 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  KeyboardAvoidingView,
+  Keyboard,
   Animated,
-  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/theme';
@@ -76,19 +75,21 @@ export default function AddEditModal({
 
   const canSave = noteMode ? note.trim().length > 0 : task.trim().length > 0;
 
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
+
   return (
     <Modal visible={internalVisible} transparent animationType="none" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <View style={styles.overlay}>
         {/* Backdrop — behind sheet in z-order (rendered first) */}
-        <Animated.View style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim, backgroundColor: 'rgba(0,0,0,0.15)' }]}>
-          <TouchableOpacity style={StyleSheet.absoluteFillObject} activeOpacity={1} onPress={onClose} />
-        </Animated.View>
+        <TouchableOpacity style={StyleSheet.absoluteFillObject} activeOpacity={1} onPress={onClose} />
 
         {/* Sheet — above backdrop in z-order (rendered second) */}
-        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(12, insets.bottom), opacity: fadeAnim }]}>
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.menuBg, paddingBottom: Math.max(12, insets.bottom), marginBottom: keyboardHeight, opacity: fadeAnim }]}>
           <Text style={[styles.title, { color: theme.accent }]}>{title}</Text>
 
           {!noteMode && (
@@ -130,7 +131,7 @@ export default function AddEditModal({
             </TouchableOpacity>
           </View>
         </Animated.View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }
@@ -145,6 +146,11 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 12,
     padding: 20,
     gap: 12,
+    elevation: 22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.33,
+    shadowRadius: 16,
   },
   title: {
     fontSize: 16,

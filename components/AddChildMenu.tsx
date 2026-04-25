@@ -11,6 +11,7 @@ type Props = {
   onAddImage: () => void;
   onAddUrl: () => void;
   onAddNote: () => void;
+  hideSubtask?: boolean;
 };
 
 export default function AddChildMenu({
@@ -21,6 +22,7 @@ export default function AddChildMenu({
   onAddImage,
   onAddUrl,
   onAddNote,
+  hideSubtask = false,
 }: Props) {
   const theme = useTheme();
 
@@ -46,10 +48,11 @@ export default function AddChildMenu({
         { backgroundColor: theme.surface, borderColor: theme.border },
         flipAbove ? { bottom, right } : { top, right },
       ]}>
-        <Text style={[styles.header, { color: theme.textSub, borderBottomColor: theme.border }]}>Add</Text>
-        <TouchableOpacity style={styles.item} onPress={() => handle(onAddSubtask)}>
-          <Text style={[styles.itemText, { color: theme.text }]}>Subtask</Text>
-        </TouchableOpacity>
+        {!hideSubtask && (
+          <TouchableOpacity style={styles.item} onPress={() => handle(onAddSubtask)}>
+            <Text style={[styles.itemText, { color: theme.text }]}>Subtask</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.item} onPress={() => handle(onAddImage)}>
           <Text style={[styles.itemText, { color: theme.text }]}>Image</Text>
         </TouchableOpacity>

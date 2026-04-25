@@ -17,6 +17,9 @@ type Props = {
   onClearCompleted: () => void;
   onClearAll: () => void;
   onSort: (by: 'status' | 'date' | 'alpha') => void;
+  dailyEnabled: boolean;
+  onDailyOn: () => void;
+  onDailyOff: () => void;
 };
 
 export default function ToolbarOptionsMenu({
@@ -27,6 +30,9 @@ export default function ToolbarOptionsMenu({
   onClearCompleted,
   onClearAll,
   onSort,
+  dailyEnabled,
+  onDailyOn,
+  onDailyOff,
 }: Props) {
   const insets = useSafeAreaInsets();
   const { theme, textSizeIndex, setTextSizeIndex } = useThemeContext();
@@ -48,15 +54,12 @@ export default function ToolbarOptionsMenu({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={handleClose}
     >
-      <TouchableOpacity
-        style={styles.backdrop}
-        activeOpacity={1}
-        onPress={handleClose}
-      />
-      <View style={[styles.sheet, { backgroundColor: t.surface, borderColor: t.border, paddingBottom: insets.bottom + 8 }]}>
+      <View style={styles.overlay}>
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={handleClose} />
+        <View style={[styles.sheet, { backgroundColor: t.menuBg, borderColor: t.border, paddingBottom: insets.bottom + 8 }]}>
         {confirmAction === 'clear' ? (
           <View style={styles.confirmBox}>
             <Text style={[styles.confirmMsg, { color: t.accent }]}>This cannot be undone</Text>
@@ -127,18 +130,31 @@ export default function ToolbarOptionsMenu({
             <View style={styles.textSizeRow}>
               <TouchableOpacity
                 style={styles.textSizeBtn}
+                onPress={() => setTextSizeIndex(textSizeIndex - 1)}
+                disabled={textSizeIndex <= 0}
+              >
+                <Text style={[styles.textSizeBtnText, { color: textSizeIndex <= 0 ? t.border : t.text }]}>−</Text>
+              </TouchableOpacity>
+              <Text style={[styles.textSizeLabel, { color: t.text }]}>Text size</Text>
+              <TouchableOpacity
+                style={styles.textSizeBtn}
                 onPress={() => setTextSizeIndex(textSizeIndex + 1)}
                 disabled={textSizeIndex >= TEXT_SIZE_COUNT - 1}
               >
                 <Text style={[styles.textSizeBtnText, { color: textSizeIndex >= TEXT_SIZE_COUNT - 1 ? t.border : t.text }]}>+</Text>
               </TouchableOpacity>
-              <Text style={[styles.textSizeLabel, { color: t.text }]}>Text size</Text>
-              <TouchableOpacity
-                style={styles.textSizeBtn}
-                onPress={() => setTextSizeIndex(textSizeIndex - 1)}
-                disabled={textSizeIndex <= 0}
-              >
-                <Text style={[styles.textSizeBtnText, { color: textSizeIndex <= 0 ? t.border : t.text }]}>−</Text>
+            </View>
+
+            <View style={[styles.divider, { backgroundColor: t.border }]} />
+
+            <Text style={[styles.sectionLabel, { color: t.accent }]}>Daily List:</Text>
+            <View style={styles.sortRow}>
+              <TouchableOpacity style={styles.sortBtn} onPress={onDailyOn}>
+                <Text style={[styles.sortBtnText, { color: t.text }, dailyEnabled && styles.activeToggle]}>On</Text>
+              </TouchableOpacity>
+              <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
+              <TouchableOpacity style={styles.sortBtn} onPress={onDailyOff}>
+                <Text style={[styles.sortBtnText, { color: t.text }, !dailyEnabled && styles.activeToggle]}>Off</Text>
               </TouchableOpacity>
             </View>
 
@@ -152,15 +168,16 @@ export default function ToolbarOptionsMenu({
             </TouchableOpacity>
           </>
         )}
+        </View>
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
+  overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    justifyContent: 'flex-end',
   },
   sheet: {
     borderTopLeftRadius: 12,
@@ -168,11 +185,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderBottomWidth: 0,
     paddingTop: 4,
-    elevation: 12,
+    elevation: 22,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.33,
+    shadowRadius: 16,
   },
   item: {
     paddingVertical: 12,
@@ -206,6 +223,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   sortBtnText: { fontSize: 16 },
+  activeToggle: { fontWeight: '700' },
   sortPipe: { fontSize: 16, flexShrink: 0 },
   splitRow: {
     flexDirection: 'row',
@@ -249,9 +267,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   textSizeBtnText: {
-    fontSize: 22,
-    fontWeight: '300',
-    lineHeight: 26,
+    fontSize: 24,
+    fontWeight: '700',
+    lineHeight: 28,
   },
   textSizeLabel: {
     flex: 2,

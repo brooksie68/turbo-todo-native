@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="1764" viewBox="0 0 420 1764" font-family="'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <linearGradient id="grad-preview" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#DDDDDD"/>
+      <stop offset="50%"  stop-color="#CCCCCC"/>
+      <stop offset="100%" stop-color="#DDDDDD"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Frame background -->
+  <rect width="420" height="1764" fill="#FFFFFF"/>
+
+  <!-- Instruction strip -->
+  <text x="20" y="13" font-size="8" fill="#AAAAAA">Name this frame after your theme. Fill each swatch. Share the frame URL with Claude.</text>
+
+  <!-- ============================================================
+       GROUP: swatches
+  ============================================================ -->
+  <g id="swatches">
+    <!-- APP BACKGROUND -->
+    <rect x="20"  y="48"   width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="48"   width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="212" y="48"   width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="308" y="48"   width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- HEADER BAR -->
+    <rect x="20"  y="270"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="270"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- LIST SELECTOR -->
+    <rect x="20"  y="444"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="444"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="212" y="444"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- ICONS -->
+    <rect x="20"  y="618"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- SCROLL AREA -->
+    <rect x="20"  y="792"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="792"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- TEXT row 1 -->
+    <rect x="20"  y="966"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="966"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="212" y="966"  width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <!-- TEXT row 2 -->
+    <rect x="20"  y="1100" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="1100" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- CHECKBOXES -->
+    <rect x="20"  y="1274" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="1274" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="212" y="1274" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- PRIORITY ICONS -->
+    <rect x="20"  y="1448" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="1448" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+
+    <!-- MENUS -->
+    <rect x="20"  y="1622" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="116" y="1622" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="212" y="1622" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+    <rect x="308" y="1622" width="80" height="80" rx="3" fill="#DDDDDD" stroke="#BBBBBB" stroke-width="1"/>
+  </g>
+
+  <!-- ============================================================
+       GROUP: gradient-extras
+  ============================================================ -->
+  <g id="gradient-extras">
+    <rect x="116" y="174" width="272" height="18" rx="2" fill="url(#grad-preview)"/>
+  </g>
+
+  <!-- ============================================================
+       GROUP: section-headers
+  ============================================================ -->
+  <g id="section-headers" font-size="10" font-weight="700" fill="#333333" letter-spacing="1">
+    <line x1="0" y1="20"   x2="420" y2="20"   stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="37">APP BACKGROUND</text>
+
+    <line x1="0" y1="242"  x2="420" y2="242"  stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="259">HEADER BAR</text>
+
+    <line x1="0" y1="416"  x2="420" y2="416"  stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="433">LIST SELECTOR</text>
+
+    <line x1="0" y1="590"  x2="420" y2="590"  stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="607">ICONS</text>
+
+    <line x1="0" y1="764"  x2="420" y2="764"  stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="781">SCROLL AREA</text>
+
+    <line x1="0" y1="938"  x2="420" y2="938"  stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="955">TEXT</text>
+
+    <line x1="0" y1="1246" x2="420" y2="1246" stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="1263">CHECKBOXES</text>
+
+    <line x1="0" y1="1420" x2="420" y2="1420" stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="1437">PRIORITY ICONS</text>
+
+    <line x1="0" y1="1594" x2="420" y2="1594" stroke="#E0E0E0" stroke-width="1"/>
+    <text x="20" y="1611">MENUS</text>
+  </g>
+
+  <!-- ============================================================
+       GROUP: token-names
+  ============================================================ -->
+  <g id="token-names" font-size="9" font-family="'Courier New', monospace" fill="#222222" text-anchor="middle">
+    <!-- APP BACKGROUND -->
+    <text x="60"  y="146">bg</text>
+    <text x="156" y="146">gradientColors[0]</text>
+    <text x="252" y="146">gradientColors[1]</text>
+    <text x="348" y="146">gradientColors[2]</text>
+    <text x="252" y="200" font-size="8" fill="#999999">gradientLocations [ 0 · 0.5 · 1 ] — edit stop positions in code</text>
+
+    <!-- HEADER BAR -->
+    <text x="60"  y="368">headerBg</text>
+    <text x="156" y="368">headerBorder</text>
+
+    <!-- LIST SELECTOR -->
+    <text x="60"  y="542">listSelectorBg</text>
+    <text x="156" y="542">listSelectorText</text>
+    <text x="252" y="542">listSelectorBorder</text>
+
+    <!-- ICONS -->
+    <text x="60"  y="716">iconColor</text>
+
+    <!-- SCROLL AREA -->
+    <text x="60"  y="890">surface</text>
+    <text x="156" y="890">separator</text>
+
+    <!-- TEXT row 1 -->
+    <text x="60"  y="1064">textDepth[0]</text>
+    <text x="156" y="1064">textDepth[1]</text>
+    <text x="252" y="1064">textDepth[2]</text>
+    <!-- TEXT row 2 -->
+    <text x="60"  y="1198">textSub</text>
+    <text x="156" y="1198">textDone</text>
+
+    <!-- CHECKBOXES -->
+    <text x="60"  y="1372">checkboxBg</text>
+    <text x="156" y="1372">checkboxDone</text>
+    <text x="252" y="1372">border</text>
+
+    <!-- PRIORITY ICONS -->
+    <text x="60"  y="1546">priorityElevated</text>
+    <text x="156" y="1546">priorityTop</text>
+
+    <!-- MENUS -->
+    <text x="60"  y="1720">menuBg</text>
+    <text x="156" y="1720">text</text>
+    <text x="252" y="1720">accent</text>
+    <text x="348" y="1720">danger</text>
+  </g>
+
+  <!-- ============================================================
+       GROUP: descriptions
+  ============================================================ -->
+  <g id="descriptions" font-size="8" fill="#888888" text-anchor="middle">
+    <!-- APP BACKGROUND -->
+    <text x="60"  y="160">Outer app background</text>
+    <text x="156" y="160">Gradient top color</text>
+    <text x="252" y="160">Gradient mid color</text>
+    <text x="348" y="160">Gradient bottom color</text>
+
+    <!-- HEADER BAR -->
+    <text x="60"  y="382">Header bar fill</text>
+    <text x="156" y="382">Header bottom edge</text>
+
+    <!-- LIST SELECTOR -->
+    <text x="60"  y="556">List dropdown fill</text>
+    <text x="156" y="556">List name + arrow</text>
+    <text x="252" y="556">Dropdown bottom edge</text>
+
+    <!-- ICONS -->
+    <text x="60"  y="730">All header + toolbar icons</text>
+
+    <!-- SCROLL AREA -->
+    <text x="60"  y="904">List body · modals · dropdowns</text>
+    <text x="156" y="904">Between-row dividers</text>
+
+    <!-- TEXT row 1 -->
+    <text x="60"  y="1078">Top-level task label</text>
+    <text x="156" y="1078">Subtask label</text>
+    <text x="252" y="1078">Sub-subtask label</text>
+    <!-- TEXT row 2 -->
+    <text x="60"  y="1212">Notes · badges · secondary</text>
+    <text x="156" y="1212">Checked item text</text>
+
+    <!-- CHECKBOXES -->
+    <text x="60"  y="1386">Unchecked fill</text>
+    <text x="156" y="1386">Checked fill + checkmark</text>
+    <text x="252" y="1386">Checkbox · row · menu edges</text>
+
+    <!-- PRIORITY ICONS -->
+    <text x="60"  y="1560">Bolt icon (elevated)</text>
+    <text x="156" y="1560">Exclamation (top priority)</text>
+
+    <!-- MENUS -->
+    <text x="60"  y="1734">Kebab dropdown bg</text>
+    <text x="156" y="1734">Menu item text</text>
+    <text x="252" y="1734">Active states + titles</text>
+    <text x="348" y="1734">Delete + destructive</text>
+  </g>
+
+</svg>

@@ -11,7 +11,8 @@ import { formatItemTree } from './useTodoData';
 
 export function useOverlayState(data: TodoData) {
   const {
-    deleteTask, saveNote, setPinned,
+    deleteTask, saveNote, setPinned, clearCompletedInGroup,
+    sendToDaily, restoreFromDaily,
     activeListId, activeList, todos, openEdit, refreshMedia, expandItem,
   } = data;
 
@@ -20,6 +21,9 @@ export function useOverlayState(data: TodoData) {
   const [itemMenuDepth, setItemMenuDepth] = useState(0);
   const [itemMenuLayout, setItemMenuLayout] = useState<ButtonLayout | null>(null);
   const [itemMenuImageCount, setItemMenuImageCount] = useState(0);
+  const [itemMenuHasCompletedChildren, setItemMenuHasCompletedChildren] = useState(false);
+  const [itemMenuIsSingleton, setItemMenuIsSingleton] = useState(false);
+  const [itemMenuHasSource, setItemMenuHasSource] = useState(false);
 
   // Add-child menu (depth-0 + button)
   const [addMenuTodo, setAddMenuTodo] = useState<Todo | null>(null);
@@ -79,6 +83,16 @@ export function useOverlayState(data: TodoData) {
   const handleOptions = useCallback(async (todo: Todo, depth: number, layout: ButtonLayout) => {
     const images = await getImages(todo.id);
     setItemMenuImageCount(images.length);
+    function anyCompleted(nodes: Todo[]): boolean {
+      for (const n of nodes) {
+        if (n.is_complete) return true;
+        if (n.children && anyCompleted(n.children)) return true;
+      }
+      return false;
+    }
+    setItemMenuHasCompletedChildren(anyCompleted(todo.children ?? []));
+    setItemMenuIsSingleton((todo.children?.length ?? 0) === 0);
+    setItemMenuHasSource(!!(todo.daily_source_list_id));
     setItemMenuTodo(todo);
     setItemMenuDepth(depth);
     setItemMenuLayout(layout);
@@ -207,6 +221,18 @@ export function useOverlayState(data: TodoData) {
     if (itemMenuTodo) setPinned(itemMenuTodo.id, !itemMenuTodo.pinned);
   }, [itemMenuTodo, setPinned]);
 
+  const handleMenuClearCompletedInGroup = useCallback(() => {
+    if (itemMenuTodo) clearCompletedInGroup(itemMenuTodo.id, todos);
+  }, [itemMenuTodo, todos, clearCompletedInGroup]);
+
+  const handleMenuSendToDaily = useCallback(() => {
+    if (itemMenuTodo) sendToDaily(itemMenuTodo);
+  }, [itemMenuTodo, sendToDaily]);
+
+  const handleMenuRestoreFromDaily = useCallback(() => {
+    if (itemMenuTodo) restoreFromDaily(itemMenuTodo);
+  }, [itemMenuTodo, restoreFromDaily]);
+
   const handleMenuSetAlarm = useCallback(() => {
     if (!itemMenuTodo) return;
     setAlarmModalTodo(itemMenuTodo);
@@ -251,7 +277,9 @@ export function useOverlayState(data: TodoData) {
     handleAddMenuSubtask, handleAddMenuImage, handleAddMenuUrl, handleAddMenuNote,
     // item menu actions (pre-bound to itemMenuTodo)
     handleMenuEdit, handleMenuSetStatus, handleMenuAddImage, handleMenuAddUrl,
-    handleMenuPin,
+    handleMenuPin, handleMenuClearCompletedInGroup,
+    handleMenuSendToDaily, handleMenuRestoreFromDaily,
+    itemMenuHasCompletedChildren, itemMenuIsSingleton, itemMenuHasSource,
     handleEditNote, handleDeleteNote, handleExportForAI, handleItemDelete,
     // note modal
     noteModalVisible, setNoteModalVisible, noteEditingTodo, setNoteEditingTodo,

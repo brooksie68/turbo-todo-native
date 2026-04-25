@@ -6,6 +6,12 @@ import type { Todo, List } from '../lib/types';
 import { cancelAlarm } from '../lib/alarms';
 import { deleteImagesForTodo, getAllImages, type TaskImage } from '../lib/imageStore';
 import { getAllLinks, type TaskLink } from '../lib/linkStore';
+import {
+  getDailySettings,
+  saveDailySettings,
+  getDailyDateString,
+  restoreAllDailyItems,
+} from '../lib/dailyList';
 
 // ── Tree helpers ────────────────────────────────────────────────────────────
 
@@ -20,22 +26,29 @@ export function buildTree(todos: Todo[]): Todo[] {
   return roots;
 }
 
-export type FlatItem = { todo: Todo; depth: number; parentId: number | null };
+export type FlatItem = { todo: Todo; depth: number; parentId: number | null; positionLabel: string };
 
 export function flattenVisible(
   nodes: Todo[],
   collapsedIds: Set<number>,
   depth = 0,
   parentId: number | null = null,
+  parentLabel = '',
 ): FlatItem[] {
   const result: FlatItem[] = [];
+  let incompleteCounter = 0;
   for (const node of nodes) {
-    result.push({ todo: node, depth, parentId });
+    let positionLabel = '';
+    if (!node.is_complete) {
+      incompleteCounter++;
+      positionLabel = parentLabel ? `${parentLabel}.${incompleteCounter}` : String(incompleteCounter);
+    }
+    result.push({ todo: node, depth, parentId, positionLabel });
     if (node.children && node.children.length > 0 && !collapsedIds.has(node.id)) {
       const sorted = [...node.children].sort((a, b) =>
         a.is_complete !== b.is_complete ? (a.is_complete ? 1 : -1) : 0,
       );
-      result.push(...flattenVisible(sorted, collapsedIds, depth + 1, node.id));
+      result.push(...flattenVisible(sorted, collapsedIds, depth + 1, node.id, positionLabel));
     }
   }
   return result;
@@ -65,6 +78,12 @@ export function flattenAll(nodes: Todo[]): Todo[] {
   }
   walk(nodes);
   return result;
+}
+
+function removeCompletedRecursive(nodes: Todo[]): Todo[] {
+  return nodes
+    .filter(t => !t.is_complete)
+    .map(t => ({ ...t, children: t.children ? removeCompletedRecursive(t.children) : [] }));
 }
 
 function getSubtreeIds(id: number, nodes: Todo[]): number[] {
@@ -115,6 +134,7 @@ export function formatItemTree(node: Todo, d: number): string {
 export function useTodoData() {
   const [lists, setLists] = useState<List[]>([]);
   const [activeListId, setActiveListId] = useState<number | null>(null);
+  const [dailyListId, setDailyListId] = useState<number | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
@@ -192,6 +212,21 @@ export function useTodoData() {
       }];
     }
 
+    // Load daily settings and validate
+    const dailySettings = await getDailySettings();
+    let newDailyListId: number | null = null;
+    if (dailySettings?.enabled && dailySettings.listId) {
+      const exists = loadedLists.find(l => l.id === dailySettings.listId);
+      if (exists) {
+        newDailyListId = dailySettings.listId;
+        // Pin daily list to front of dropdown
+        loadedLists = [exists, ...loadedLists.filter(l => l.id !== dailySettings.listId)];
+      } else {
+        // Daily list was deleted externally — clear settings
+        await saveDailySettings({ enabled: false, listId: null, date: '' });
+      }
+    }
+    setDailyListId(newDailyListId);
     setLists(loadedLists);
 
     const saved = await AsyncStorage.getItem('turbotodo-active-list');
@@ -338,7 +373,20 @@ export function useTodoData() {
     const flat = flattenAll(currentTodos);
     const completedIds = flat.filter(t => t.is_complete).map(t => t.id);
     if (completedIds.length === 0) return;
-    setTodos(prev => prev.filter(t => !t.is_complete));
+    setTodos(prev => removeCompletedRecursive(prev));
+    await Promise.all(completedIds.map(id => deleteImagesForTodo(id)));
+    const placeholders = completedIds.map(() => '?').join(',');
+    db.runAsync(`DELETE FROM todos WHERE id IN (${placeholders})`, completedIds);
+  }, []);
+
+  const clearCompletedInGroup = useCallback(async (parentId: number, currentTodos: Todo[]) => {
+    const parent = flattenAll(currentTodos).find(t => t.id === parentId);
+    if (!parent?.children) return;
+    const completedIds = flattenAll(parent.children).filter(t => t.is_complete).map(t => t.id);
+    if (completedIds.length === 0) return;
+    setTodos(prev => prev.map(t =>
+      t.id !== parentId ? t : { ...t, children: removeCompletedRecursive(t.children ?? []) },
+    ));
     await Promise.all(completedIds.map(id => deleteImagesForTodo(id)));
     const placeholders = completedIds.map(() => '?').join(',');
     db.runAsync(`DELETE FROM todos WHERE id IN (${placeholders})`, completedIds);
@@ -375,6 +423,97 @@ export function useTodoData() {
   const saveNote = useCallback(async (id: number, note: string | null, _listId: number) => {
     setTodos(prev => updateTodoInTree(prev, id, { note }));
     db.runAsync('UPDATE todos SET note = ? WHERE id = ?', [note, id]);
+  }, []);
+
+  // ── Daily List ────────────────────────────────────────────────────────────
+
+  const enableDaily = useCallback(async () => {
+    const dateStr = getDailyDateString();
+    const result = await db.runAsync(
+      'INSERT INTO lists (name, sort_order) VALUES (?, ?)',
+      [`Daily List ${dateStr}`, -1],
+    );
+    const newListId = result.lastInsertRowId;
+    const newList: List = {
+      id: newListId,
+      name: `Daily List ${dateStr}`,
+      sort_order: -1,
+      inserted_at: new Date().toISOString(),
+    };
+    setDailyListId(newListId);
+    setLists(prev => [newList, ...prev]);
+    await saveDailySettings({ enabled: true, listId: newListId, date: dateStr });
+  }, []);
+
+  const disableDaily = useCallback(async (restore: boolean) => {
+    if (!dailyListId) return;
+    if (restore) {
+      await restoreAllDailyItems(dailyListId);
+    }
+    // CASCADE deletes all remaining todos in the daily list
+    await db.runAsync('DELETE FROM lists WHERE id = ?', [dailyListId]);
+    const remaining = lists.filter(l => l.id !== dailyListId);
+    setLists(remaining);
+    setDailyListId(null);
+    if (activeListId === dailyListId) {
+      const next = remaining[0]?.id ?? null;
+      if (next) switchToList(next);
+      else fetchLists();
+    }
+    await saveDailySettings({ enabled: false, listId: null, date: '' });
+  }, [dailyListId, lists, activeListId, switchToList, fetchLists]);
+
+  const getDailyItemCount = useCallback(async (): Promise<number> => {
+    if (!dailyListId) return 0;
+    const row = await db.getFirstAsync<{ count: number }>(
+      'SELECT COUNT(*) as count FROM todos WHERE list_id = ?', [dailyListId],
+    );
+    return row?.count ?? 0;
+  }, [dailyListId]);
+
+  const sendToDaily = useCallback(async (todo: Todo) => {
+    if (!dailyListId || !activeListId) return;
+    const rows = await db.getAllAsync<{ sort_order: number }>(
+      'SELECT sort_order FROM todos WHERE list_id = ? AND parent_id IS NULL', [dailyListId],
+    );
+    const maxOrder = rows.length ? Math.max(...rows.map(r => r.sort_order)) : -1;
+    await db.runAsync(
+      `UPDATE todos
+       SET list_id = ?, parent_id = NULL, sort_order = ?,
+           daily_source_list_id = ?, daily_source_parent_id = ?, daily_source_sort_order = ?
+       WHERE id = ?`,
+      [dailyListId, maxOrder + 10, activeListId, todo.parent_id, todo.sort_order, todo.id],
+    );
+    setTodos(prev => removeTodoFromTree(prev, todo.id));
+  }, [dailyListId, activeListId]);
+
+  const restoreFromDaily = useCallback(async (todo: Todo) => {
+    if (!todo.daily_source_list_id) return;
+    let parentId: number | null = todo.daily_source_parent_id ?? null;
+    if (parentId !== null) {
+      const parentExists = await db.getFirstAsync<{ id: number }>(
+        'SELECT id FROM todos WHERE id = ?', [parentId],
+      );
+      if (!parentExists) parentId = null;
+    }
+    let sortOrder: number;
+    if (parentId !== null) {
+      sortOrder = todo.daily_source_sort_order ?? 0;
+    } else {
+      const maxRow = await db.getFirstAsync<{ max: number | null }>(
+        'SELECT MAX(sort_order) as max FROM todos WHERE list_id = ? AND parent_id IS NULL AND is_complete = 0',
+        [todo.daily_source_list_id],
+      );
+      sortOrder = (maxRow?.max ?? -10) + 10;
+    }
+    await db.runAsync(
+      `UPDATE todos
+       SET list_id = ?, parent_id = ?, sort_order = ?,
+           daily_source_list_id = NULL, daily_source_parent_id = NULL, daily_source_sort_order = NULL
+       WHERE id = ?`,
+      [todo.daily_source_list_id, parentId, sortOrder, todo.id],
+    );
+    setTodos(prev => removeTodoFromTree(prev, todo.id));
   }, []);
 
   // ── CRUD modal helpers ───────────────────────────────────────────────────
@@ -551,6 +690,8 @@ export function useTodoData() {
   // ── Derived ──────────────────────────────────────────────────────────────
 
   const activeList = useMemo(() => lists.find(l => l.id === activeListId) ?? null, [lists, activeListId]);
+  const dailyEnabled = dailyListId !== null;
+  const isDailyList = activeListId !== null && activeListId === dailyListId;
   const incomplete = useMemo(
     () => [...todos.filter(t => !t.is_complete)].sort((a, b) => {
       if (a.pinned && !b.pinned) return -1;
@@ -579,13 +720,16 @@ export function useTodoData() {
     lists, activeListId, todos, loading, collapsedIds,
     // derived
     activeList, incomplete, complete, incompleteFlat, completeFlat, anyDepth0Expanded,
+    // daily list
+    dailyListId, dailyEnabled, isDailyList,
+    enableDaily, disableDaily, getDailyItemCount, sendToDaily, restoreFromDaily,
     // list management
     fetchTodos, fetchLists, switchToList, createList, renameList, deleteList,
     // collapse
     toggleCollapse, toggleAll,
     // CRUD
     toggleComplete, addTask, updateTask, deleteTask, setStatus, setPinned,
-    handleClearCompleted, handleClearAll, handleSort, saveNote,
+    handleClearCompleted, clearCompletedInGroup, handleClearAll, handleSort, saveNote,
     // Expand
     expandItem,
     // Alarms

@@ -60,6 +60,15 @@ export function initDB(): void {
   try {
     db.execSync('ALTER TABLE todos ADD COLUMN notification_id TEXT');
   } catch { /* already exists */ }
+  try {
+    db.execSync('ALTER TABLE todos ADD COLUMN daily_source_list_id INTEGER');
+  } catch { /* already exists */ }
+  try {
+    db.execSync('ALTER TABLE todos ADD COLUMN daily_source_parent_id INTEGER');
+  } catch { /* already exists */ }
+  try {
+    db.execSync('ALTER TABLE todos ADD COLUMN daily_source_sort_order INTEGER');
+  } catch { /* already exists */ }
 }
 
 export default db;
