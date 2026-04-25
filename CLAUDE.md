@@ -65,6 +65,18 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 4. Clear all completed (recursive — removes completed at all depths)
 5. Clear entire list (with confirm)
 
+## Figma
+- **File:** https://www.figma.com/design/1j3iOtMrXTHjyuWXLekcEh/Turbo-Todo
+- **File key:** `1j3iOtMrXTHjyuWXLekcEh`
+- **360×800 template node:** `91:25`
+- Claude can read AND write to this file via the Figma MCP (`use_figma` Plugin API, `get_design_context` for reading)
+- **Theme workflow:** James designs a theme frame in Figma (frame name = theme name), fills swatch rects named after tokens, shares URL → Claude reads colors and generates Theme object for `lib/theme.tsx`
+- **Theme tooling files** (project root):
+  - `theme.md` — full token reference, descriptions, code template, existing themes
+  - `theme-template.svg` — 25-swatch Figma template, 9 sections, 4 named groups (import into Figma)
+  - `figma-template-360x800.svg` — annotated zone guide with dimensions and token names
+- Never use expiring Figma MCP asset URLs in code — they expire in 7 days
+
 ## Key files
 - `lib/db.ts` — SQLite init, schema, WAL mode, migrations
 - `lib/types.ts` — List, Todo types (includes daily_source_* fields)
