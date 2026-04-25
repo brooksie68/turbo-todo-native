@@ -1,5 +1,9 @@
 # TurboTodo Native — Theme Reference
 
+> **Note (2026-04-25):** The abstract swatch template approach (`theme-template.svg`) has been scrapped. New plan: a dedicated Figma file for themes, one page per theme, each with a visual app template James styles directly. Claude reads styles and generates an info panel + code from that. Process being designed. This file remains valid as a token reference.
+
+---
+
 ---
 
 ## The 25 theme tokens

@@ -70,11 +70,11 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - **File key:** `1j3iOtMrXTHjyuWXLekcEh`
 - **360×800 template node:** `91:25`
 - Claude can read AND write to this file via the Figma MCP (`use_figma` Plugin API, `get_design_context` for reading)
-- **Theme workflow:** James designs a theme frame in Figma (frame name = theme name), fills swatch rects named after tokens, shares URL → Claude reads colors and generates Theme object for `lib/theme.tsx`
-- **Theme tooling files** (project root):
-  - `theme.md` — full token reference, descriptions, code template, existing themes
-  - `theme-template.svg` — 25-swatch Figma template, 9 sections, 4 named groups (import into Figma)
-  - `figma-template-360x800.svg` — annotated zone guide with dimensions and token names
+- **Theme workflow (in progress — new approach):** Abstract swatch/token templates are scrapped. New plan: dedicated Figma file for themes only; each theme on its own page; each page has a visual app template (looks like the real UI) that James styles directly; Claude reads styles off it and generates an info panel on the same page; from there Claude generates the Theme object for `lib/theme.tsx`. Process still being designed collaboratively.
+- **Theme reference files** (project root):
+  - `theme.md` — token reference, still valid
+  - `figma-template-360x800.svg` — annotated zone guide, still useful
+  - `theme-template.svg` — OLD swatch approach, superseded
 - Never use expiring Figma MCP asset URLs in code — they expire in 7 days
 
 ## Key files
