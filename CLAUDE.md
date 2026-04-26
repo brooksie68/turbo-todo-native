@@ -66,15 +66,10 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 5. Clear entire list (with confirm)
 
 ## Figma
-- **File:** https://www.figma.com/design/1j3iOtMrXTHjyuWXLekcEh/Turbo-Todo
-- **File key:** `1j3iOtMrXTHjyuWXLekcEh`
-- **360×800 template node:** `91:25`
-- Claude can read AND write to this file via the Figma MCP (`use_figma` Plugin API, `get_design_context` for reading)
-- **Theme workflow (in progress — new approach):** Abstract swatch/token templates are scrapped. New plan: dedicated Figma file for themes only; each theme on its own page; each page has a visual app template (looks like the real UI) that James styles directly; Claude reads styles off it and generates an info panel on the same page; from there Claude generates the Theme object for `lib/theme.tsx`. Process still being designed collaboratively.
-- **Theme reference files** (project root):
-  - `theme.md` — token reference, still valid
-  - `figma-template-360x800.svg` — annotated zone guide, still useful
-  - `theme-template.svg` — OLD swatch approach, superseded
+- **Design file:** https://www.figma.com/design/1j3iOtMrXTHjyuWXLekcEh/Turbo-Todo (file key: `1j3iOtMrXTHjyuWXLekcEh`, 360×800 template node: `91:25`)
+- **Theme authoring file:** https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes (file key: `wUMtjlawjc3wFuROGfYuO6`)
+- Claude can read AND write both files via the Figma MCP (`use_figma` Plugin API, `get_design_context` for reading)
+- **Full theme workflow documented in `themes.md`** — read that file before doing any theme work
 - Never use expiring Figma MCP asset URLs in code — they expire in 7 days
 
 ## Key files
@@ -117,7 +112,8 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Active
-_(none — all 2026-04-25 items complete)_
+- [ ] **Theme icons** — get remaining 5 SVGs from Affinity Designer and replace placeholders in T2 and card 5: `toolbar-add-btn`, `row-add-subtask`, `row-kebab`, `priorityElevated` (bolt), `priorityTop` (exclamation)
+- [ ] **Default theme code sync** — after T2 is finalized, update `default` theme object in `lib/theme.tsx`: `bg: '#ffbe30'`, `listSelectorBorder: '#025f96'` (changed in Figma session 2026-04-26)
 
 ### Backlog
 - [ ] Android emulator autonomous debug workflow
