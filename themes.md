@@ -1,6 +1,6 @@
 # TurboTodo Native — Theme System & Figma Workflow
 
-> Last updated: 2026-04-26
+> Last updated: 2026-04-29
 
 ---
 
@@ -72,10 +72,10 @@ T2 is a 360×800 frame. Layers are named to match code token names exactly so Cl
       [sample rows — checkboxBg, checkboxDone, separator, textDepth[*], textDone]
       top-inset-shadow     (gradient rect — visual only, not a token)
     todo-bottom-toolbar    (frame, 360×42, fill = none)
-      toolbar-kebab-icon   (real SVG group — iconColor)
-      toolbar-add-btn      (placeholder ellipse + "+" text — no SVG yet)
-      toolbar-collapse-btn (real SVG group — iconColor)
-      toolbar-expand-btn   (real SVG group — iconColor, hidden)
+      toolbar-kebab-icon   (real SVG group — iconColor) [→ IconOptions]
+      toolbar-add-btn      (real SVG group — iconColor) [→ IconCreateNew]
+      toolbar-collapse-btn (real SVG group — iconColor) [→ IconExpandUp, shown when expanded]
+      toolbar-expand-btn   (real SVG group — iconColor, hidden) [→ IconExpandDown, shown when collapsed]
   android_navigation_bar   (rect, 360×48, fill = white — OS controlled, not a token)
 ```
 
@@ -119,23 +119,47 @@ T2 is a 360×800 frame. Layers are named to match code token names exactly so Cl
 
 ## Icon Status
 
-Icons in T2 and card 5 are real Affinity Designer SVGs where available, emoji placeholders otherwise.
+All icons in T2 and card 5 (`icons-and-values`) are real SVGs as of 2026-04-29. Source files in `_ref/app-icons/`.
 
-| Icon | Layer name | Status |
-|---|---|---|
-| App logo / theme picker | `turbo-todo-logo-btn` | ✅ Real SVG |
-| List gear | `list-gear-btn` | ✅ Real SVG |
-| Help | `help-icon` | ✅ Real SVG |
-| Toolbar kebab / options | `toolbar-kebab-icon` | ✅ Real SVG |
-| Toolbar collapse | `toolbar-collapse-btn` | ✅ Real SVG |
-| Toolbar expand | `toolbar-expand-btn` | ✅ Real SVG (hidden) |
-| Toolbar add new | `toolbar-add-btn` | ⏳ Placeholder (ellipse + "+") |
-| Row add subtask | `row-add-subtask` | ⏳ Placeholder (emoji) |
-| Row kebab | `row-kebab` | ⏳ Placeholder (emoji) |
-| Priority elevated (bolt) | `priorityElevated` | ⏳ Placeholder (emoji) |
-| Priority top (!) | `priorityTop` | ⏳ Placeholder (emoji) |
+**Consolidations:** `IconCreateNew` covers both toolbar-add and row-add-subtask slots. `IconOptions` covers both toolbar-kebab and row-kebab slots.
 
-**Immediate todo:** Get remaining 5 SVGs from Affinity Designer and replace placeholders in T2 and card 5.
+| Icon | Layer name (T2 / card 5) | Code component | Status |
+|---|---|---|---|
+| App logo / theme picker | `turbo-todo-logo-btn` | `IconLogo` | ✅ Real SVG |
+| List gear | `list-gear-btn` | `IconGear` | ✅ Real SVG |
+| Help | `help-icon` | `IconHelp` | ✅ Real SVG |
+| Toolbar + row kebab / options | `toolbar-kebab-icon` / `IconOptions` | `IconOptions` | ✅ Real SVG |
+| Toolbar add + row add subtask | `toolbar-add-btn` / `IconCreateNew` | `IconCreateNew` | ✅ Real SVG |
+| Toolbar collapse (▲) | `toolbar-collapse-btn` | `IconExpandUp` | ✅ Real SVG |
+| Toolbar expand (▽) | `toolbar-expand-btn` | `IconExpandDown` | ✅ Real SVG |
+| Priority elevated (bolt) | `IconPriorityMedium` | `IconPriorityMedium` | ✅ Real SVG |
+| Priority top (!) | `IconPriorityHigh` | `IconPriorityHigh` | ✅ Real SVG |
+
+### icons-and-values frame structure (node `14:2` in file `wUMtjlawjc3wFuROGfYuO6`)
+
+Each icon card is a GROUP with this exact layer order (bottom → top / backmost → frontmost):
+
+```
+[0] bg          RECTANGLE  162×140, fill #1c1f27, no stroke, cornerRadius 5
+[1] outline     RECTANGLE  162×140, no fill, 1px stroke, cornerRadius 5
+[2] description TEXT       semantic label ("Add child item", etc.)
+[3] name        TEXT       app component name ("IconCreateNew", "IconOptions", etc.)
+[4] swatch      RECTANGLE  color swatch
+[5] hex         TEXT       hex value
+[6] icon FRAME  FRAME      24×24 (42×42 for logo), no fill, no stroke — FRONTMOST
+      └─ SVG artwork centered at (0,0) inside the frame
+```
+
+All cards now have a real icon FRAME at [6]. Priority cards (`IconPriorityMedium`, `IconPriorityHigh`) use fill-only SVGs — no stroke. The `color` prop controls fill at runtime; the SVG path uses the app's default color in Figma.
+
+### SVG import workflow (when James pastes a new SVG)
+
+1. James exports SVG from Affinity Designer → pastes into the Figma file
+2. Claude resizes the pasted node to 24×24 (or 42×42 for logo) — do not change the artwork proportions
+3. Create a 24×24 FRAME (no fill, no stroke) named after the icon, move it into the card GROUP at frontmost (appendChild), move the SVG artwork inside the icon FRAME at (0,0)
+4. Remove the old placeholder node (TEXT emoji or ellipse+text)
+5. Verify icon FRAME is at children[last] (frontmost) in the card GROUP
+6. Do the same replacement in T2 (the live theme frame on the Default Theme page)
 
 ---
 

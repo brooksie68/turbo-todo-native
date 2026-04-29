@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../lib/theme';
-import { IconOptions, IconExpandDown, IconExpandUp } from './Icons';
+import { IconOptions, IconCreateNew, IconExpandDown, IconExpandUp } from './Icons';
 
 type Props = {
   onOpenMenu: () => void;
@@ -28,7 +28,7 @@ export default function TodoListToolbar({
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarCenter} onPress={onAddNew}>
-          <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
+          <IconCreateNew size={28} color={theme.iconColor} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarRight} onPress={onToggleAll}>
@@ -64,12 +64,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addPlus: {
-    fontSize: 36,
-    fontWeight: '900',
-    lineHeight: 40,
-  },
-  toolbarRight: {
+toolbarRight: {
     position: 'absolute',
     right: 0,
     top: 6,

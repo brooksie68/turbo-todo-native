@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useThemeContext, themes } from '../lib/theme';
 import type { List } from '../lib/types';
-import { IconLogo, IconSettings, IconHelp } from './Icons';
+import { IconLogo, IconGear, IconHelp } from './Icons';
 
 type Props = {
   lists: List[];
@@ -126,7 +126,7 @@ export default function TodoListHeader({
         {/* Gear / list options */}
         <View ref={gearBtnRef} collapsable={false} style={styles.gearBtn}>
           <TouchableOpacity style={styles.gearBtnInner} onPress={openGearMenu}>
-            <IconSettings size={28} color={theme.iconColor} />
+            <IconGear size={28} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
 

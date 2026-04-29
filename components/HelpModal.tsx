@@ -21,15 +21,15 @@ const sections: Section[] = [
   {
     title: 'Lists',
     items: [
-      'You can have multiple lists. Tap the list name in the header to switch between them.',
-      'Tap the gear icon to create a new list, rename the current one, or delete it.',
+      'Tap the list name in the header to switch between lists.',
+      'Tap the gear icon to create a new list, rename it, or delete it.',
     ],
   },
   {
     title: 'Adding Tasks',
     items: [
-      'The toolbar has two add buttons. Add to Bottom places the new task at the end. Add to Top places it at the beginning.',
-      'Type your task and tap OK or press Enter to save.',
+      'Tap the + button in the toolbar to add a task to the top of the list.',
+      'Type your task, then tap OK or press Enter.',
     ],
   },
   {
@@ -37,14 +37,14 @@ const sections: Section[] = [
     items: [
       'Tasks support up to 3 levels: Task → Subtask → Sub-subtask.',
       'Tap the + button on any row that can have children.',
-      'The + button disappears at the deepest level.',
+      "The + button doesn't appear at the deepest level.",
     ],
   },
   {
     title: 'Editing & Completing',
     items: [
       'Double-tap a row to edit it.',
-      'Tap the checkbox to mark complete. Completed items sink to the bottom of their group.',
+      'Tap the checkbox to complete a task. Completed items move to the bottom of their group.',
       'Tap a parent row to expand or collapse it.',
     ],
   },
@@ -52,51 +52,72 @@ const sections: Section[] = [
     title: 'Priority',
     items: [
       'Open a row\'s options menu (kebab icon) to set priority.',
-      'Elevated shows a bolt icon. Top Priority shows an exclamation icon.',
+      'Elevated: bolt icon. Top Priority: exclamation icon.',
     ],
   },
   {
     title: 'Pin to Top',
     items: [
-      'Depth-0 tasks can be pinned. Pinned items float to the top of the incomplete list and cannot be dragged.',
-      'Pin and unpin via the row options menu.',
+      "Pinned top-level tasks stay above the list and can't be dragged.",
+      'Pin and unpin via the options menu.',
     ],
   },
   {
     title: 'Reordering',
     items: [
       'Long-press a row and drag to reorder within the same level.',
-      'Pinned items cannot be dragged.',
+      'Pinned and completed items cannot be dragged.',
     ],
   },
   {
     title: 'Notes',
     items: [
-      'Add a short note to any task via the options menu.',
+      'Add a note to any task via the options menu.',
+      'Notes appear below the task label. Tap ✕ on the note to delete it.',
+      'To edit a note, tap Edit note in the options menu.',
+      'Notes on completed tasks show with a strikethrough.',
     ],
   },
   {
     title: 'Images',
     items: [
-      'Subtasks can have up to 5 attached photos.',
+      'Top-level tasks and subtasks support up to 5 attached photos.',
       'Tap Add image in the row options menu.',
-      'Tap a thumbnail to view full-screen. Tap the close button or swipe back to dismiss.',
+      'Tap a thumbnail to view full-screen. Close with the close button or the back gesture.',
       'Tap ✕ on a thumbnail to remove it.',
     ],
   },
   {
     title: 'Links',
     items: [
-      'Subtasks can have attached URLs.',
-      'Tap Add URL in the row options menu. Enter a URL and an optional display name.',
+      'Top-level tasks and subtasks support attached URLs.',
+      'Tap Add URL in the options menu. Enter a URL and an optional display name.',
       'Tap a link to open it in the browser.',
+    ],
+  },
+  {
+    title: 'Alarms',
+    items: [
+      'Set a daily repeating alarm on any top-level task or subtask via the options menu.',
+      'A bell icon appears on the row when an alarm is set.',
+      'Alarms are automatically cancelled when the task is completed or deleted.',
+      'Setting a new alarm replaces the old one.',
+    ],
+  },
+  {
+    title: 'Daily List',
+    items: [
+      'The Daily List is a special list for your focus items each day.',
+      'Turn it on in toolbar options. It appears at the front of the list picker.',
+      'Send tasks from any list to the Daily List via the row options menu.',
+      'At midnight, items sent from other lists return to their original list. Items added directly to the Daily List are removed.',
     ],
   },
   {
     title: 'Export for AI',
     items: [
-      'Row options (depth 0–1): exports that item and its incomplete children as a markdown outline via the share sheet.',
-      'Toolbar options: exports the full list the same way.',
+      'Row options (top-level tasks and subtasks): exports that item and its incomplete children as a markdown outline via the share sheet.',
+      'Toolbar options: exports the entire active list the same way.',
       'Paste directly into a chat with your AI assistant.',
     ],
   },
@@ -109,17 +130,19 @@ const sections: Section[] = [
   {
     title: 'Toolbar Options',
     items: [
-      'Back up — saves all your lists, tasks, and images to a zip file. Save it to Google Drive or wherever you like.',
+      'Back up — saves all lists, tasks, and images to a zip file you can store anywhere.',
       'Restore — pick a backup zip to restore from. Replaces all current data.',
-      'Sort by — tap Status, Date, or Alpha to re-sort incomplete items. One-time action; drag and drop freely afterward.',
-      'Clear all completed — removes all checked tasks.',
-      'Clear entire list — removes everything from the active list (asks to confirm).',
+      'Sort by — tap Status, Date, or Alpha to re-sort incomplete items. This is a one-time sort; drag and drop freely afterward.',
+      'Daily List — turn the Daily List on or off.',
+      'Text size — use + and − to adjust task text size. Five sizes available.',
+      'Clear all completed — removes all completed tasks across all levels.',
+      'Clear entire list — removes everything in the active list. Asks to confirm.',
     ],
   },
   {
     title: 'Expand / Collapse All',
     items: [
-      'The expand/collapse button in the toolbar toggles all rows at once.',
+      'The expand/collapse button toggles all rows at once.',
     ],
   },
 ];

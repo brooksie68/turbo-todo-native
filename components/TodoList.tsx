@@ -348,6 +348,7 @@ export default function TodoList() {
           ) : (
             <DraggableFlatList
               key={listKey}
+              overScrollMode="always"
               data={data.incompleteFlat}
               keyExtractor={item => String(item.todo.id)}
               containerStyle={[styles.scrollArea, { backgroundColor: themeCtx.surface, borderColor: themeCtx.listSelectorBorder }]}

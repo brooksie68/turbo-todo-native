@@ -7,7 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconBolt, IconPriorityHigh } from './Icons';
+import { IconPriorityMedium, IconPriorityHigh } from './Icons';
 import { useTheme } from '../lib/theme';
 
 export type ButtonLayout = {
@@ -120,7 +120,7 @@ export default function ItemOptionsMenu({
             style={styles.priorityBtn}
             onPress={() => handle(() => onSetStatus(todo.status === 'elevated' ? null : 'elevated'))}
           >
-            <IconBolt size={20} color={todo.status === 'elevated' ? theme.priorityElevated : theme.textSub} />
+            <IconPriorityMedium size={20} color={todo.status === 'elevated' ? theme.priorityElevated : theme.textSub} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.priorityBtn}

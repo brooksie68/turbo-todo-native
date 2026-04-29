@@ -112,15 +112,47 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Active
-- [ ] **Theme icons** — get remaining 5 SVGs from Affinity Designer and replace placeholders in T2 and card 5: `toolbar-add-btn`, `row-add-subtask`, `row-kebab`, `priorityElevated` (bolt), `priorityTop` (exclamation)
 - [ ] **Default theme code sync** — after T2 is finalized, update `default` theme object in `lib/theme.tsx`: `bg: '#ffbe30'`, `listSelectorBorder: '#025f96'` (changed in Figma session 2026-04-26)
+- [ ] **Icon sizing/positioning tuning** — new icons shipped via OTA (2026-04-29), live with them before adjusting
+
+### Icon system (2026-04-29)
+All icons sourced from `_ref/app-icons/`. Figma `icons-and-values` frame updated with new SVGs and component names. `Icons.tsx` component map:
+- `IconLogo` — turbo-todo-logo-btn (42×42, untouched)
+- `IconGear` — list-gear-btn (was `IconSettings`)
+- `IconHelp` — help-icon-btn
+- `IconOptions` — kebab-options-btn (consolidated: toolbar + row kebab)
+- `IconCreateNew` — create-new-btn (consolidated: toolbar FAB + row add child; was text `+`)
+- `IconExpandDown` — toolbar-expand-btn (collapsed state)
+- `IconExpandUp` — toolbar-collapse-btn (expanded state)
+- `IconPriorityMedium` — priorityElevated / bolt (no stroke)
+- `IconPriorityHigh` — priorityTop (no stroke)
+- `IconClose`, `IconBell`, `IconPin` — unchanged
+
+### Bugs
+- [ ] Cancel/save buttons need padding on regular subtask
+- [ ] Add URL: label field and add button covered by keyboard
+- [ ] URL not indented correctly when child of a depth-0 item
+- [ ] Sounds not in new app
 
 ### Backlog
+- [ ] Image attach: open camera immediately and attach photo taken
+- [ ] Progress bar and/or percentage completion
+- [ ] Auto-collapse completed subtasks after 10
+- [ ] On checked items: lighten checkboxes, darken text slightly
+- [ ] Reverse logo teeth direction
+- [ ] Have Claude generate graphics for help items
+- [ ] Teach Claude to read JSON backup files
+- [ ] Android widget
+- [ ] Normalize icon sizes — all icons same size
+- [ ] Archive completed items — stored, downloadable as JSON; long-term: trends chart
 - [ ] Android emulator autonomous debug workflow
 - [ ] Print export to thin paper list with checkboxes
-- [ ] Archive completed items — stored, downloadable as JSON
 - [ ] Animate logo in splash screen
 - [ ] Export to CSV and XLSX
 - [ ] Magic meal machine integration
+- [ ] Gardening app integration (planting windows, works with this app)
 - [ ] Categories
 - [ ] Supabase sync as optional paid backup feature (long-term)
+
+### App Name Shortlist
+TaskBlast, TaskBlaster, TaskSaw, TaskTree, Stacked, Momentum, StackFlow, TaskMaster, Getterdunn, Giterdone, Buzzsaw, Mobile Mind, Don't Forget!
