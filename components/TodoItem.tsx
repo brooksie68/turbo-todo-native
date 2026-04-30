@@ -179,7 +179,7 @@ const TodoItem = memo(function TodoItem({
 
       {/* Note */}
       {todo.note ? (
-        <View style={[styles.noteRow, { paddingLeft: indentLeft + 26 }]}>
+        <View style={[styles.noteRow, { paddingLeft: indentLeft + 28 }]}>
           <Text
             style={[
               styles.note,
@@ -202,7 +202,7 @@ const TodoItem = memo(function TodoItem({
 
       {/* Image strip — depth 1 only */}
       {showMedia && !(depth === 0 && isCollapsed) && images.length > 0 && (
-        <View style={[styles.imageStrip, { paddingLeft: indentLeft + 26 }]}>
+        <View style={[styles.imageStrip, { paddingLeft: indentLeft + 28 }]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll} contentContainerStyle={styles.imageScrollContent}>
             {images.map(img => (
               <View key={img.id} style={styles.thumbWrap}>
@@ -224,7 +224,7 @@ const TodoItem = memo(function TodoItem({
 
       {/* Link strip — depth 1 only */}
       {showMedia && !(depth === 0 && isCollapsed) && links.length > 0 && (
-        <View style={[styles.linkStrip, { paddingLeft: indentLeft + 26 }]}>
+        <View style={[styles.linkStrip, { paddingLeft: indentLeft + 28 }]}>
           {links.map(link => (
             <View key={link.id} style={styles.linkRow}>
               <TouchableOpacity

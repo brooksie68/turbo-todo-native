@@ -336,6 +336,7 @@ export default function TodoList() {
           onClose={overlay.closeAddMenu}
           onAddSubtask={overlay.handleAddMenuSubtask}
           onAddImage={overlay.handleAddMenuImage}
+          onTakePhoto={overlay.handleAddMenuTakePhoto}
           onAddUrl={overlay.handleAddMenuUrl}
           onAddNote={overlay.handleAddMenuNote}
           hideSubtask={data.isDailyList}

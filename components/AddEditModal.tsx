@@ -78,8 +78,9 @@ export default function AddEditModal({
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', (e) => setKeyboardHeight(e.endCoordinates.height));
+    const change = Keyboard.addListener('keyboardDidChangeFrame', (e) => setKeyboardHeight(e.endCoordinates.height));
     const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
-    return () => { show.remove(); hide.remove(); };
+    return () => { show.remove(); change.remove(); hide.remove(); };
   }, []);
 
   return (
@@ -89,7 +90,7 @@ export default function AddEditModal({
         <TouchableOpacity style={StyleSheet.absoluteFillObject} activeOpacity={1} onPress={onClose} />
 
         {/* Sheet — above backdrop in z-order (rendered second) */}
-        <Animated.View style={[styles.sheet, { backgroundColor: theme.menuBg, paddingBottom: Math.max(12, insets.bottom), marginBottom: keyboardHeight, opacity: fadeAnim }]}>
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.menuBg, paddingBottom: keyboardHeight > 0 ? keyboardHeight + 72 : Math.max(20, insets.bottom), opacity: fadeAnim }]}>
           <Text style={[styles.title, { color: theme.accent }]}>{title}</Text>
 
           {!noteMode && (

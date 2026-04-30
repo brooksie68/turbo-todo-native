@@ -45,8 +45,9 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   useEffect(() => {
     const show = Keyboard.addListener('keyboardDidShow', (e) => setKeyboardHeight(e.endCoordinates.height));
+    const change = Keyboard.addListener('keyboardDidChangeFrame', (e) => setKeyboardHeight(e.endCoordinates.height));
     const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardHeight(0));
-    return () => { show.remove(); hide.remove(); };
+    return () => { show.remove(); change.remove(); hide.remove(); };
   }, []);
 
   function handleSave() {
@@ -65,7 +66,7 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
         </Animated.View>
 
         {/* Sheet */}
-        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Math.max(12, insets.bottom), marginBottom: keyboardHeight, opacity: fadeAnim }]}>
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: keyboardHeight > 0 ? keyboardHeight + 72 : Math.max(20, insets.bottom), opacity: fadeAnim }]}>
           <Text style={[styles.title, { color: theme.accent }]}>Add URL</Text>
 
           <TextInput
@@ -76,7 +77,7 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
             value={url}
             onChangeText={setUrl}
             autoCapitalize="none"
-            keyboardType="url"
+            autoCorrect={false}
             returnKeyType="next"
             maxLength={2000}
           />

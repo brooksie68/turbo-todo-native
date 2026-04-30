@@ -9,6 +9,7 @@ type Props = {
   onClose: () => void;
   onAddSubtask: () => void;
   onAddImage: () => void;
+  onTakePhoto: () => void;
   onAddUrl: () => void;
   onAddNote: () => void;
   hideSubtask?: boolean;
@@ -20,6 +21,7 @@ export default function AddChildMenu({
   onClose,
   onAddSubtask,
   onAddImage,
+  onTakePhoto,
   onAddUrl,
   onAddNote,
   hideSubtask = false,
@@ -55,6 +57,9 @@ export default function AddChildMenu({
         )}
         <TouchableOpacity style={styles.item} onPress={() => handle(onAddImage)}>
           <Text style={[styles.itemText, { color: theme.text }]}>Image</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.item} onPress={() => handle(onTakePhoto)}>
+          <Text style={[styles.itemText, { color: theme.text }]}>Take photo</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.item} onPress={() => handle(onAddUrl)}>
           <Text style={[styles.itemText, { color: theme.text }]}>URL</Text>

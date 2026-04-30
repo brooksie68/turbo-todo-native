@@ -31,7 +31,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Fallback: `assets/icon.png` (1024x1024, composed flat icon)
 - Source files: `C:/Users/brook/ai-projects/turbo-todo/images/native-icons/`
 
-## Features (all shipped as of 2026-04-25)
+## Features (all shipped as of 2026-04-29)
 - 3+ lists, todos fully loaded from original Supabase migration
 - Add/edit/delete tasks at all depths (3 levels max)
 - Complete/uncomplete with optimistic updates
@@ -39,7 +39,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Collapse/expand individual items and all at once
 - Status: elevated (bolt icon), top-priority (exclamation icon)
 - Notes on any item; inline delete X right-aligned under kebab; note strikethrough when item checked
-- Images on depth-0 and depth-1 items (local file system, up to 5)
+- Images on depth-0 and depth-1 items (local file system, up to 5); AddChildMenu has "Image" (gallery, multi-select) and "Take photo" (camera, single shot)
 - Links on depth-0 and depth-1 items (SQLite task_links table)
 - Export for AI (share sheet, markdown outline)
 - 2 themes: Default (gold gradient), Bimini Breeze (teal gradient)
@@ -134,13 +134,12 @@ Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/d
 **T2 (Default Theme page):** row icons (IconCreateNew + IconOptions) visible on all rows; IconPin on pinned example row; all toolbar/header icons are current SVGs. SVG checkmarks replace old text ✓ in checkboxDone boxes.
 
 ### Bugs
-- [ ] Cancel/save buttons need padding on regular subtask
-- [ ] Add URL: label field and add button covered by keyboard
-- [ ] URL not indented correctly when child of a depth-0 item
+- [x] Cancel/save buttons need padding on regular subtask (2026-04-29)
+- [x] Add URL: label field and add button covered by keyboard (2026-04-29)
+- [x] URL not indented correctly when child of a depth-0 item (2026-04-29)
 - [ ] Sounds not in new app
 
 ### Backlog
-- [ ] Image attach: open camera immediately and attach photo taken
 - [ ] Progress bar and/or percentage completion
 - [ ] Auto-collapse completed subtasks after 10
 - [ ] On checked items: lighten checkboxes, darken text slightly

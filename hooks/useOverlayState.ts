@@ -66,6 +66,11 @@ export function useOverlayState(data: TodoData) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addMenuTodo]);
 
+  const handleAddMenuTakePhoto = useCallback(() => {
+    if (addMenuTodo) handleTakePhoto(addMenuTodo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addMenuTodo]);
+
   const handleAddMenuUrl = useCallback(() => {
     if (addMenuTodo) handleAddUrl(addMenuTodo);
     // handleAddUrl defined later in this scope — stable useCallback ref
@@ -135,6 +140,21 @@ export function useOverlayState(data: TodoData) {
       );
     }
   }, [refreshMedia]);
+
+  const handleTakePhoto = useCallback(async (todo: Todo) => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Allow camera access to take photos.');
+      return;
+    }
+    const existing = await getImages(todo.id);
+    if (existing.length >= MAX_IMAGES) return;
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.8 });
+    if (result.canceled) return;
+    await addImages(todo.id, [result.assets[0].uri]);
+    refreshMedia();
+    expandItem(todo.parent_id ?? todo.id);
+  }, [refreshMedia, expandItem]);
 
   const handleAddUrl = useCallback((todo: Todo) => {
     setLinkTargetTodo(todo);
@@ -274,7 +294,7 @@ export function useOverlayState(data: TodoData) {
     // add-child menu
     addMenuTodo, addMenuLayout,
     handleShowAddMenu, closeAddMenu,
-    handleAddMenuSubtask, handleAddMenuImage, handleAddMenuUrl, handleAddMenuNote,
+    handleAddMenuSubtask, handleAddMenuImage, handleAddMenuTakePhoto, handleAddMenuUrl, handleAddMenuNote,
     // item menu actions (pre-bound to itemMenuTodo)
     handleMenuEdit, handleMenuSetStatus, handleMenuAddImage, handleMenuAddUrl,
     handleMenuPin, handleMenuClearCompletedInGroup,

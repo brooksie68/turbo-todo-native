@@ -28,7 +28,7 @@ export default function TodoListToolbar({
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarCenter} onPress={onAddNew}>
-          <IconCreateNew size={28} color={theme.iconColor} />
+          <IconCreateNew size={24} color={theme.iconColor} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarRight} onPress={onToggleAll}>
@@ -44,7 +44,7 @@ export default function TodoListToolbar({
 
 const styles = StyleSheet.create({
   toolbarOuter: { borderTopWidth: 1 },
-  toolbarInner: { height: 42 },
+  toolbarInner: { height: 46 },
   toolbarLeft: {
     position: 'absolute',
     left: 0,
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
 toolbarRight: {
     position: 'absolute',
     right: 0,
-    top: 6,
+    top: 7,
     width: 58,
     height: 30,
     paddingRight: 22,
