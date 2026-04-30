@@ -72,12 +72,14 @@ T2 is a 360×800 frame. Layers are named to match code token names exactly so Cl
       [sample rows — checkboxBg, checkboxDone, separator, textDepth[*], textDone]
       top-inset-shadow     (gradient rect — visual only, not a token)
     todo-bottom-toolbar    (frame, 360×42, fill = none)
-      toolbar-kebab-icon   (real SVG group — iconColor) [→ IconOptions]
-      toolbar-add-btn      (real SVG group — iconColor) [→ IconCreateNew]
-      toolbar-collapse-btn (real SVG group — iconColor) [→ IconExpandUp, shown when expanded]
-      toolbar-expand-btn   (real SVG group — iconColor, hidden) [→ IconExpandDown, shown when collapsed]
+      toolbar-kebab-icon   (real SVG group — iconColor) [→ IconOptions, 24px]
+      toolbar-add-btn      (real SVG group — iconColor) [→ IconCreateNew, 24px]
+      toolbar-collapse-btn (real SVG group — iconColor) [→ IconExpandUp, 24px, shown when expanded]
+      toolbar-expand-btn   (real SVG group — iconColor, hidden) [→ IconExpandDown, 24px, shown when collapsed]
   android_navigation_bar   (rect, 360×48, fill = white — OS controlled, not a token)
 ```
+
+**Row icons (added 2026-04-29):** Each row in todo-scroll-area now shows `IconCreateNew` (18px) and `IconOptions` (18px) on the right. Completed rows show only `IconOptions`. The first row ("Plan beach trip") also shows `IconPin` (14px) as a pinned example. Checkboxes use SVG fill-path checkmarks instead of text ✓.
 
 **Design rules for T2:**
 - Frames have no fill — backgrounds live on named rect layers inside them

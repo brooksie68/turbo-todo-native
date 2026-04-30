@@ -113,20 +113,23 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ### Active
 - [ ] **Default theme code sync** — after T2 is finalized, update `default` theme object in `lib/theme.tsx`: `bg: '#ffbe30'`, `listSelectorBorder: '#025f96'` (changed in Figma session 2026-04-26)
-- [ ] **Icon sizing/positioning tuning** — new icons shipped via OTA (2026-04-29), live with them before adjusting
 
-### Icon system (2026-04-29)
-All icons sourced from `_ref/app-icons/`. Figma `icons-and-values` frame updated with new SVGs and component names. `Icons.tsx` component map:
+### Icon system (2026-04-29, updated paths 2026-04-29)
+All icons sourced from `_ref/app-icons/`. Figma T2 and `icons-and-values` frame both reflect current SVGs. `Icons.tsx` component map:
 - `IconLogo` — turbo-todo-logo-btn (42×42, untouched)
-- `IconGear` — list-gear-btn (was `IconSettings`)
-- `IconHelp` — help-icon-btn
+- `IconGear` — list-gear-btn (updated path 2026-04-29)
+- `IconHelp` — help-icon-btn (updated path 2026-04-29)
 - `IconOptions` — kebab-options-btn (consolidated: toolbar + row kebab)
-- `IconCreateNew` — create-new-btn (consolidated: toolbar FAB + row add child; was text `+`)
+- `IconCreateNew` — create-new-btn (consolidated: toolbar FAB + row add child)
 - `IconExpandDown` — toolbar-expand-btn (collapsed state)
 - `IconExpandUp` — toolbar-collapse-btn (expanded state)
-- `IconPriorityMedium` — priorityElevated / bolt (no stroke)
+- `IconPriorityMedium` — priorityElevated / bolt (no stroke; was `IconBolt`)
 - `IconPriorityHigh` — priorityTop (no stroke)
 - `IconClose`, `IconBell`, `IconPin` — unchanged
+
+**Icon sizes:** header = 24px, toolbar = 24px, row = 18px (create + options)
+
+**T2 (Default Theme page):** row icons (IconCreateNew + IconOptions) visible on all rows; IconPin on pinned example row; all toolbar/header icons are current SVGs. SVG checkmarks replace old text ✓ in checkboxDone boxes.
 
 ### Bugs
 - [ ] Cancel/save buttons need padding on regular subtask
@@ -143,7 +146,6 @@ All icons sourced from `_ref/app-icons/`. Figma `icons-and-values` frame updated
 - [ ] Have Claude generate graphics for help items
 - [ ] Teach Claude to read JSON backup files
 - [ ] Android widget
-- [ ] Normalize icon sizes — all icons same size
 - [ ] Archive completed items — stored, downloadable as JSON; long-term: trends chart
 - [ ] Android emulator autonomous debug workflow
 - [ ] Print export to thin paper list with checkboxes
