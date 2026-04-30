@@ -121,7 +121,7 @@ T2 is a 360×800 frame. Layers are named to match code token names exactly so Cl
 
 ## Icon Status
 
-All icons in T2 and card 5 (`icons-and-values`) are real SVGs as of 2026-04-29. Source files in `_ref/app-icons/`.
+All icons in T2 and card 5 (`icons-and-values`) are real SVGs as of 2026-04-29. Source files organized by theme in `_ref/app-icons/<theme-id>/` — e.g. `_ref/app-icons/default/`. Each new theme gets its own subfolder with its icon variants.
 
 **Consolidations:** `IconCreateNew` covers both toolbar-add and row-add-subtask slots. `IconOptions` covers both toolbar-kebab and row-kebab slots.
 

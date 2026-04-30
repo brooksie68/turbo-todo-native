@@ -115,7 +115,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - [x] **Default theme code sync** — `bg: '#ffbe30'`, `listSelectorBorder: '#025f96'` applied to `lib/theme.tsx` (2026-04-29)
 
 ### Icon system (2026-04-29, updated paths 2026-04-29)
-All icons sourced from `_ref/app-icons/`. Figma T2 and `icons-and-values` frame both reflect current SVGs. `Icons.tsx` component map:
+Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/default/`). Each theme folder contains its icon variants. Figma T2 and `icons-and-values` frame reflect current SVGs. `Icons.tsx` component map:
 - `IconLogo` — turbo-todo-logo-btn (42×42, untouched)
 - `IconGear` — list-gear-btn (updated path 2026-04-29)
 - `IconHelp` — help-icon-btn (updated path 2026-04-29)
