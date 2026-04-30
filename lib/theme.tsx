@@ -44,7 +44,7 @@ export const themes: Record<string, Theme> = {
   default: {
     id: 'default',
     name: 'Default',
-    bg: '#003759',
+    bg: '#ffbe30',
     headerBg: '#F6CD75',
     headerBorder: '#e0c060',
     surface: '#eae2ca',
@@ -60,7 +60,7 @@ export const themes: Record<string, Theme> = {
     iconColor: '#025f96',
     listSelectorBg: '#ffe8a9',
     listSelectorText: '#00395b',
-    listSelectorBorder: '#023455',
+    listSelectorBorder: '#025f96',
     checkboxBg: '#fffdf5',
     checkboxDone: '#6a3f1f',
     separator: '#d9ccb4',
