@@ -24,6 +24,7 @@ import AddLinkModal from './AddLinkModal';
 import ToolbarOptionsMenu from './ToolbarOptionsMenu';
 import ItemOptionsMenu from './ItemOptionsMenu';
 import AddChildMenu from './AddChildMenu';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme, useThemeContext } from '../lib/theme';
 import { exportBackup, importBackup } from '../lib/backup';
 import HelpModal from './HelpModal';
@@ -252,6 +253,7 @@ export default function TodoList() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeCtx.bg }]} edges={['top']}>
+      <StatusBar style={themeCtx.statusBarStyle} backgroundColor={themeCtx.bg} />
       <ThemeBg style={styles.container}>
 
         <TodoListHeader

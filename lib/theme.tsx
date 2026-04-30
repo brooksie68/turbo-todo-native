@@ -15,6 +15,7 @@ export type Theme = {
   id: string;
   name: string;
   enabled?: boolean;
+  statusBarStyle: 'dark' | 'light';
   bg: string;
   headerBg: string;
   headerBorder: string;
@@ -44,6 +45,7 @@ export const themes: Record<string, Theme> = {
   default: {
     id: 'default',
     name: 'Default',
+    statusBarStyle: 'dark',
     bg: '#ffbe30',
     headerBg: '#F6CD75',
     headerBorder: '#e0c060',
@@ -72,6 +74,7 @@ export const themes: Record<string, Theme> = {
     id: 'dark-slate',
     name: 'Dark Slate',
     enabled: true,
+    statusBarStyle: 'light',
     bg: '#1c1a18',
     headerBg: '#2e2b27',
     headerBorder: '#3e3a36',
@@ -100,6 +103,7 @@ export const themes: Record<string, Theme> = {
     id: 'slate',
     name: 'Slate',
     enabled: true,
+    statusBarStyle: 'light',
     bg: '#48453f',
     headerBg: '#d6d2cc',
     headerBorder: '#bfbbb4',
@@ -127,6 +131,7 @@ export const themes: Record<string, Theme> = {
   'bimini-breeze': {
     id: 'bimini-breeze',
     name: 'Bimini Breeze',
+    statusBarStyle: 'light',
     bg: '#004455',
     headerBg: '#c8f0e8',
     headerBorder: '#8ecdc0',
