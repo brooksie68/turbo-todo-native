@@ -1,5 +1,7 @@
 # TurboTodo Native — Claude Context
 
+**Always use numbered lists** when displaying the Todo section, asking questions, or offering any list of options to James. Keeps replies token-efficient.
+
 React Native + Expo conversion of TurboTodo web app. Target: native Android. **Local-first storage (SQLite on device).** Supabase is optional future sync feature only.
 
 **Project dir:** `C:/Users/brook/ai-projects/turbo-todo-native/`
