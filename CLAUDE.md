@@ -112,7 +112,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Active
-- [ ] **Default theme code sync** — after T2 is finalized, update `default` theme object in `lib/theme.tsx`: `bg: '#ffbe30'`, `listSelectorBorder: '#025f96'` (changed in Figma session 2026-04-26)
+- [x] **Default theme code sync** — `bg: '#ffbe30'`, `listSelectorBorder: '#025f96'` applied to `lib/theme.tsx` (2026-04-29)
 
 ### Icon system (2026-04-29, updated paths 2026-04-29)
 All icons sourced from `_ref/app-icons/`. Figma T2 and `icons-and-values` frame both reflect current SVGs. `Icons.tsx` component map:
