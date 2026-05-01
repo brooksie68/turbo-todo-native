@@ -31,7 +31,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Fallback: `assets/icon.png` (1024x1024, composed flat icon)
 - Source files: `C:/Users/brook/ai-projects/turbo-todo/images/native-icons/`
 
-## Features (all shipped as of 2026-04-29)
+## Features (all shipped as of 2026-05-01)
 - 3+ lists, todos fully loaded from original Supabase migration
 - Add/edit/delete tasks at all depths (3 levels max)
 - Complete/uncomplete with optimistic updates
@@ -48,7 +48,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Pin to top: depth-0 only, floats above incomplete list, blocks drag
 - Row UI: + button (add subtask) + kebab (options)
 - **Gear menu (header):** New list / Rename / Delete list with confirm; Rename + Delete hidden for Daily List
-- **Help modal:** Full scrollable help, all features documented, themed
+- **Help modal:** Full scrollable help, all 17 sections documented, themed. Each section has a UI illustration built from real theme tokens + existing Icon components (HelpIllustrations.tsx). Section headers: 15pt / 800 weight / uppercase.
 - **Backup system:** zip archive containing JSON (all lists/todos/links) + image files organized by todo ID. Export via share sheet, restore via file picker. One zip = complete backup.
   - Export: toolbar options → Back up → share sheet → save zip to Google Drive
   - Restore: toolbar options → Restore → confirm → file picker → pick zip → full restore
@@ -113,70 +113,12 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ## Todo
 
-### Active
-- [x] **Default theme code sync** — `bg: '#ffbe30'`, `listSelectorBorder: '#025f96'` applied to `lib/theme.tsx` (2026-04-29)
-
-### Icon system (2026-04-29, updated paths 2026-04-29)
-Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/default/`). Each theme folder contains its icon variants. Figma T2 and `icons-and-values` frame reflect current SVGs. `Icons.tsx` component map:
-- `IconLogo` — turbo-todo-logo-btn (42×42, untouched)
-- `IconGear` — list-gear-btn (updated path 2026-04-29)
-- `IconHelp` — help-icon-btn (updated path 2026-04-29)
-- `IconOptions` — kebab-options-btn (consolidated: toolbar + row kebab)
-- `IconCreateNew` — create-new-btn (consolidated: toolbar FAB + row add child)
-- `IconExpandDown` — toolbar-expand-btn (collapsed state)
-- `IconExpandUp` — toolbar-collapse-btn (expanded state)
-- `IconPriorityMedium` — priorityElevated / bolt (no stroke; was `IconBolt`)
-- `IconPriorityHigh` — priorityTop (no stroke)
-- `IconClose`, `IconBell`, `IconPin` — unchanged
-
-**Icon sizes:** header = 24px, toolbar = 24px, row = 18px (create + options)
-
-**T2 (Default Theme page):** row icons (IconCreateNew + IconOptions) visible on all rows; IconPin on pinned example row; all toolbar/header icons are current SVGs. SVG checkmarks replace old text ✓ in checkboxDone boxes.
-
-### Sound effects (in progress, 2026-04-30)
-- ElevenLabs API integration: `sound-effects/generate.py`, `.env` (gitignored), `demo.html` audition page
-- MP3s from web app copied to `sound-effects/assets/` as baseline; new generations go to `sound-effects/new/`
-- Workflow: write prompt → generate variations → audition in demo.html → iterate
-- task-complete winner prompt: "two distinct soft tones in sequence, short pause between them, second tone slightly higher, gentle and round, like a soft boop then a bup, pleasant UI sound" — influence=0.8, duration=0.9s
-- **Next step:** task-complete-2 through task-complete-6 still need new variations (faster, higher pitched). Run generate.py to overwrite them, audition, pick winner.
-- Final step: wire up expo-av in app
-
-#### Sound assignments (locked)
-| Action | File |
-|---|---|
-| Task complete | `sound-effects/new/task-complete-1.mp3` |
-| Subtask complete | `sound-effects/new/task-complete-1.mp3` |
-| Task create | `sound-effects/assets/task-create.mp3` |
-| Subtask create | `sound-effects/assets/subtask-create.mp3` |
-| List create | `sound-effects/assets/list-create.mp3` |
-| Task delete | `sound-effects/assets/task-delete.mp3` |
-| List delete | `sound-effects/assets/task-delete.mp3` |
-| Clear completed | `sound-effects/assets/task-delete.mp3` |
-| Clear all | `sound-effects/assets/task-delete.mp3` |
-| Expand all | `sound-effects/assets/expand-all.mp3` |
-| Collapse all | `sound-effects/assets/collapse-all.mp3` |
-| Drag & drop | `sound-effects/assets/drag-drop.mp3` |
-| Priority set | `sound-effects/assets/priority-set.mp3` |
-| Notification | `sound-effects/assets/notification.mp3` |
-| Error | `sound-effects/assets/error.mp3` |
-
-### Toolbar (2026-04-30)
-- Height: 46px (was 42px)
-- CreateNew icon: 24px (was 28px)
-- Expand/collapse icon: top: 7px
-
-### Bugs
-- [x] Cancel/save buttons need padding on regular subtask (2026-04-29)
-- [x] Add URL: label field and add button covered by keyboard (2026-04-29)
-- [x] URL not indented correctly when child of a depth-0 item (2026-04-29)
-- [ ] Sounds not in new app (in progress)
-
 ### Backlog
 - [ ] Progress bar and/or percentage completion
 - [ ] Auto-collapse completed subtasks after 10
 - [ ] On checked items: lighten checkboxes, darken text slightly
 - [ ] Reverse logo teeth direction
-- [ ] Have Claude generate graphics for help items
+- [x] Have Claude generate graphics for help items
 - [ ] Teach Claude to read JSON backup files
 - [ ] Android widget
 - [ ] Archive completed items — stored, downloadable as JSON; long-term: trends chart
@@ -188,6 +130,11 @@ Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/d
 - [ ] Gardening app integration (planting windows, works with this app)
 - [ ] Categories
 - [ ] Supabase sync as optional paid backup feature (long-term)
+- [ ] Clean up current themes and make new ones
+- [ ] Send to list — send any todo item to another list
+- [ ] Note and URL close X should use theme accent color
+- [ ] Bug: list name dropdown placement too far right
+- [ ] Bug: notes not exported in Export for AI function
 
 ### App Name Shortlist
 TaskBlast, TaskBlaster, TaskSaw, TaskTree, Stacked, Momentum, StackFlow, TaskMaster, Getterdunn, Giterdone, Buzzsaw, Mobile Mind, Don't Forget!
