@@ -134,15 +134,31 @@ Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/d
 **T2 (Default Theme page):** row icons (IconCreateNew + IconOptions) visible on all rows; IconPin on pinned example row; all toolbar/header icons are current SVGs. SVG checkmarks replace old text ✓ in checkboxDone boxes.
 
 ### Sound effects (in progress, 2026-04-30)
-- ElevenLabs API integration: `sound-effects/generate.py`, `.env` (gitignored), `demo.html` A/B audition page
+- ElevenLabs API integration: `sound-effects/generate.py`, `.env` (gitignored), `demo.html` audition page
 - MP3s from web app copied to `sound-effects/assets/` as baseline; new generations go to `sound-effects/new/`
 - Workflow: write prompt → generate variations → audition in demo.html → iterate
-- task-complete: `new/task-complete-1.mp3` is the locked winner (was v4). Full prompt: "two distinct soft tones in sequence, short pause between them, second tone slightly higher, gentle and round, like a soft boop then a bup, pleasant UI sound" — influence=0.8, duration=0.9s
-- `new/task-complete-2.mp3` through `task-complete-6.mp3` = rejected, to be overwritten
-- **Next step:** generate 5 new variations (faster tempo, higher pitched) off the v1 prompt → save as task-complete-2 through task-complete-6 (overwrite). demo.html already has v1–v6 buttons. Audition, pick winner, move to next sound.
-- task-complete and subtask-complete will share one sound
-- Next: finish task-complete, then work through remaining sounds one by one
+- task-complete winner prompt: "two distinct soft tones in sequence, short pause between them, second tone slightly higher, gentle and round, like a soft boop then a bup, pleasant UI sound" — influence=0.8, duration=0.9s
+- **Next step:** task-complete-2 through task-complete-6 still need new variations (faster, higher pitched). Run generate.py to overwrite them, audition, pick winner.
 - Final step: wire up expo-av in app
+
+#### Sound assignments (locked)
+| Action | File |
+|---|---|
+| Task complete | `sound-effects/new/task-complete-1.mp3` |
+| Subtask complete | `sound-effects/new/task-complete-1.mp3` |
+| Task create | `sound-effects/assets/task-create.mp3` |
+| Subtask create | `sound-effects/assets/subtask-create.mp3` |
+| List create | `sound-effects/assets/list-create.mp3` |
+| Task delete | `sound-effects/assets/task-delete.mp3` |
+| List delete | `sound-effects/assets/task-delete.mp3` |
+| Clear completed | `sound-effects/assets/task-delete.mp3` |
+| Clear all | `sound-effects/assets/task-delete.mp3` |
+| Expand all | `sound-effects/assets/expand-all.mp3` |
+| Collapse all | `sound-effects/assets/collapse-all.mp3` |
+| Drag & drop | `sound-effects/assets/drag-drop.mp3` |
+| Priority set | `sound-effects/assets/priority-set.mp3` |
+| Notification | `sound-effects/assets/notification.mp3` |
+| Error | `sound-effects/assets/error.mp3` |
 
 ### Toolbar (2026-04-30)
 - Height: 46px (was 42px)

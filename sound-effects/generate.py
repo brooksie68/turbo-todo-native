@@ -33,7 +33,7 @@ def generate(name: str, prompt: str, influence: float = 0.8, duration: float = 0
     with open(path, "wb") as f:
         for chunk in result:
             f.write(chunk)
-    print(f"  → {path}")
+    print(f"  -> {path}")
 
 # --- Generate ---
 
@@ -54,7 +54,50 @@ VARIATIONS = [
     ("task-complete-6", BASE_PROMPT + ", punchy and quick, tones in a higher register",  0.9, 0.7),
 ]
 
+EXPAND_PROMPT = (
+    "fifty playing cards riffled rapidly under a thumb, dense papery flutter, "
+    "pitch sweeps from low to high, fast zip upward, crisp and dry"
+)
+
+COLLAPSE_PROMPT = (
+    "fifty playing cards riffled rapidly under a thumb, dense papery flutter, "
+    "pitch sweeps from high to low, fast zip downward, crisp and dry"
+)
+
+EXPAND_COLLAPSE = [
+    ("expand-all-1",  EXPAND_PROMPT,   0.25, 0.6),
+    ("expand-all-2",  EXPAND_PROMPT,   0.25, 0.6),
+    ("expand-all-3",  EXPAND_PROMPT,   0.25, 0.6),
+    ("expand-all-4",  EXPAND_PROMPT,   0.25, 0.6),
+    ("expand-all-5",  EXPAND_PROMPT,   0.25, 0.6),
+    ("expand-all-6",  EXPAND_PROMPT,   0.25, 0.6),
+    ("collapse-all-1", COLLAPSE_PROMPT, 0.25, 0.6),
+    ("collapse-all-2", COLLAPSE_PROMPT, 0.25, 0.6),
+    ("collapse-all-3", COLLAPSE_PROMPT, 0.25, 0.6),
+    ("collapse-all-4", COLLAPSE_PROMPT, 0.25, 0.6),
+    ("collapse-all-5", COLLAPSE_PROMPT, 0.25, 0.6),
+    ("collapse-all-6", COLLAPSE_PROMPT, 0.25, 0.6),
+]
+
+DESTRUCTIVE_PROMPT = "Short soft whoosh, item dismissed, gentle and brief"
+
+DESTRUCTIVE = [
+    # Winner becomes shared sound for task-delete, list-delete, clear-completed, clear-all
+    ("list-delete-1", DESTRUCTIVE_PROMPT,                                          0.8, 0.8),
+    ("list-delete-2", DESTRUCTIVE_PROMPT + ", slightly airy",                      0.8, 0.8),
+    ("list-delete-3", DESTRUCTIVE_PROMPT + ", a touch softer, trailing off",       0.8, 0.8),
+    ("list-delete-4", DESTRUCTIVE_PROMPT + ", dry and crisp",                      0.85, 0.8),
+    ("list-delete-5", DESTRUCTIVE_PROMPT + ", minimal, almost silent",             0.85, 0.8),
+    ("list-delete-6", DESTRUCTIVE_PROMPT + ", slightly deeper tone",               0.8, 0.8),
+]
+
+for name, prompt, influence, duration in EXPAND_COLLAPSE:
+    generate(name, prompt, influence, duration)
+
 for name, prompt, influence, duration in VARIATIONS:
+    generate(name, prompt, influence, duration)
+
+for name, prompt, influence, duration in DESTRUCTIVE:
     generate(name, prompt, influence, duration)
 
 print("Done.")
