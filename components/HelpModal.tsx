@@ -72,7 +72,7 @@ const sections: Section[] = [
     title: 'Priority',
     items: [
       'Open a row\'s options menu (kebab icon) to set priority.',
-      'Elevated: bolt icon. Top Priority: exclamation icon.',
+      'Elevated: orange text + bolt icon. Top Priority: red text + exclamation icon.',
     ],
   },
   {

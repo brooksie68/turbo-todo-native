@@ -23,10 +23,10 @@ function RowBox({ children }: { children: React.ReactNode }) {
 }
 
 function TaskRow({
-  label, done = false, icon, note, indent = 0, first = false,
+  label, done = false, icon, note, indent = 0, first = false, labelColor,
 }: {
   label: string; done?: boolean; icon?: React.ReactNode;
-  note?: string; indent?: number; first?: boolean;
+  note?: string; indent?: number; first?: boolean; labelColor?: string;
 }) {
   const { theme: t } = useThemeContext();
   return (
@@ -44,7 +44,7 @@ function TaskRow({
           {done && <Text style={styles.checkmark}>✓</Text>}
         </View>
         <Text
-          style={[styles.taskLabel, { color: done ? t.textDone : t.text }, done && styles.strikethrough]}
+          style={[styles.taskLabel, { color: labelColor ?? (done ? t.textDone : t.text) }, done && styles.strikethrough]}
           numberOfLines={1}
         >{label}</Text>
         {icon}
@@ -145,12 +145,14 @@ export function IllustrationPriority() {
   return (
     <RowBox>
       <TaskRow
-        label="Elevated"
+        label="Elevated task"
         first
+        labelColor={t.priorityElevated}
         icon={<IconPriorityMedium size={18} color={t.priorityElevated} />}
       />
       <TaskRow
-        label="Top Priority"
+        label="Top priority task"
+        labelColor={t.priorityTop}
         icon={<IconPriorityHigh size={18} color={t.priorityTop} />}
       />
     </RowBox>
