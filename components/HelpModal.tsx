@@ -114,6 +114,13 @@ const sections: Section[] = [
     ],
   },
   {
+    title: 'Sounds',
+    items: [
+      'Sound effects play when you complete, create, or delete tasks.',
+      'Turn sounds on or off in toolbar options.',
+    ],
+  },
+  {
     title: 'Export for AI',
     items: [
       'Row options (top-level tasks and subtasks): exports that item and its incomplete children as a markdown outline via the share sheet.',
@@ -134,6 +141,7 @@ const sections: Section[] = [
       'Restore — pick a backup zip to restore from. Replaces all current data.',
       'Sort by — tap Status, Date, or Alpha to re-sort incomplete items. This is a one-time sort; drag and drop freely afterward.',
       'Daily List — turn the Daily List on or off.',
+      'Sounds — turn sound effects on or off.',
       'Text size — use + and − to adjust task text size. Five sizes available.',
       'Clear all completed — removes all completed tasks across all levels.',
       'Clear entire list — removes everything in the active list. Asks to confirm.',
