@@ -14,6 +14,20 @@ import {
   IllustrationLists,
   IllustrationAddingTasks,
   IllustrationSubtasks,
+  IllustrationEditingCompleting,
+  IllustrationPriority,
+  IllustrationPinToTop,
+  IllustrationReordering,
+  IllustrationNotes,
+  IllustrationImages,
+  IllustrationLinks,
+  IllustrationAlarms,
+  IllustrationDailyList,
+  IllustrationSounds,
+  IllustrationExportForAI,
+  IllustrationThemes,
+  IllustrationToolbarOptions,
+  IllustrationExpandCollapse,
 } from './HelpIllustrations';
 
 type Props = {
@@ -165,6 +179,20 @@ const illustrations: Partial<Record<string, React.ReactNode>> = {
   'Lists': <IllustrationLists />,
   'Adding Tasks': <IllustrationAddingTasks />,
   'Subtasks': <IllustrationSubtasks />,
+  'Editing & Completing': <IllustrationEditingCompleting />,
+  'Priority': <IllustrationPriority />,
+  'Pin to Top': <IllustrationPinToTop />,
+  'Reordering': <IllustrationReordering />,
+  'Notes': <IllustrationNotes />,
+  'Images': <IllustrationImages />,
+  'Links': <IllustrationLinks />,
+  'Alarms': <IllustrationAlarms />,
+  'Daily List': <IllustrationDailyList />,
+  'Sounds': <IllustrationSounds />,
+  'Export for AI': <IllustrationExportForAI />,
+  'Themes': <IllustrationThemes />,
+  'Toolbar Options': <IllustrationToolbarOptions />,
+  'Expand / Collapse All': <IllustrationExpandCollapse />,
 };
 
 export default function HelpModal({ visible, onClose }: Props) {
@@ -232,10 +260,10 @@ const styles = StyleSheet.create({
   },
   section: { gap: 6 },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
     marginBottom: 2,
   },
   item: {
