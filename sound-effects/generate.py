@@ -44,12 +44,14 @@ BASE_PROMPT = (
 )
 
 VARIATIONS = [
+    # Overwrites task-complete-2 through task-complete-6 (v1 is locked winner, do not touch)
+    # Direction: faster tempo, higher pitched vs v1
     # name, prompt, influence, duration
-    ("task-complete-7",  BASE_PROMPT + ", slightly faster tempo",                              0.8, 0.8),
-    ("task-complete-8",  BASE_PROMPT + ", faster tempo, slightly higher pitched",              0.8, 0.8),
-    ("task-complete-9",  BASE_PROMPT + ", brisk and snappy, higher register",                  0.85, 0.75),
-    ("task-complete-10", BASE_PROMPT + ", quick and light, higher frequency tones",            0.85, 0.75),
-    ("task-complete-11", BASE_PROMPT + ", punchy and quick, tones in a higher register",       0.9, 0.7),
+    ("task-complete-2", BASE_PROMPT + ", slightly faster tempo",                         0.8, 0.8),
+    ("task-complete-3", BASE_PROMPT + ", faster tempo, slightly higher pitched",         0.8, 0.8),
+    ("task-complete-4", BASE_PROMPT + ", brisk and snappy, higher register",             0.85, 0.75),
+    ("task-complete-5", BASE_PROMPT + ", quick and light, higher frequency tones",       0.85, 0.75),
+    ("task-complete-6", BASE_PROMPT + ", punchy and quick, tones in a higher register",  0.9, 0.7),
 ]
 
 for name, prompt, influence, duration in VARIATIONS:

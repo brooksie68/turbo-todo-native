@@ -137,7 +137,9 @@ Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/d
 - ElevenLabs API integration: `sound-effects/generate.py`, `.env` (gitignored), `demo.html` A/B audition page
 - MP3s from web app copied to `sound-effects/assets/` as baseline; new generations go to `sound-effects/new/`
 - Workflow: write prompt → generate variations → audition in demo.html → iterate
-- task-complete: v1 in `new/` is the winner (was v4). Full prompt: "two distinct soft tones in sequence, short pause between them, second tone slightly higher, gentle and round, like a soft boop then a bup, pleasant UI sound" — influence=0.8, duration=0.9s. Next: 5 more variations (faster tempo, higher pitched) → v7–v11
+- task-complete: `new/task-complete-1.mp3` is the locked winner (was v4). Full prompt: "two distinct soft tones in sequence, short pause between them, second tone slightly higher, gentle and round, like a soft boop then a bup, pleasant UI sound" — influence=0.8, duration=0.9s
+- `new/task-complete-2.mp3` through `task-complete-6.mp3` = rejected, to be overwritten
+- **Next step:** generate 5 new variations (faster tempo, higher pitched) off the v1 prompt → save as task-complete-2 through task-complete-6 (overwrite). demo.html already has v1–v6 buttons. Audition, pick winner, move to next sound.
 - task-complete and subtask-complete will share one sound
 - Next: finish task-complete, then work through remaining sounds one by one
 - Final step: wire up expo-av in app
