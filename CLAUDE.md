@@ -137,7 +137,7 @@ Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/d
 - ElevenLabs API integration: `sound-effects/generate.py`, `.env` (gitignored), `demo.html` A/B audition page
 - MP3s from web app copied to `sound-effects/assets/` as baseline; new generations go to `sound-effects/new/`
 - Workflow: write prompt → generate variations → audition in demo.html → iterate
-- task-complete: v4 prompt ("two distinct soft tones in sequence, short pause, second higher, boop-bup") is best so far; needs 5 more variations (faster, higher pitched)
+- task-complete: v1 in `new/` is the winner (was v4). Full prompt: "two distinct soft tones in sequence, short pause between them, second tone slightly higher, gentle and round, like a soft boop then a bup, pleasant UI sound" — influence=0.8, duration=0.9s. Next: 5 more variations (faster tempo, higher pitched) → v7–v11
 - task-complete and subtask-complete will share one sound
 - Next: finish task-complete, then work through remaining sounds one by one
 - Final step: wire up expo-av in app
