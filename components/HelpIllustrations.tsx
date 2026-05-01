@@ -1,68 +1,59 @@
 /**
- * HelpIllustrations — small schematic UI diagrams for each help section.
- * Composed from Views + existing Icon components. Themed.
+ * HelpIllustrations — small UI diagrams for each help section.
+ * Matches the actual app UI as closely as possible. Themed.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useThemeContext } from '../lib/theme';
-import { IconGear, IconCreateNew, IconOptions, IconExpandDown } from './Icons';
-
-// ─── Shared wrapper ─────────────────────────────────────────────
-
-function IllustrationBox({ children }: { children: React.ReactNode }) {
-  const { theme: t } = useThemeContext();
-  return (
-    <View style={[styles.box, { backgroundColor: t.surface, borderColor: t.border }]}>
-      {children}
-    </View>
-  );
-}
+import { IconLogo, IconGear, IconCreateNew, IconOptions, IconExpandDown } from './Icons';
 
 // ─── 1. Lists ───────────────────────────────────────────────────
+// Reproduces the actual header bar: logo + list dropdown + gear icon
 
 export function IllustrationLists() {
   const { theme: t } = useThemeContext();
   return (
-    <IllustrationBox>
-      {/* Simulated header bar */}
-      <View style={[styles.headerBar, { backgroundColor: t.headerBg ?? t.surface, borderBottomColor: t.border }]}>
-        {/* List name pill */}
-        <View style={[styles.listPill, { borderColor: t.accent }]}>
-          <Text style={[styles.listPillText, { color: t.text }]}>Shopping List</Text>
-          <Text style={[styles.listPillCaret, { color: t.accent }]}>▾</Text>
-        </View>
-        {/* Gear icon */}
-        <View style={styles.gearWrap}>
-          <IconGear size={20} color={t.iconColor} />
-        </View>
+    <View style={[styles.header, { backgroundColor: t.headerBg }]}>
+      {/* Logo */}
+      <View style={styles.logoWrap}>
+        <IconLogo size={32} color={t.iconColor} />
       </View>
-    </IllustrationBox>
+      {/* List selector dropdown — matches actual styles */}
+      <View style={[styles.listSelector, { backgroundColor: t.listSelectorBg, borderBottomColor: t.listSelectorBorder }]}>
+        <Text style={[styles.listSelectorText, { color: t.listSelectorText }]} numberOfLines={1}>
+          Shopping List
+        </Text>
+        <Text style={[styles.listSelectorArrow, { color: t.listSelectorText }]}>▼</Text>
+      </View>
+      {/* Gear */}
+      <View style={styles.gearWrap}>
+        <IconGear size={22} color={t.iconColor} />
+      </View>
+    </View>
   );
 }
 
 // ─── 2. Adding Tasks ────────────────────────────────────────────
+// Reproduces the actual toolbar: options | create new | expand
 
 export function IllustrationAddingTasks() {
   const { theme: t } = useThemeContext();
   return (
-    <IllustrationBox>
-      <View style={[styles.toolbar, { borderTopColor: t.border }]}>
-        {/* Options icon — dim */}
-        <View style={styles.toolbarLeft}>
-          <IconOptions size={20} color={t.iconColor + '55'} />
-        </View>
-        {/* Create new — highlighted */}
-        <View style={[styles.toolbarCenter, styles.highlighted, { borderColor: t.accent, backgroundColor: t.accent + '18' }]}>
-          <IconCreateNew size={22} color={t.accent} />
-          <Text style={[styles.tapLabel, { color: t.accent }]}>tap to add</Text>
-        </View>
-        {/* Expand icon — dim */}
-        <View style={styles.toolbarRight}>
-          <IconExpandDown size={20} color={t.iconColor + '55'} />
-        </View>
+    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.border }]}>
+      {/* Options — left */}
+      <View style={styles.tbLeft}>
+        <IconOptions size={24} color={t.iconColor} />
       </View>
-    </IllustrationBox>
+      {/* Create new — center, full color to draw the eye */}
+      <View style={styles.tbCenter}>
+        <IconCreateNew size={24} color={t.iconColor} />
+      </View>
+      {/* Expand — right */}
+      <View style={styles.tbRight}>
+        <IconExpandDown size={24} color={t.iconColor} />
+      </View>
+    </View>
   );
 }
 
@@ -76,90 +67,96 @@ export function IllustrationSubtasks() {
     { label: 'Sub-subtask', indent: 32, hasAdd: false },
   ];
   return (
-    <IllustrationBox>
-      <View style={styles.subtaskList}>
-        {rows.map((row, i) => (
-          <View key={i} style={[styles.subtaskRow, { marginLeft: row.indent }]}>
-            {/* Checkbox */}
-            <View style={[styles.checkbox, { borderColor: t.accent }]} />
-            {/* Label */}
-            <Text style={[styles.subtaskLabel, { color: t.text }]}>{row.label}</Text>
-            {/* + button */}
-            {row.hasAdd && (
-              <View style={styles.addBtn}>
-                <IconCreateNew size={14} color={t.accent} />
-              </View>
-            )}
-          </View>
-        ))}
-      </View>
-    </IllustrationBox>
+    <View style={[styles.subtaskBox, { borderColor: t.border }]}>
+      {rows.map((row, i) => (
+        <View key={i} style={[styles.subtaskRow, { marginLeft: row.indent, borderTopColor: t.border, borderTopWidth: i === 0 ? 0 : StyleSheet.hairlineWidth }]}>
+          <View style={[styles.checkbox, { borderColor: t.accent }]} />
+          <Text style={[styles.subtaskLabel, { color: t.text }]}>{row.label}</Text>
+          {row.hasAdd && <IconCreateNew size={16} color={t.iconColor} />}
+        </View>
+      ))}
+    </View>
   );
 }
 
 // ─── Styles ─────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  box: {
-    borderWidth: 1,
+  // Lists
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
     borderRadius: 8,
     overflow: 'hidden',
     marginBottom: 10,
+    paddingHorizontal: 8,
+    gap: 8,
   },
-
-  // Lists
-  headerBar: {
-    flexDirection: 'row',
+  logoWrap: {
+    width: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
   },
-  listPill: {
+  listSelector: {
+    flex: 1,
+    height: 34,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderRadius: 3,
+    paddingHorizontal: 10,
     gap: 6,
   },
-  listPillText: { fontSize: 14, fontWeight: '500' },
-  listPillCaret: { fontSize: 12 },
-  gearWrap: { position: 'absolute', right: 16 },
+  listSelectorText: { flex: 1, fontSize: 15 },
+  listSelectorArrow: { fontSize: 10 },
+  gearWrap: {
+    width: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // Adding Tasks
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 52,
+    height: 46,
     borderTopWidth: 1,
-    paddingHorizontal: 16,
-  },
-  toolbarLeft: { flex: 1, alignItems: 'flex-start' },
-  toolbarCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    overflow: 'hidden',
+    marginBottom: 10,
   },
-  toolbarRight: { flex: 1, alignItems: 'flex-end' },
-  highlighted: {},
-  tapLabel: { fontSize: 12, fontWeight: '600' },
+  tbLeft: {
+    width: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 8,
+  },
+  tbCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tbRight: {
+    width: 58,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingRight: 8,
+  },
 
   // Subtasks
-  subtaskList: {
-    padding: 12,
-    gap: 10,
+  subtaskBox: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 10,
   },
   subtaskRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   checkbox: {
     width: 16,
@@ -170,8 +167,5 @@ const styles = StyleSheet.create({
   subtaskLabel: {
     flex: 1,
     fontSize: 14,
-  },
-  addBtn: {
-    padding: 2,
   },
 });
