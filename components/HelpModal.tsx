@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Modal,
   View,
@@ -9,6 +10,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeContext } from '../lib/theme';
 import { IconClose } from './Icons';
+import {
+  IllustrationLists,
+  IllustrationAddingTasks,
+  IllustrationSubtasks,
+} from './HelpIllustrations';
 
 type Props = {
   visible: boolean;
@@ -155,6 +161,12 @@ const sections: Section[] = [
   },
 ];
 
+const illustrations: Partial<Record<string, React.ReactNode>> = {
+  'Lists': <IllustrationLists />,
+  'Adding Tasks': <IllustrationAddingTasks />,
+  'Subtasks': <IllustrationSubtasks />,
+};
+
 export default function HelpModal({ visible, onClose }: Props) {
   const insets = useSafeAreaInsets();
   const { theme } = useThemeContext();
@@ -180,6 +192,7 @@ export default function HelpModal({ visible, onClose }: Props) {
           {sections.map(section => (
             <View key={section.title} style={styles.section}>
               <Text style={[styles.sectionTitle, { color: t.accent }]}>{section.title}</Text>
+              {illustrations[section.title] ?? null}
               {section.items.map((item, i) => (
                 <View key={i} style={styles.item}>
                   <Text style={[styles.bullet, { color: t.accent }]}>·</Text>
