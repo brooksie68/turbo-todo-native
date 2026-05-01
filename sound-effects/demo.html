@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TurboTodo Sound Demo</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #1a1a1a;
+      color: #eee;
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 { color: #ffbe30; font-size: 20px; margin-bottom: 32px; }
+    .group { margin-bottom: 28px; }
+    .group-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    button {
+      display: block;
+      width: 100%;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #eee;
+      padding: 12px 16px;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+      margin-bottom: 6px;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    button:hover { background: #333; border-color: #ffbe30; }
+    button.playing { background: #3a3000; border-color: #ffbe30; color: #ffbe30; }
+    .filename { font-size: 12px; color: #666; float: right; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>🔊 TurboTodo — Sound Demo</h1>
+
+  <table style="width:100%; border-collapse:collapse;">
+    <tr>
+      <th style="text-align:left; color:#888; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding-bottom:12px; width:50%;">Current</th>
+      <th style="text-align:left; color:#ffbe30; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding-bottom:12px; width:50%; padding-left:8px;">New</th>
+    </tr>
+
+    <tr><td colspan="2"><div class="group-label">Completion</div></td></tr>
+    <tr>
+      <td><button onclick="play('task-complete', this, 'assets')">Task complete</button></td>
+      <td style="padding-left:8px">
+        <button onclick="play('task-complete-1', this, 'new')">v1</button>
+        <button onclick="play('task-complete-2', this, 'new')">v2</button>
+        <button onclick="play('task-complete-3', this, 'new')">v3</button>
+        <button onclick="play('task-complete-4', this, 'new')">v4</button>
+        <button onclick="play('task-complete-5', this, 'new')">v5</button>
+        <button onclick="play('task-complete-6', this, 'new')">v6</button>
+      </td>
+    </tr>
+    <tr>
+      <td><button onclick="play('subtask-complete', this, 'assets')">Subtask complete</button></td>
+      <td style="padding-left:8px"><button onclick="play('subtask-complete', this, 'new')">Subtask complete</button></td>
+    </tr>
+    <tr>
+      <td><button onclick="play('clear-completed', this, 'assets')">Clear completed</button></td>
+      <td style="padding-left:8px"><button onclick="play('clear-completed', this, 'new')">Clear completed</button></td>
+    </tr>
+
+    <tr><td colspan="2"><div class="group-label">Create</div></td></tr>
+    <tr>
+      <td><button onclick="play('task-create', this, 'assets')">Task create</button></td>
+      <td style="padding-left:8px"><button onclick="play('task-create', this, 'new')">Task create</button></td>
+    </tr>
+    <tr>
+      <td><button onclick="play('subtask-create', this, 'assets')">Subtask create</button></td>
+      <td style="padding-left:8px"><button onclick="play('subtask-create', this, 'new')">Subtask create</button></td>
+    </tr>
+    <tr>
+      <td><button onclick="play('list-create', this, 'assets')">List create</button></td>
+      <td style="padding-left:8px"><button onclick="play('list-create', this, 'new')">List create</button></td>
+    </tr>
+
+    <tr><td colspan="2"><div class="group-label">Destructive</div></td></tr>
+    <tr>
+      <td><button onclick="play('task-delete', this, 'assets')">Task delete</button></td>
+      <td style="padding-left:8px"><button onclick="play('task-delete', this, 'new')">Task delete</button></td>
+    </tr>
+    <tr>
+      <td><button onclick="play('list-delete', this, 'assets')">List delete</button></td>
+      <td style="padding-left:8px"><button onclick="play('list-delete', this, 'new')">List delete</button></td>
+    </tr>
+    <tr>
+      <td><button onclick="play('clear-all', this, 'assets')">Clear all</button></td>
+      <td style="padding-left:8px"><button onclick="play('clear-all', this, 'new')">Clear all</button></td>
+    </tr>
+
+    <tr><td colspan="2"><div class="group-label">Interaction</div></td></tr>
+    <tr>
+      <td><button onclick="play('drag-drop', this, 'assets')">Drag &amp; drop</button></td>
+      <td style="padding-left:8px"><button onclick="play('drag-drop', this, 'new')">Drag &amp; drop</button></td>
+    </tr>
+    <tr>
+      <td><button onclick="play('priority-set', this, 'assets')">Priority set</button></td>
+      <td style="padding-left:8px"><button onclick="play('priority-set', this, 'new')">Priority set</button></td>
+    </tr>
+
+    <tr><td colspan="2"><div class="group-label">System</div></td></tr>
+    <tr>
+      <td><button onclick="play('notification', this, 'assets')">Notification</button></td>
+      <td style="padding-left:8px"><button onclick="play('notification', this, 'new')">Notification</button></td>
+    </tr>
+    <tr>
+      <td><button onclick="play('error', this, 'assets')">Error</button></td>
+      <td style="padding-left:8px"><button onclick="play('error', this, 'new')">Error</button></td>
+    </tr>
+  </table>
+
+  <script>
+    let current = null;
+    let currentBtn = null;
+
+    function play(name, btn, folder) {
+      folder = folder || 'assets';
+      if (current) {
+        current.pause();
+        current.currentTime = 0;
+        if (currentBtn) currentBtn.classList.remove('playing');
+      }
+      const audio = new Audio(folder + '/' + name + '.mp3');
+      audio.play();
+      btn.classList.add('playing');
+      current = audio;
+      currentBtn = btn;
+      audio.onended = () => btn.classList.remove('playing');
+    }
+  </script>
+</body>
+</html>

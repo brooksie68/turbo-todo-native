@@ -133,11 +133,25 @@ Icons organized by theme in `_ref/app-icons/<theme-id>/` (e.g. `_ref/app-icons/d
 
 **T2 (Default Theme page):** row icons (IconCreateNew + IconOptions) visible on all rows; IconPin on pinned example row; all toolbar/header icons are current SVGs. SVG checkmarks replace old text ✓ in checkboxDone boxes.
 
+### Sound effects (in progress, 2026-04-30)
+- ElevenLabs API integration: `sound-effects/generate.py`, `.env` (gitignored), `demo.html` A/B audition page
+- MP3s from web app copied to `sound-effects/assets/` as baseline; new generations go to `sound-effects/new/`
+- Workflow: write prompt → generate variations → audition in demo.html → iterate
+- task-complete: v4 prompt ("two distinct soft tones in sequence, short pause, second higher, boop-bup") is best so far; needs 5 more variations (faster, higher pitched)
+- task-complete and subtask-complete will share one sound
+- Next: finish task-complete, then work through remaining sounds one by one
+- Final step: wire up expo-av in app
+
+### Toolbar (2026-04-30)
+- Height: 46px (was 42px)
+- CreateNew icon: 24px (was 28px)
+- Expand/collapse icon: top: 7px
+
 ### Bugs
 - [x] Cancel/save buttons need padding on regular subtask (2026-04-29)
 - [x] Add URL: label field and add button covered by keyboard (2026-04-29)
 - [x] URL not indented correctly when child of a depth-0 item (2026-04-29)
-- [ ] Sounds not in new app
+- [ ] Sounds not in new app (in progress)
 
 ### Backlog
 - [ ] Progress bar and/or percentage completion
