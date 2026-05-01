@@ -12,6 +12,7 @@ import {
   getDailyDateString,
   restoreAllDailyItems,
 } from '../lib/dailyList';
+import { playSound } from '../lib/sounds';
 
 // ── Tree helpers ────────────────────────────────────────────────────────────
 
@@ -298,12 +299,13 @@ export function useTodoData() {
 
   const toggleComplete = useCallback((id: number, current: boolean) => {
     const newValue = !current;
+    const raw = rawTodosRef.current.find(t => t.id === id);
     if (newValue) {
-      const raw = rawTodosRef.current.find(t => t.id === id);
       if (raw?.notification_id) {
         cancelAlarm(raw.notification_id);
         db.runAsync('UPDATE todos SET alarm_time = NULL, notification_id = NULL WHERE id = ?', [id]);
       }
+      playSound(raw?.parent_id ? 'subtask-complete' : 'task-complete');
     }
     setTodos(prev => updateTodoInTree(prev, id, {
       is_complete: newValue,
@@ -340,6 +342,7 @@ export function useTodoData() {
       'INSERT INTO todos (list_id, parent_id, task, note, is_complete, sort_order) VALUES (?, ?, ?, ?, 0, ?)',
       [listId, parentId, task, note || null, sort_order],
     );
+    playSound(parentId ? 'subtask-create' : 'task-create');
     fetchTodos(listId, false);
   }, [fetchTodos]);
 
@@ -357,11 +360,13 @@ export function useTodoData() {
     setTodos(prev => removeTodoFromTree(prev, id));
     await Promise.all(subtreeIds.map(tid => deleteImagesForTodo(tid)));
     db.runAsync('DELETE FROM todos WHERE id = ?', [id]);
+    playSound('task-delete');
   }, []);
 
   const setStatus = useCallback((id: number, status: string | null, _listId: number) => {
     setTodos(prev => updateTodoInTree(prev, id, { status }));
     db.runAsync('UPDATE todos SET status = ? WHERE id = ?', [status, id]);
+    if (status) playSound('priority-set');
   }, []);
 
   const setPinned = useCallback((id: number, pinned: boolean) => {
@@ -377,6 +382,7 @@ export function useTodoData() {
     await Promise.all(completedIds.map(id => deleteImagesForTodo(id)));
     const placeholders = completedIds.map(() => '?').join(',');
     db.runAsync(`DELETE FROM todos WHERE id IN (${placeholders})`, completedIds);
+    playSound('task-delete');
   }, []);
 
   const clearCompletedInGroup = useCallback(async (parentId: number, currentTodos: Todo[]) => {
@@ -398,6 +404,7 @@ export function useTodoData() {
     setTodos([]);
     await Promise.all(allIds.map(id => deleteImagesForTodo(id)));
     db.runAsync('DELETE FROM todos WHERE list_id = ?', [listId]);
+    playSound('task-delete');
   }, []);
 
   const handleSort = useCallback((criterion: string, _listId: number) => {
@@ -633,6 +640,7 @@ export function useTodoData() {
     };
     setLists(prev => [...prev, newList]);
     switchToList(newList.id);
+    playSound('list-create');
   }, [lists.length, switchToList]);
 
   const renameList = useCallback(async (id: number, name: string) => {
@@ -645,6 +653,7 @@ export function useTodoData() {
     const allIds = flattenAll(buildTree(todosInList)).map(t => t.id);
     await Promise.all(allIds.map(tid => deleteImagesForTodo(tid)));
     await db.runAsync('DELETE FROM lists WHERE id = ?', [id]);
+    playSound('task-delete');
     const remaining = lists.filter(l => l.id !== id);
     if (remaining.length > 0) {
       setLists(remaining);

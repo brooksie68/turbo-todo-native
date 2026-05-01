@@ -20,6 +20,9 @@ type Props = {
   dailyEnabled: boolean;
   onDailyOn: () => void;
   onDailyOff: () => void;
+  soundEnabled: boolean;
+  onSoundOn: () => void;
+  onSoundOff: () => void;
 };
 
 export default function ToolbarOptionsMenu({
@@ -33,6 +36,9 @@ export default function ToolbarOptionsMenu({
   dailyEnabled,
   onDailyOn,
   onDailyOff,
+  soundEnabled,
+  onSoundOn,
+  onSoundOff,
 }: Props) {
   const insets = useSafeAreaInsets();
   const { theme, textSizeIndex, setTextSizeIndex } = useThemeContext();
@@ -155,6 +161,19 @@ export default function ToolbarOptionsMenu({
               <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
               <TouchableOpacity style={styles.sortBtn} onPress={onDailyOff}>
                 <Text style={[styles.sortBtnText, { color: t.text }, !dailyEnabled && styles.activeToggle]}>Off</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.divider, { backgroundColor: t.border }]} />
+
+            <Text style={[styles.sectionLabel, { color: t.accent }]}>Sounds:</Text>
+            <View style={styles.sortRow}>
+              <TouchableOpacity style={styles.sortBtn} onPress={onSoundOn}>
+                <Text style={[styles.sortBtnText, { color: t.text }, soundEnabled && styles.activeToggle]}>On</Text>
+              </TouchableOpacity>
+              <Text style={[styles.sortPipe, { color: t.accent }]}>|</Text>
+              <TouchableOpacity style={styles.sortBtn} onPress={onSoundOff}>
+                <Text style={[styles.sortBtnText, { color: t.text }, !soundEnabled && styles.activeToggle]}>Off</Text>
               </TouchableOpacity>
             </View>
 

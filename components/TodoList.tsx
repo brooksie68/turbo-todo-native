@@ -27,6 +27,7 @@ import AddChildMenu from './AddChildMenu';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme, useThemeContext } from '../lib/theme';
 import { exportBackup, importBackup } from '../lib/backup';
+import { isSoundEnabled, setSoundEnabled, loadSoundSetting, playSound } from '../lib/sounds';
 import HelpModal from './HelpModal';
 import AlarmModal from './AlarmModal';
 
@@ -58,8 +59,14 @@ export default function TodoList() {
   const [viewerUri, setViewerUri] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [listKey, setListKey] = useState(0);
+  const [soundEnabled, setSoundEnabledState] = useState(false);
   const dragFromIndexRef = useRef<number | null>(null);
   const [dragTargetIndex, setDragTargetIndex] = useState<number | null>(null);
+
+  // Load sound setting on mount
+  React.useEffect(() => {
+    loadSoundSetting().then(setSoundEnabledState);
+  }, []);
 
   // ── Drop validity ────────────────────────────────────────────────────────
 
@@ -169,7 +176,18 @@ export default function TodoList() {
     }
   }, [data.dailyEnabled, data.getDailyItemCount, data.disableDaily]);
 
+  const handleSoundOn = useCallback(() => {
+    setSoundEnabled(true);
+    setSoundEnabledState(true);
+  }, []);
+
+  const handleSoundOff = useCallback(() => {
+    setSoundEnabled(false);
+    setSoundEnabledState(false);
+  }, []);
+
   const handleToggleAll = useCallback(() => {
+    playSound(data.anyDepth0Expanded ? 'collapse-all' : 'expand-all');
     data.toggleAll(data.anyDepth0Expanded);
   }, [data.anyDepth0Expanded, data.toggleAll]);
 
@@ -183,7 +201,8 @@ export default function TodoList() {
     setDragTargetIndex(null);
     if (data.activeListId) {
       const valid = await data.handleDragEnd(newFlat, from, to, data.activeListId);
-      if (!valid) setListKey(k => k + 1);
+      if (valid) playSound('drag-drop');
+      else setListKey(k => k + 1);
     }
   }, [data.activeListId, data.handleDragEnd]);
 
@@ -288,6 +307,9 @@ export default function TodoList() {
           dailyEnabled={data.dailyEnabled}
           onDailyOn={handleDailyOn}
           onDailyOff={handleDailyOff}
+          soundEnabled={soundEnabled}
+          onSoundOn={handleSoundOn}
+          onSoundOff={handleSoundOff}
         />
         <ItemOptionsMenu
           visible={overlay.itemMenuTodo !== null}
