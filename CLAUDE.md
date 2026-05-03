@@ -10,7 +10,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ## Current state (as of 2026-05-03 session 2)
 
-**Git HEAD:** pending commit — App Info section + versionCode fix
+**Git HEAD:** `3846b73` — "Add App Info section to Help modal with share button"
 **Base:** `6de6e5e` — "Mark help illustrations done; update features date and help modal description; clean up sound-effects/new"
 
 **Device state:** Clean. New APK (build 10, versionCode 10) installed from `6de6e5e`. OTA delivery confirmed working (red icon test). Data restored. No Tear Sheet, no auto-collapse.
