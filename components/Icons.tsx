@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import Svg, { G, Path, Line } from 'react-native-svg';
+import Svg, { G, Path, Line, Polyline, Rect } from 'react-native-svg';
 
 type IconProps = {
   size?: number;
@@ -162,6 +162,15 @@ export function IconPin({ size = 24, color = '#025f96' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path d="M16 3H8v7l-2 3h5v7l1 2 1-2v-7h5l-2-3V3z" fill={color} />
+    </Svg>
+  );
+}
+
+export function IconShare({ size = 24, color = '#025f96' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 3l-4 4h3v7h2V7h3l-4-4z" fill={color} />
+      <Path d="M5 13v6h14v-6h-2v4H7v-4H5z" fill={color} />
     </Svg>
   );
 }

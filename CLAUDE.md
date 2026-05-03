@@ -5,8 +5,45 @@
 React Native + Expo conversion of TurboTodo web app. Target: native Android. **Local-first storage (SQLite on device).** Supabase is optional future sync feature only.
 
 **Project dir:** `C:/Users/brook/ai-projects/turbo-todo-native/`
-**JS-only changes:** `eas update --channel production --message "..."` — no build needed, OTA to device
-**New native package:** `eas build --profile production --platform android` — required when adding native packages or changing app.json plugins
+**JS-only changes:** `eas update --branch preview --message "..."` — no build needed, OTA to device
+**New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
+
+## Current state (as of 2026-05-03 session 2)
+
+**Git HEAD:** pending commit — App Info section + versionCode fix
+**Base:** `6de6e5e` — "Mark help illustrations done; update features date and help modal description; clean up sound-effects/new"
+
+**Device state:** Clean. New APK (build 10, versionCode 10) installed from `6de6e5e`. OTA delivery confirmed working (red icon test). Data restored. No Tear Sheet, no auto-collapse.
+
+### What was done this session
+- Built new APK from `6de6e5e` (versionCode defaulted to 10 by EAS)
+- Confirmed OTA delivery works with red help icon test
+- Added **App Info section** to bottom of Help modal:
+  - Version + build number (fallback hardcoded to `'10'` until native value available)
+  - Launch type (Embedded APK vs OTA update)
+  - OTA ID (first 8 chars of UUID)
+  - OTA published timestamp
+  - OTA message (from manifest metadata, shown if available)
+  - Channel, Runtime version, Android OS API level
+  - Share button (IconShare) → Share.share() sheet to export all fields as text
+- Added `IconShare` to `components/Icons.tsx`
+- Added `versionCode: 10` to `app.json`
+- OTA message field not yet confirmed working (manifest metadata path may be wrong — monitor)
+
+### Lessons learned (locked in)
+- `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
+- **Rule going forward: one feature at a time, implement → test on device → commit**
+- OTA fingerprint is computed from `node_modules` content — leftover packages after rollback cause mismatch
+- `npm ci` before APK build ensures clean fingerprint
+
+### Features from `2ce078c` — still to re-add (one at a time)
+- **Send to list** — working, safe to re-add ✓
+- **List picker fix** (anchored dropdown position) — working, safe to re-add ✓
+- **Notes in Export for AI** — working, safe to re-add ✓
+- **Checked styling** (lighter checkbox, darker done text) — working, safe to re-add ✓
+- **Print export / Tear Sheet** — crashed Android; needs proper fix before re-adding
+- **Auto-collapse at 10+ completed** — crashed app; needs requirements clarification before re-adding
+- **Close-X accent recolor** — James does not want this
 
 ## Stack
 - Expo SDK 54, Expo Router, TypeScript
@@ -22,16 +59,17 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ## Production build
 - APK sideloaded on James's Android device
-- OTA updates via expo-updates, channel: production
+- OTA updates via expo-updates, channel: preview
 - runtimeVersion policy: appVersion (currently "1.0.0")
-- **Workflow: edit code → `eas update` → kill + relaunch app. No Metro server needed.**
+- Current APK: build 10 (versionCode 10), built from `6de6e5e`
+- **Workflow: edit code → `eas update --branch preview` → kill + relaunch app. No Metro server needed.**
 
 ## App icon
 - Adaptive icon: `assets/adaptive-icon-fg.png` (1024x1024, logo centered in safe zone, transparent bg) + `assets/adaptive-icon-bg.png` (1024x1024, gold gradient)
 - Fallback: `assets/icon.png` (1024x1024, composed flat icon)
 - Source files: `C:/Users/brook/ai-projects/turbo-todo/images/native-icons/`
 
-## Features (all shipped as of 2026-05-01)
+## Features (shipped and stable)
 - 3+ lists, todos fully loaded from original Supabase migration
 - Add/edit/delete tasks at all depths (3 levels max)
 - Complete/uncomplete with optimistic updates
@@ -48,7 +86,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Pin to top: depth-0 only, floats above incomplete list, blocks drag
 - Row UI: + button (add subtask) + kebab (options)
 - **Gear menu (header):** New list / Rename / Delete list with confirm; Rename + Delete hidden for Daily List
-- **Help modal:** Full scrollable help, all 17 sections documented, themed. Each section has a UI illustration built from real theme tokens + existing Icon components (HelpIllustrations.tsx). Section headers: 15pt / 800 weight / uppercase.
+- **Help modal:** Full scrollable help, all 17 sections documented, themed. Each section has a UI illustration built from real theme tokens + existing Icon components (HelpIllustrations.tsx). Section headers: 15pt / 800 weight / uppercase. App Info section at bottom with share button.
 - **Backup system:** zip archive containing JSON (all lists/todos/links) + image files organized by todo ID. Export via share sheet, restore via file picker. One zip = complete backup.
   - Export: toolbar options → Back up → share sheet → save zip to Google Drive
   - Restore: toolbar options → Restore → confirm → file picker → pick zip → full restore
@@ -59,13 +97,16 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - **Text size:** 5 steps (small/normal/large/xlarge/xxlarge), toolbar options +/− control, persisted to AsyncStorage
 - **Clear completed per group:** "Clear completed" in depth-0 kebab (conditional on having completed children); recursively removes all completed descendants
 - **Computed position labels:** FlatItem carries `positionLabel` string ("1", "2.3", "1.1.2") — internal, not displayed; foundation for future features
+- **Sound effects:** expo-av, 10 sounds mapped to actions, on/off toggle in toolbar options
 
 ## Toolbar options menu (bottom sheet)
 1. Back up | Restore (split row, top)
 2. Sort by: Status | Date | Alpha
 3. Daily List: On | Off (active option bold)
-4. Clear all completed (recursive — removes completed at all depths)
-5. Clear entire list (with confirm)
+4. Sounds: On | Off
+5. Text size: − / + controls
+6. Clear all completed (recursive — removes completed at all depths)
+7. Clear entire list (with confirm)
 
 ## Figma
 - **Design file:** https://www.figma.com/design/1j3iOtMrXTHjyuWXLekcEh/Turbo-Todo (file key: `1j3iOtMrXTHjyuWXLekcEh`, 360×800 template node: `91:25`)
@@ -91,8 +132,8 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - `components/TodoItem.tsx` — row renderer
 - `components/ToolbarOptionsMenu.tsx` — bottom sheet options
 - `components/ItemOptionsMenu.tsx` — per-item dropdown
-- `components/HelpModal.tsx` — full-screen help overlay
-- `components/Icons.tsx` — all SVG icons
+- `components/HelpModal.tsx` — full-screen help overlay; App Info section at bottom
+- `components/Icons.tsx` — all SVG icons (includes IconShare)
 
 ## Data model (SQLite)
 - `lists`: id, name, sort_order, inserted_at
@@ -110,20 +151,27 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Daily list midnight check runs in `_layout.tsx` before first render — `useState(false)` for `ready`, returns null until resolved
 - DB migrations are idempotent try/catch ALTER TABLE calls — safe to re-run
 - `removeCompletedRecursive` is a module-level pure helper in useTodoData.ts — used by both clearCompleted and clearCompletedInGroup
+- **OTA channel is `preview` not `production`** — always use `eas update --branch preview`
+- **One feature at a time rule:** implement → test on device → commit. No batch commits on untested features.
+- `Constants.nativeBuildVersion` currently falls back to `'10'` in HelpModal — will return real value once next APK is built with versionCode set
 
 ## Todo
 
+### Next up (one at a time, test each before committing)
+1. Re-add send-to-list
+2. Re-add list picker fix (anchored dropdown position)
+3. Re-add notes in Export for AI
+4. Re-add checked styling (lighter checkbox / darker done text)
+
 ### Backlog
+- [ ] Print export / Tear Sheet — needs proper Android PDF fix (use `width: 612` only, no height; wrap entire dynamic import in try/catch)
+- [ ] Auto-collapse completed subtasks after 10 — needs requirements clarification from James before building
 - [ ] Progress bar and/or percentage completion
-- [ ] Auto-collapse completed subtasks after 10
-- [ ] On checked items: lighten checkboxes, darken text slightly
 - [ ] Reverse logo teeth direction
-- [x] Have Claude generate graphics for help items
 - [ ] Teach Claude to read JSON backup files
 - [ ] Android widget
 - [ ] Archive completed items — stored, downloadable as JSON; long-term: trends chart
 - [ ] Android emulator autonomous debug workflow
-- [ ] Print export to thin paper list with checkboxes
 - [ ] Animate logo in splash screen
 - [ ] Export to CSV and XLSX
 - [ ] Magic meal machine integration
@@ -131,10 +179,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - [ ] Categories
 - [ ] Supabase sync as optional paid backup feature (long-term)
 - [ ] Clean up current themes and make new ones
-- [ ] Send to list — send any todo item to another list
-- [ ] Note and URL close X should use theme accent color
-- [ ] Bug: list name dropdown placement too far right
-- [ ] Bug: notes not exported in Export for AI function
+- [ ] Verify OTA message field appears in App Info (manifest metadata path may not be correct)
 
 ### App Name Shortlist
 TaskBlast, TaskBlaster, TaskSaw, TaskTree, Stacked, Momentum, StackFlow, TaskMaster, Getterdunn, Giterdone, Buzzsaw, Mobile Mind, Don't Forget!

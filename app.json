@@ -23,7 +23,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.brooksieappfest.turbotodonative"
+      "package": "com.brooksieappfest.turbotodonative",
+      "versionCode": 10
     },
     "web": {
       "favicon": "./assets/favicon.png"

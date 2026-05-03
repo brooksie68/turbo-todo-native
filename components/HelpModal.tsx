@@ -6,10 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Platform,
+  Share,
 } from 'react-native';
+import * as Updates from 'expo-updates';
+import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useThemeContext } from '../lib/theme';
-import { IconClose } from './Icons';
+import { IconClose, IconShare } from './Icons';
 import {
   IllustrationLists,
   IllustrationAddingTasks,
@@ -195,6 +199,48 @@ const illustrations: Partial<Record<string, React.ReactNode>> = {
   'Expand / Collapse All': <IllustrationExpandCollapse />,
 };
 
+function buildAppInfoText(): { rows: { label: string; value: string }[]; shareText: string } {
+  const appVersion = Constants.expoConfig?.version ?? '—';
+  const buildNumber = Constants.nativeBuildVersion ?? '10';
+  const isEmbedded = Updates.isEmbeddedLaunch;
+  const updateId = Updates.updateId ? Updates.updateId.slice(0, 8) : null;
+  const channel = Updates.channel ?? '—';
+  const runtimeVersion = Updates.runtimeVersion ?? '—';
+  const publishedAt = Updates.createdAt ? Updates.createdAt.toLocaleString() : null;
+  const androidVersion = Platform.OS === 'android' ? String(Platform.Version) : null;
+  const updateMessage = (Updates.manifest as any)?.metadata?.message ?? null;
+
+  const rows: { label: string; value: string }[] = [
+    { label: 'Version', value: buildNumber !== '—' ? `${appVersion} (build ${buildNumber})` : appVersion },
+    { label: 'Launch type', value: isEmbedded ? 'Embedded (APK)' : 'OTA update' },
+    { label: 'OTA ID', value: updateId ? `${updateId}…` : isEmbedded ? 'n/a' : '—' },
+    ...(publishedAt ? [{ label: 'OTA published', value: publishedAt }] : []),
+    ...(updateMessage ? [{ label: 'OTA message', value: updateMessage }] : []),
+    { label: 'Channel', value: channel },
+    { label: 'Runtime version', value: runtimeVersion },
+    ...(androidVersion ? [{ label: 'Android OS', value: `API ${androidVersion}` }] : []),
+  ];
+
+  const shareText = rows.map(r => `${r.label}: ${r.value}`).join('\n');
+  return { rows, shareText };
+}
+
+function AppInfoRows() {
+  const { theme: t } = useThemeContext();
+  const { rows } = buildAppInfoText();
+
+  return (
+    <View style={styles.infoTable}>
+      {rows.map(({ label, value }) => (
+        <View key={label} style={[styles.infoRow, { borderBottomColor: t.border }]}>
+          <Text style={[styles.infoLabel, { color: t.textSub ?? t.accent }]}>{label}</Text>
+          <Text style={[styles.infoValue, { color: t.text }]}>{value}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function HelpModal({ visible, onClose }: Props) {
   const insets = useSafeAreaInsets();
   const { theme } = useThemeContext();
@@ -229,6 +275,23 @@ export default function HelpModal({ visible, onClose }: Props) {
               ))}
             </View>
           ))}
+
+          {/* APP INFO */}
+          <View style={styles.section}>
+            <View style={styles.sectionTitleRow}>
+              <Text style={[styles.sectionTitle, { color: t.accent }]}>App Info</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  const { shareText } = buildAppInfoText();
+                  Share.share({ message: shareText, title: 'TurboTodo App Info' });
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <IconShare size={18} color={t.accent} />
+              </TouchableOpacity>
+            </View>
+            <AppInfoRows />
+          </View>
         </ScrollView>
       </View>
     </Modal>
@@ -278,5 +341,36 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  infoTable: {
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 2,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 12,
+  },
+  infoLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    flexShrink: 0,
+  },
+  infoValue: {
+    fontSize: 13,
+    textAlign: 'right',
+    flex: 1,
   },
 });
