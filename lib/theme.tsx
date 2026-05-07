@@ -184,7 +184,7 @@ export const themes: Record<string, Theme> = {
     danger: '#9e3a2a',
     priorityElevated: '#c96a00',
     priorityTop: '#b52a1a',
-    iconColor: '#025f96',
+    iconColor: '#ff0000',
     listSelectorBg: '#ffe8a9',
     listSelectorText: '#00395b',
     listSelectorBorder: '#025f96',
