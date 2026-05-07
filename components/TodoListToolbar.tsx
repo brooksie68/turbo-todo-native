@@ -21,7 +21,7 @@ export default function TodoListToolbar({
   const theme = useTheme();
 
   return (
-    <View style={[styles.toolbarOuter, { backgroundColor: 'transparent', borderTopColor: theme.headerBorder, paddingBottom: insets.bottom }]}>
+    <View style={[styles.toolbarOuter, { backgroundColor: 'transparent', borderBottomColor: theme.footerBorder, paddingBottom: insets.bottom }]}>
       <View style={styles.toolbarInner}>
         <TouchableOpacity style={styles.toolbarLeft} onPress={onOpenMenu}>
           <IconOptions size={24} color={theme.iconColor} />
@@ -43,7 +43,7 @@ export default function TodoListToolbar({
 }
 
 const styles = StyleSheet.create({
-  toolbarOuter: { borderTopWidth: 1 },
+  toolbarOuter: { borderBottomWidth: 1 },
   toolbarInner: { height: 46 },
   toolbarLeft: {
     position: 'absolute',

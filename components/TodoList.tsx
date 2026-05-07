@@ -400,12 +400,12 @@ export default function TodoList() {
             />
           )}
           <LinearGradient
-            colors={['rgba(0,0,0,0.10)', 'rgba(0,0,0,0)']}
+            colors={['rgba(0,0,0,0.08)', 'rgba(0,0,0,0)']}
             style={styles.shadowTop}
             pointerEvents="none"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.10)']}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.08)']}
             style={styles.shadowBottom}
             pointerEvents="none"
           />
@@ -442,21 +442,21 @@ export default function TodoList() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollWrapper: { flex: 1, marginHorizontal: 6, position: 'relative' },
+  scrollWrapper: { flex: 1, marginHorizontal: 8, position: 'relative' },
   scrollArea: { flex: 1, borderWidth: 1, borderRadius: 2 },
   shadowTop: {
     position: 'absolute',
     top: 1,
     left: 1,
     right: 1,
-    height: 8,
+    height: 5,
   },
   shadowBottom: {
     position: 'absolute',
     bottom: 1,
     left: 1,
     right: 1,
-    height: 8,
+    height: 5,
   },
   scrollContent: { paddingBottom: 8 },
   section: { margin: 8, borderRadius: 4, borderWidth: 1 },

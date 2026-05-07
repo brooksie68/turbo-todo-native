@@ -35,8 +35,10 @@ export type Theme = {
   listSelectorBorder: string;
   checkboxBg: string;
   checkboxDone: string;
+  checkmarkColor: string;
   separator: string;
   menuBg: string;
+  footerBorder: string;
   gradientColors: string[] | null;
   gradientLocations: number[] | null;
 };
@@ -65,8 +67,10 @@ export const themes: Record<string, Theme> = {
     listSelectorBorder: '#025f96',
     checkboxBg: '#fffdf5',
     checkboxDone: '#6a3f1f',
+    checkmarkColor: '#ffffff',
     separator: '#d9ccb4',
     menuBg: '#f0e8d5',
+    footerBorder: '#43350c',
     gradientColors: ['#ffcb58', '#eeddba', '#ffbe30'],
     gradientLocations: [0, 0.5, 1],
   },
@@ -94,8 +98,10 @@ export const themes: Record<string, Theme> = {
     listSelectorBorder: '#5a5652',
     checkboxBg: '#2e2b27',
     checkboxDone: '#7aa0b8',
+    checkmarkColor: '#ffffff',
     separator: '#363230',
     menuBg: '#302d29',
+    footerBorder: '#1a1815',
     gradientColors: ['#2e2b27', '#272421', '#2a2724'],
     gradientLocations: [0, 0.5, 1],
   },
@@ -123,8 +129,10 @@ export const themes: Record<string, Theme> = {
     listSelectorBorder: '#3c3935',
     checkboxBg: '#f4f3f1',
     checkboxDone: '#48453f',
+    checkmarkColor: '#ffffff',
     separator: '#d2cec8',
     menuBg: '#f2f0ed',
+    footerBorder: '#3c3935',
     gradientColors: ['#d6d2cc', '#e4e0da', '#ccc8c2'],
     gradientLocations: [0, 0.5, 1],
   },
@@ -151,10 +159,43 @@ export const themes: Record<string, Theme> = {
     listSelectorBorder: '#00998a',
     checkboxBg: '#f0fbf7',
     checkboxDone: '#007766',
+    checkmarkColor: '#ffffff',
     separator: '#b0ddd4',
     menuBg: '#f5fdfb',
+    footerBorder: '#006655',
     gradientColors: ['#fdf5e0', '#c8f0e8', '#7dd8cc'],
     gradientLocations: [0, 0.6, 1],
+  },
+  'default-2': {
+    id: 'default-2',
+    name: 'Default 2',
+    enabled: true,
+    statusBarStyle: 'dark',
+    bg: '#ffbe30',
+    headerBg: '#F6CD75',
+    headerBorder: '#d4b24d',
+    surface: '#eae2ca',
+    border: '#c7ba9b',
+    text: '#3d2e21',
+    textSub: '#725f4b',
+    textDone: '#b0a08a',
+    textDepth: ['#1a1008', '#3d2e21', '#5a4535'],
+    accent: '#6a3f1f',
+    danger: '#9e3a2a',
+    priorityElevated: '#c96a00',
+    priorityTop: '#b52a1a',
+    iconColor: '#025f96',
+    listSelectorBg: '#ffe8a9',
+    listSelectorText: '#00395b',
+    listSelectorBorder: '#025f96',
+    checkboxBg: '#fffdf5',
+    checkboxDone: '#6a3f1f',
+    checkmarkColor: '#eae2ca',
+    separator: '#d9ccb4',
+    menuBg: '#f0e8d5',
+    footerBorder: '#43350c',
+    gradientColors: ['#ffcb58', '#eeddba', '#ffbe30'],
+    gradientLocations: [0, 0.5, 1],
   },
 };
 

@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconOptions, IconClose, IconPin, IconBell } from './Icons';
+import { IconOptions, IconClose, IconPin, IconBell, IconCheckmark } from './Icons';
 import { deleteImage, type TaskImage } from '../lib/imageStore';
 import { deleteLink, type TaskLink } from '../lib/linkStore';
 import type { ButtonLayout } from './ItemOptionsMenu';
@@ -83,7 +83,7 @@ const TodoItem = memo(function TodoItem({
 
   const labelColor = getLabelColor();
   const fontSize = depth === 0 ? fontSizes.d0 : depth === 1 ? fontSizes.d1 : fontSizes.d2;
-  const indentLeft = 12 + depth * INDENT_PX;
+  const indentLeft = 8 + depth * INDENT_PX;
 
   return (
     <View style={isBeingDragged ? {
@@ -115,7 +115,7 @@ const TodoItem = memo(function TodoItem({
           onPress={() => onToggleComplete(todo.id, todo.is_complete)}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          {todo.is_complete && <Text style={styles.checkmark}>✓</Text>}
+          {todo.is_complete && <IconCheckmark size={12} color={theme.checkmarkColor} />}
         </TouchableOpacity>
 
         {/* Label + child count */}
@@ -171,7 +171,7 @@ const TodoItem = memo(function TodoItem({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.rowActionBtn}
             >
-              <IconOptions size={20} color={theme.iconColor} />
+              <IconOptions size={18} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         </View>
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 7,
+    paddingVertical: 8,
     paddingRight: 12,
     gap: 8,
   },
@@ -266,16 +266,10 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 1,
-    borderRadius: 2,
+    borderRadius: 1,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '700',
-    lineHeight: 13,
   },
   labelRow: {
     flex: 1,
@@ -292,7 +286,7 @@ const styles = StyleSheet.create({
   rowActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
     flexShrink: 0,
   },
   rowActionBtn: {
@@ -300,9 +294,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addPlus: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 20,
+    lineHeight: 18,
     marginLeft: 2,
   },
   childCount: {

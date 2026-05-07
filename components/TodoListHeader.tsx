@@ -96,7 +96,7 @@ export default function TodoListHeader({
 
   return (
     <>
-      <View style={[styles.header, { backgroundColor: 'transparent' }]}>
+      <View style={[styles.header, { backgroundColor: 'transparent', borderTopWidth: 1, borderTopColor: theme.headerBorder }]}>
         {/* Logo / theme picker */}
         <View ref={logoBtnRef} collapsable={false} style={styles.logoBtn}>
           <TouchableOpacity
@@ -108,7 +108,7 @@ export default function TodoListHeader({
               });
             }}
           >
-            <IconLogo size={42} color={theme.iconColor} />
+            <IconLogo size={40} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
 
@@ -126,13 +126,13 @@ export default function TodoListHeader({
         {/* Gear / list options */}
         <View ref={gearBtnRef} collapsable={false} style={styles.gearBtn}>
           <TouchableOpacity style={styles.gearBtnInner} onPress={openGearMenu}>
-            <IconGear size={28} color={theme.iconColor} />
+            <IconGear size={24} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
 
         {/* Help */}
         <TouchableOpacity style={styles.helpBtn} onPress={onHelp}>
-          <IconHelp size={28} color={theme.iconColor} />
+          <IconHelp size={24} color={theme.iconColor} />
         </TouchableOpacity>
       </View>
 
@@ -288,13 +288,13 @@ const styles = StyleSheet.create({
   logoBtn: {
     position: 'absolute',
     left: 8,
-    top: 10,
-    width: 42,
-    height: 42,
+    top: 12,
+    width: 40,
+    height: 40,
   },
   logoBtnInner: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -302,36 +302,36 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 60,
     top: 15,
-    width: 202,
+    width: 189,
     height: 34,
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderRadius: 3,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     gap: 6,
   },
   listSelectorText: { flex: 1, fontSize: 15 },
   listSelectorArrow: { fontSize: 10 },
   gearBtn: {
     position: 'absolute',
-    left: 271,
-    top: 18,
-    width: 28,
-    height: 28,
+    left: 262,
+    top: 20,
+    width: 24,
+    height: 24,
   },
   gearBtnInner: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   helpBtn: {
     position: 'absolute',
     right: 19,
-    top: 18,
-    width: 28,
-    height: 28,
+    top: 20,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
