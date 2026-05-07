@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import type { Todo } from '../lib/types';
-import { IconOptions, IconClose, IconPin, IconBell, IconCheckmark } from './Icons';
+import { IconOptions, IconClose, IconPin, IconBell, IconCheckmark, IconCreateNew } from './Icons';
 import { deleteImage, type TaskImage } from '../lib/imageStore';
 import { deleteLink, type TaskLink } from '../lib/linkStore';
 import type { ButtonLayout } from './ItemOptionsMenu';
@@ -157,7 +157,7 @@ const TodoItem = memo(function TodoItem({
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 style={styles.rowActionBtn}
               >
-                <Text style={[styles.addPlus, { color: theme.iconColor }]}>+</Text>
+                <IconCreateNew size={18} color={theme.iconColor} />
               </TouchableOpacity>
             </View>
           )}
@@ -292,12 +292,6 @@ const styles = StyleSheet.create({
   rowActionBtn: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  addPlus: {
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 18,
-    marginLeft: 2,
   },
   childCount: {
     fontSize: 12,
