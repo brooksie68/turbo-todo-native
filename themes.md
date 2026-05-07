@@ -137,8 +137,7 @@ Every token is required. No nullables. See the `Theme` type in `lib/theme.tsx` f
 
 | ID | Name | Status | Notes |
 |---|---|---|---|
-| `default` | Default | Production | Shipped. `headerBorder` is `#e0c060` — keep until Default 2 replaces it |
-| `default-2` | Default 2 | Testing | Pixel-corrected. If confirmed on device, merge and replace `default` |
+| `default` | Default | Production | Pixel-corrected. `headerBorder: #d4b24d`, `checkmarkColor: #eae2ca` |
 | `dark-slate` | Dark Slate | Enabled | Values are canon for this theme — do not compare against Default |
 | `slate` | Slate | Enabled | Same |
 | `bimini-breeze` | Bimini Breeze | Enabled | Same |
