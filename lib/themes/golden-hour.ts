@@ -1,0 +1,35 @@
+import type { Theme } from '../theme';
+
+const goldenHour: Theme = {
+  id: 'golden-hour',
+  name: 'Golden Hour',
+  enabled: true,
+  statusBarStyle: 'dark',
+  bg: '#c8884a',
+  headerBg: '#f5e8d4',
+  headerBorder: '#c9a070',
+  surface: '#fdf0dc',
+  border: '#d4b896',
+  text: '#4a403a',
+  textSub: '#8a7060',
+  textDone: '#c0a88c',
+  textDepth: ['#2e2420', '#4a403a', '#6a5848'],
+  accent: '#7a4a20',
+  danger: '#c1666b',
+  priorityElevated: '#c8780a',
+  priorityTop: '#c1666b',
+  iconColor: '#7a4a20',
+  listSelectorBg: '#fde8c0',
+  listSelectorText: '#4a403a',
+  listSelectorBorder: '#7a4a20',
+  checkboxBg: '#fdf8f0',
+  checkboxDone: '#7a4a20',
+  checkmarkColor: '#fdf0dc',
+  separator: '#e4c8a0',
+  menuBg: '#f8ead8',
+  footerBorder: '#8a5a30',
+  gradientColors: ['#f5e0c0', '#fdf0dc', '#f0d8b8'],
+  gradientLocations: [0, 0.5, 1],
+};
+
+export default goldenHour;
