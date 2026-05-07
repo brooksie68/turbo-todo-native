@@ -389,7 +389,7 @@ export default function TodoList() {
                 return (
                   <View style={[
                     styles.dropIndicator,
-                    { backgroundColor: valid ? themeCtx.accent : '#cc3300', height: valid ? 2 : 3 },
+                    { backgroundColor: valid ? themeCtx.accent : themeCtx.danger, height: valid ? 2 : 3 },
                   ]} />
                 );
               }}

@@ -1,0 +1,35 @@
+import type { Theme } from '../theme';
+
+const default2Theme: Theme = {
+  id: 'default-2',
+  name: 'Default 2',
+  enabled: true,
+  statusBarStyle: 'dark',
+  bg: '#ffbe30',
+  headerBg: '#F6CD75',
+  headerBorder: '#d4b24d',
+  surface: '#eae2ca',
+  border: '#c7ba9b',
+  text: '#3d2e21',
+  textSub: '#725f4b',
+  textDone: '#b0a08a',
+  textDepth: ['#1a1008', '#3d2e21', '#5a4535'],
+  accent: '#6a3f1f',
+  danger: '#9e3a2a',
+  priorityElevated: '#c96a00',
+  priorityTop: '#b52a1a',
+  iconColor: '#025f96',
+  listSelectorBg: '#ffe8a9',
+  listSelectorText: '#00395b',
+  listSelectorBorder: '#025f96',
+  checkboxBg: '#fffdf5',
+  checkboxDone: '#6a3f1f',
+  checkmarkColor: '#eae2ca',
+  separator: '#d9ccb4',
+  menuBg: '#f0e8d5',
+  footerBorder: '#43350c',
+  gradientColors: ['#ffcb58', '#eeddba', '#ffbe30'],
+  gradientLocations: [0, 0.5, 1],
+};
+
+export default default2Theme;

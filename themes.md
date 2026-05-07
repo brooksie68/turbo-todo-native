@@ -1,26 +1,161 @@
 # TurboTodo Native — Theme System & Figma Workflow
 
-> Last updated: 2026-04-29
+> Last updated: 2026-05-07
 
 ---
 
 ## Overview
 
-Themes live in `lib/theme.tsx` as a `Record<string, Theme>` object. Each theme has 25 tokens covering backgrounds, text, borders, icons, menus, priority indicators, and gradient. See the bottom of this file for the full token reference.
+Each theme is a TypeScript object that satisfies the `Theme` type defined in `lib/theme.tsx`. Themes live in individual files under `lib/themes/` — one file per theme. The provider, hooks, and type live in `lib/theme.tsx` and import from `lib/themes/index.ts`.
 
-The **authoring workflow** is Figma-first: James designs visually in Figma, Claude reads the values and generates the Theme object. No manual hex entry.
+**Adding a theme:** create `lib/themes/your-theme.ts`, add one import + one entry to `lib/themes/index.ts`. Done.  
+**Hiding a theme:** set `enabled: false` in the theme file. It stays loadable but disappears from the picker.  
+**Removing a theme:** delete the file and remove it from `lib/themes/index.ts`.
+
+The **authoring workflow** is Figma-first: James designs in Figma, Claude reads the values and generates the Theme object. No manual hex entry.
+
+---
+
+## File Structure
+
+```
+lib/
+  theme.tsx               ← Theme type, ThemeProvider, useTheme, useThemeContext
+  themes/
+    index.ts              ← imports all theme files, exports themes record
+    default.ts            ← Default (gold/parchment) — current production theme
+    default-2.ts          ← Default 2 (pixel-corrected) — candidate to replace default
+    dark-slate.ts         ← Dark Slate (near-black dark mode)
+    slate.ts              ← Slate (cool gray, light)
+    bimini-breeze.ts      ← Bimini Breeze (Caribbean teal/sand)
+```
+
+Adding a new theme file and registering it in `index.ts` is the only code change required.
+
+---
+
+## Token Reference (27 tokens)
+
+Every token is required. No nullables. See the `Theme` type in `lib/theme.tsx` for the TypeScript definition.
+
+### Identity
+| Token | Type | What it controls |
+|---|---|---|
+| `id` | `string` | Unique key — must match the key in `themes/index.ts` |
+| `name` | `string` | Display name in the theme picker |
+| `enabled` | `boolean` | `true` = visible in picker. `false` = hidden but still loadable |
+| `statusBarStyle` | `'dark' \| 'light'` | Android status bar icon color |
+
+### Backgrounds
+| Token | Type | What it controls |
+|---|---|---|
+| `bg` | `string` | App background fallback when gradient is absent; also `android_status_bar` fill in Figma |
+| `headerBg` | `string` | Header bar background — **placeholder, not yet consumed in code** — reserved for future themes that use a solid header |
+| `surface` | `string` | Scroll area, modal panels, card backgrounds |
+| `menuBg` | `string` | Bottom sheet, kebab dropdowns, AddChild menu backgrounds |
+| `gradientColors` | `string[]` | ThemeBg gradient stops — min 2, typically 3 |
+| `gradientLocations` | `number[]` | Stop positions 0–1, must match `gradientColors` length |
+
+### Borders
+| Token | Type | What it controls |
+|---|---|---|
+| `border` | `string` | Scroll area full border, checkbox border, modal outlines, inputs |
+| `headerBorder` | `string` | 1px line at top of header |
+| `footerBorder` | `string` | 1px line at bottom of toolbar |
+| `separator` | `string` | Thin divider lines between rows |
+| `listSelectorBorder` | `string` | List selector bottom underline |
+
+### Text
+| Token | Type | What it controls |
+|---|---|---|
+| `text` | `string` | Primary body text — modal titles, menu items, form labels |
+| `textSub` | `string` | Notes, child-count badges, secondary info |
+| `textDone` | `string` | Struck-through completed item text |
+| `textDepth` | `[string, string, string]` | Task label color by depth: `[d0, d1, d2]` |
+
+### Interactive / Semantic
+| Token | Type | What it controls |
+|---|---|---|
+| `accent` | `string` | Active states, selected list item, modal title color, Save button |
+| `danger` | `string` | Destructive action text (Delete, Clear), invalid drag-drop indicator |
+| `iconColor` | `string` | All SVG icons — header (logo, gear, help), toolbar, and row (add, kebab) |
+
+### Priority
+| Token | Type | What it controls |
+|---|---|---|
+| `priorityElevated` | `string` | Elevated status — bolt icon color + task label color |
+| `priorityTop` | `string` | Top priority — exclamation icon color + task label color |
+
+### List Selector
+| Token | Type | What it controls |
+|---|---|---|
+| `listSelectorBg` | `string` | List selector pill/box background |
+| `listSelectorText` | `string` | List name text + dropdown arrow |
+
+### Checkbox
+| Token | Type | What it controls |
+|---|---|---|
+| `checkboxBg` | `string` | Unchecked checkbox fill |
+| `checkboxDone` | `string` | Checked checkbox fill + border color |
+| `checkmarkColor` | `string` | SVG checkmark color inside done checkbox |
+
+---
+
+## Where Each Token Is Consumed
+
+| Token | File | Notes |
+|---|---|---|
+| `bg` | `TodoList.tsx` | ThemeBg fallback when no gradient |
+| `headerBg` | — | Reserved, not yet used |
+| `surface` | Multiple | Modals, dropdowns, scroll area |
+| `menuBg` | `ItemOptionsMenu`, `AddChildMenu`, `ToolbarOptionsMenu` | Bottom sheet bg |
+| `gradientColors` | `TodoList.tsx` | ThemeBg LinearGradient |
+| `gradientLocations` | `TodoList.tsx` | ThemeBg stop positions |
+| `border` | Multiple | Inputs, checkboxes, scroll area |
+| `headerBorder` | `TodoListHeader.tsx` | 1px top border on header View |
+| `footerBorder` | `TodoListToolbar.tsx` | 1px bottom border on toolbar View |
+| `separator` | `TodoItem.tsx` | Row separator line |
+| `listSelectorBorder` | `TodoListHeader.tsx` | Bottom border on list selector |
+| `text` | Multiple | Modal and menu body text |
+| `textSub` | Multiple | Notes, badges |
+| `textDone` | `TodoItem.tsx` | Done text color |
+| `textDepth` | `TodoItem.tsx` | `getLabelColor()` — indexed by depth |
+| `accent` | Multiple | Active states, Save buttons |
+| `danger` | Multiple | Destructive text, invalid drag indicator |
+| `iconColor` | Multiple | All icon components |
+| `priorityElevated` | `TodoItem.tsx` | Bolt icon / elevated label |
+| `priorityTop` | `TodoItem.tsx` | Exclamation icon / top-priority label |
+| `listSelectorBg` | `TodoListHeader.tsx` | Selector background |
+| `listSelectorText` | `TodoListHeader.tsx` | Selector text + arrow |
+| `checkboxBg` | `TodoItem.tsx` | Unchecked fill |
+| `checkboxDone` | `TodoItem.tsx` | Checked fill + border |
+| `checkmarkColor` | `TodoItem.tsx` | SVG checkmark prop |
+
+---
+
+## Theme Status
+
+| ID | Name | Status | Notes |
+|---|---|---|---|
+| `default` | Default | Production | Shipped. `headerBorder` is `#e0c060` — keep until Default 2 replaces it |
+| `default-2` | Default 2 | Testing | Pixel-corrected. If confirmed on device, merge and replace `default` |
+| `dark-slate` | Dark Slate | Enabled | Values are canon for this theme — do not compare against Default |
+| `slate` | Slate | Enabled | Same |
+| `bimini-breeze` | Bimini Breeze | Enabled | Same |
+
+**Rule:** each theme's values are correct for that theme. Differences between themes are intentional. Only compare a theme against its own Figma page.
 
 ---
 
 ## Figma Theme File
 
-**File:** `todo-app-themes`
-**URL:** https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
+**File:** `todo-app-themes`  
+**URL:** https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes  
 **File key:** `wUMtjlawjc3wFuROGfYuO6`
 
 **Pages:**
-- `Page 1` (id: `0:1`) — James's original reference example, do not modify
-- `Default Theme` (id: `2:5`) — live template, currently the Default theme
+- `Page 1` (id: `0:1`) — original reference, do not modify
+- `Default Theme` (id: `2:5`) — T2 frame node: `5:2` — live Default template
 
 Each new theme gets its own page. Page name = theme display name = code `name` field.
 
@@ -28,276 +163,143 @@ Each new theme gets its own page. Page name = theme display name = code `name` f
 
 ## 5-Frame Template Structure (per page)
 
-Every theme page has exactly 5 frames in a row, left to right:
-
 | # | Frame name | Purpose |
 |---|---|---|
-| 1 | `page-layout` | Engineering spec blueprint — zone labels, pixel dimensions, token names per zone. Static, never changes between themes. |
-| 2 | `[Theme Name]` | **T2 — the theme frame.** Live visual mockup of the app with all theme colors applied. James edits this. Layer names match code token names. |
-| 3 | `theme-values` | Info card populated by Claude. Semantic descriptions + token names + color swatches + hex values for all tokens. |
-| 4 | `menus-modals-and-values` | Info card for menus, dropdowns, modals, priority indicators. |
-| 5 | `icons-and-values` | Icon grid — real icon shapes + semantic label + token + hex value per icon. |
+| 1 | `page-layout` | Engineering spec — zone labels, pixel dimensions, token names. Static. |
+| 2 | `[Theme Name]` | **T2 — the live theme frame.** James edits this. Layer names match token names. |
+| 3 | `theme-values` | Info card — token names + color swatches + hex values. Claude writes this. |
+| 4 | `menus-modals-and-values` | Info card — menus, modals, priority tokens. Claude writes this. |
+| 5 | `icons-and-values` | Icon grid — real icon shapes + token + hex. Claude writes this. |
 
-**Frame positions (Default Theme page — locked in):**
+Frame positions (Default Theme page):
 
-| Frame | x | Width | Gap to next |
-|---|---|---|---|
-| page-layout | -640 | 360 | 648px |
-| [Default] | 368 | 360 | 200px |
-| theme-values | 928 | 408 | 40px |
-| menus-modals-and-values | 1448 | 400 | 40px (approx) |
-| icons-and-values | 1968 | 360 | — |
+| Frame | x | Width |
+|---|---|---|
+| page-layout | -640 | 360 |
+| [Default] | 368 | 360 |
+| theme-values | 928 | 408 |
+| menus-modals-and-values | 1448 | 400 |
+| icons-and-values | 1968 | 360 |
 
-Cards 3, 4, 5 auto-resize to content height.
-
----
-
-## T2 — The Theme Frame (Layer Structure)
-
-T2 is a 360×800 frame. Layers are named to match code token names exactly so Claude can read them back unambiguously.
-
-```
-[Default]  (360×800, outer frame, fill = none — bg color on android_status_bar)
-  android_status_bar       (rect, 360×27, fill = bg)
-  todo-container           (frame, 360×725, fill = none)
-    bg-gradient            (rect at bottom of stack, gradient fill = gradientColors/gradientLocations)
-    app-header             (frame, 360×64, fill = none)
-      headerBorder         (rect, 360×1, at TOP of header — separates from status bar)
-      turbo-todo-logo-btn  (real SVG group — iconColor)
-      listSelectorBg       (rect, fill = listSelectorBg, bottom border only = listSelectorBorder)
-      List Name            (text layer — sample text, ignored in read-back)
-      list-gear-btn        (real SVG group — iconColor)
-      help-icon            (real SVG vector — iconColor)
-    todo-scroll-area       (frame, 344×618, fill = surface, stroke = listSelectorBorder)
-      [sample rows — checkboxBg, checkboxDone, separator, textDepth[*], textDone]
-      top-inset-shadow     (gradient rect — visual only, not a token)
-    todo-bottom-toolbar    (frame, 360×42, fill = none)
-      toolbar-kebab-icon   (real SVG group — iconColor) [→ IconOptions, 24px]
-      toolbar-add-btn      (real SVG group — iconColor) [→ IconCreateNew, 24px]
-      toolbar-collapse-btn (real SVG group — iconColor) [→ IconExpandUp, 24px, shown when expanded]
-      toolbar-expand-btn   (real SVG group — iconColor, hidden) [→ IconExpandDown, 24px, shown when collapsed]
-  android_navigation_bar   (rect, 360×48, fill = white — OS controlled, not a token)
-```
-
-**Row icons (added 2026-04-29):** Each row in todo-scroll-area now shows `IconCreateNew` (18px) and `IconOptions` (18px) on the right. Completed rows show only `IconOptions`. The first row ("Plan beach trip") also shows `IconPin` (14px) as a pinned example. Checkboxes use SVG fill-path checkmarks instead of text ✓.
-
-**Design rules for T2:**
-- Frames have no fill — backgrounds live on named rect layers inside them
-- `bg` token = `android_status_bar` fill color
-- `headerBg` is NOT used as a frame fill — the gradient shows through the transparent header frame
-- `listSelectorBorder` controls both the list selector bottom border AND the scroll area full border
-- Priority is shown via text color on sample rows (`priorityTop`, `priorityElevated`) — not as side bars
+Cards 3, 4, 5 auto-resize to content height. Never move or resize them manually.
 
 ---
 
-## The Authoring Workflow
+## T2 Layer Structure
+
+T2 is a 360×800 frame. Layer names must stay stable — they're how Claude maps Figma values to tokens.
+
+```
+[Default]  (360×800, fill = none)
+  android_status_bar       (360×27, fill = bg)
+  todo-container           (360×725, fill = none)
+    bg-gradient            (full-size rect, gradient fill = gradientColors / gradientLocations)
+    headerBorder           (360×1, at top — fill = headerBorder)
+    turbo-todo-logo-btn    (SVG, iconColor)
+    listSelectorBg         (rect, fill = listSelectorBg, bottom border = listSelectorBorder)
+    List Name              (text — sample content, ignored in read-back)
+    list-gear-btn          (SVG, iconColor)
+    help-icon              (SVG, iconColor)
+    todo-scroll-area       (344×618, fill = surface, stroke = border)
+      [sample rows — checkboxBg, checkboxDone, checkmarkColor, separator, textDepth[*], textDone]
+      row icons            (IconCreateNew + IconOptions at 18px — iconColor)
+      top-inset-shadow     (gradient rect, visual only — not a token)
+    footerBorder           (360×1, fill = footerBorder)
+    todo-bottom-toolbar    (360×42, fill = none)
+      toolbar-kebab-icon   (SVG → IconOptions, 24px, iconColor)
+      toolbar-add-btn      (SVG → IconCreateNew, 24px, iconColor)
+      toolbar-collapse-btn (SVG → IconExpandUp, 24px, iconColor)
+      toolbar-expand-btn   (SVG → IconExpandDown, 24px, iconColor — hidden)
+  android_navigation_bar   (360×48, fill = white — OS controlled, not a token)
+```
+
+**Design rules:**
+- Frames have no fill. Backgrounds live on named rect layers inside them.
+- `headerBg` is reserved — the header frame is transparent and shows the gradient through it.
+- `listSelectorBorder` = list selector bottom border only (scroll area uses `border`).
+- Priority is shown via text color on sample rows, not side bars.
+- Do not resize or move objects in T2 unless explicitly told to.
+
+---
+
+## Authoring Workflow
 
 ### Creating a new theme
 
 1. In Figma, duplicate the `Default Theme` page
 2. Rename the page to the new theme name (e.g. `Cape Cod Shore`)
-3. In T2, rename the frame from `[Default]` to `[Cape Cod Shore]`
-4. Edit T2 visually — change fills, stroke colors, gradient stops to design the theme
-5. When ready, tell Claude: "read T2 and update the cards"
+3. In T2, rename the outer frame from `[Default]` to `[Cape Cod Shore]`
+4. Edit T2 visually — change fills, strokes, gradient stops
+5. When ready, tell Claude: "read T2 on the Cape Cod Shore page and generate the theme"
 
 ### Claude's read-back process
 
-1. **Snapshot** — Claude calls `use_figma` to read all named layers in T2: fills, strokes, positions
-2. **Diff** (optional) — if a prior snapshot exists in context, Claude surfaces only what changed
-3. **Update cards** — Claude rewrites cards 3, 4, 5 with the current values from T2
-4. **Generate code** — Claude outputs a new Theme object for `lib/theme.tsx`
+1. Call `get_design_context` on the T2 node (REST API — works across pages)
+2. Extract hex values from named layers
+3. Generate a `Theme` object matching the `Theme` type exactly
+4. Create `lib/themes/your-theme.ts` with the object
+5. Add the import + entry to `lib/themes/index.ts`
+6. Update cards 3, 4, 5 on the Figma page via `use_figma`
 
-**Layer names must stay stable.** If you rename a layer between snapshot and diff, Claude sees it as deleted + added (breaks the diff). Only `List Name` text content is expected to change.
+### Diff workflow
 
-### Claude's diff capability
-
-- Take snapshot before you start: "take a snapshot"
-- Make your changes in Figma
-- Say "diff and update cards" when done
-- Claude reports what changed (e.g. `listSelectorBg: #ffe8a9 → #d4eaf5`) and rewrites the cards
-- Up to ~20 changes per diff cycle — no limit enforced
+- "Take a snapshot" → Claude reads and stores current T2 values
+- James edits in Figma
+- "Diff and update cards" → Claude reports what changed and rewrites cards
 
 ---
 
-## Icon Status
+## Icons
 
-All icons in T2 and card 5 (`icons-and-values`) are real SVGs as of 2026-04-29. Source files organized by theme in `_ref/app-icons/<theme-id>/` — e.g. `_ref/app-icons/default/`. Each new theme gets its own subfolder with its icon variants.
+All icons are SVG components in `components/Icons.tsx`. Every call site passes `color={theme.iconColor}` — the defaults in the function signatures are irrelevant in practice.
 
-**Consolidations:** `IconCreateNew` covers both toolbar-add and row-add-subtask slots. `IconOptions` covers both toolbar-kebab and row-kebab slots.
+| Icon | T2 layer | Code component | Size in rows | Size in toolbar/header |
+|---|---|---|---|---|
+| App logo / theme picker | `turbo-todo-logo-btn` | `IconLogo` | — | 40px |
+| List gear | `list-gear-btn` | `IconGear` | — | 24px |
+| Help | `help-icon` | `IconHelp` | — | 24px |
+| Row add subtask | `IconCreateNew` | `IconCreateNew` | 18px | — |
+| Row kebab | `IconOptions` | `IconOptions` | 18px | — |
+| Toolbar options | `toolbar-kebab-icon` | `IconOptions` | — | 24px |
+| Toolbar add | `toolbar-add-btn` | `IconCreateNew` | — | 24px |
+| Toolbar collapse | `toolbar-collapse-btn` | `IconExpandUp` | — | 24px |
+| Toolbar expand | `toolbar-expand-btn` | `IconExpandDown` | — | 24px |
+| Priority elevated | — | `IconPriorityMedium` | 16px | — |
+| Priority top | — | `IconPriorityHigh` | 16px | — |
+| Checkbox done | — | `IconCheckmark` | 12px | — |
+| Pin | — | `IconPin` | 18px | — |
+| Bell (alarm) | — | `IconBell` | 14px | — |
 
-| Icon | Layer name (T2 / card 5) | Code component | Status |
-|---|---|---|---|
-| App logo / theme picker | `turbo-todo-logo-btn` | `IconLogo` | ✅ Real SVG |
-| List gear | `list-gear-btn` | `IconGear` | ✅ Real SVG |
-| Help | `help-icon` | `IconHelp` | ✅ Real SVG |
-| Toolbar + row kebab / options | `toolbar-kebab-icon` / `IconOptions` | `IconOptions` | ✅ Real SVG |
-| Toolbar add + row add subtask | `toolbar-add-btn` / `IconCreateNew` | `IconCreateNew` | ✅ Real SVG |
-| Toolbar collapse (▲) | `toolbar-collapse-btn` | `IconExpandUp` | ✅ Real SVG |
-| Toolbar expand (▽) | `toolbar-expand-btn` | `IconExpandDown` | ✅ Real SVG |
-| Priority elevated (bolt) | `IconPriorityMedium` | `IconPriorityMedium` | ✅ Real SVG |
-| Priority top (!) | `IconPriorityHigh` | `IconPriorityHigh` | ✅ Real SVG |
+### Adding a new icon
 
-### icons-and-values frame structure (node `14:2` in file `wUMtjlawjc3wFuROGfYuO6`)
-
-Each icon card is a GROUP with this exact layer order (bottom → top / backmost → frontmost):
-
-```
-[0] bg          RECTANGLE  162×140, fill #1c1f27, no stroke, cornerRadius 5
-[1] outline     RECTANGLE  162×140, no fill, 1px stroke, cornerRadius 5
-[2] description TEXT       semantic label ("Add child item", etc.)
-[3] name        TEXT       app component name ("IconCreateNew", "IconOptions", etc.)
-[4] swatch      RECTANGLE  color swatch
-[5] hex         TEXT       hex value
-[6] icon FRAME  FRAME      24×24 (42×42 for logo), no fill, no stroke — FRONTMOST
-      └─ SVG artwork centered at (0,0) inside the frame
-```
-
-All cards now have a real icon FRAME at [6]. Priority cards (`IconPriorityMedium`, `IconPriorityHigh`) use fill-only SVGs — no stroke. The `color` prop controls fill at runtime; the SVG path uses the app's default color in Figma.
-
-### SVG import workflow (when James pastes a new SVG)
-
-1. James exports SVG from Affinity Designer → pastes into the Figma file
-2. Claude resizes the pasted node to 24×24 (or 42×42 for logo) — do not change the artwork proportions
-3. Create a 24×24 FRAME (no fill, no stroke) named after the icon, move it into the card GROUP at frontmost (appendChild), move the SVG artwork inside the icon FRAME at (0,0)
-4. Remove the old placeholder node (TEXT emoji or ellipse+text)
-5. Verify icon FRAME is at children[last] (frontmost) in the card GROUP
-6. Do the same replacement in T2 (the live theme frame on the Default Theme page)
+1. James exports SVG from Affinity → pastes into Figma
+2. Claude resizes to 24×24 (or 42×42 for logo), wraps in a named FRAME, slots into the card GROUP at frontmost
+3. Claude also places it in T2 at the correct layer position
+4. Claude adds the `IconXxx` function to `components/Icons.tsx` using the SVG path data
 
 ---
 
-## Cards 3, 4, 5 — Info Card Design
+## Info Card Design (Cards 3, 4, 5)
 
-Dark background (`#13151a`), three distinct accent colors:
+Dark background (`#13151a`), three accent colors:
 
 | Card | Accent | Content |
 |---|---|---|
-| 3 — theme-values | Amber `#f5a623` | All 25 tokens: "what it controls" + token name + swatch + hex |
-| 4 — menus-modals-and-values | Coral `#ff6b6b` | Menu, modal, priority tokens with semantic descriptions |
-| 5 — icons-and-values | Cyan `#38d9e8` | 2-col icon grid: real icon shape + semantic label + token + hex |
+| 3 — theme-values | Amber `#f5a623` | All tokens: semantic label + token name + swatch + hex |
+| 4 — menus-modals-and-values | Coral `#ff6b6b` | Menu, modal, priority tokens |
+| 5 — icons-and-values | Cyan `#38d9e8` | 2-col icon grid: shape + label + token + hex |
 
-Typography: Roboto, 10px semantic labels (white), 8.5px token names (muted), 9px hex values (light blue mono).
+Typography: Roboto. 10px semantic labels (white), 8.5px token names (muted), 9px hex values (light blue mono).
 
----
+### Icon card GROUP structure (card 5)
 
-## Existing Themes in Code
-
-| Theme ID | Display name | Character |
-|---|---|---|
-| `default` | Default | Warm gold/parchment gradient |
-| `dark-slate` | Dark Slate | Near-black dark mode |
-| `slate` | Slate | Cool gray, light mode |
-| `bimini-breeze` | Bimini Breeze | Caribbean teal/sand |
-
----
-
-## Token Reference (25 tokens)
-
-### App background & gradient
-| What it controls | Token |
-|---|---|
-| Android status bar fill (also outer background) | `bg` |
-| 3-stop gradient filling the main list column | `gradientColors` |
-| Position of each gradient stop (array of 3, 0–1) | `gradientLocations` |
-
-### Header
-| What it controls | Token |
-|---|---|
-| 1px line at top of header — separates from status bar | `headerBorder` |
-
-### List selector
-| What it controls | Token |
-|---|---|
-| Selector pill/box background | `listSelectorBg` |
-| List name text | `listSelectorText` |
-| Selector bottom border + scroll area full border | `listSelectorBorder` |
-
-### Icons
-| What it controls | Token |
-|---|---|
-| All header icons (logo, gear, help) and all toolbar + row icons | `iconColor` |
-
-### Scroll area / list surface
-| What it controls | Token |
-|---|---|
-| Main list body background | `surface` |
-| Thin divider lines between rows | `separator` |
-
-### Text
-| What it controls | Token |
-|---|---|
-| Depth-0 (root) task label | `textDepth[0]` |
-| Depth-1 (subtask) task label | `textDepth[1]` |
-| Depth-2 (sub-subtask) task label | `textDepth[2]` |
-| Note text, child-count badge, secondary info | `textSub` |
-| Completed item text | `textDone` |
-
-### Checkboxes & borders
-| What it controls | Token |
-|---|---|
-| Unchecked checkbox fill | `checkboxBg` |
-| Checked checkbox fill | `checkboxDone` |
-| Checkbox border, modal and menu outlines | `border` |
-
-### Priority / status (optional ornamentation)
-| What it controls | Token |
-|---|---|
-| Elevated priority — color applied per theme (text, icon, bar, etc.) | `priorityElevated` |
-| Top priority — color applied per theme | `priorityTop` |
-
-### Menus & modals
-| What it controls | Token |
-|---|---|
-| Kebab dropdown, AddChild menu, modal panel backgrounds | `menuBg` |
-| Menu item and modal body text | `text` |
-| Active/selected text, Save button background | `accent` |
-| Destructive action text (Delete, Clear) | `danger` |
-
-### TypeScript type
-```ts
-type Theme = {
-  id: string;
-  name: string;
-  enabled?: boolean;
-  bg: string;
-  headerBorder: string;
-  surface: string;
-  menuBg: string;
-  listSelectorBg: string;
-  listSelectorText: string;
-  listSelectorBorder: string;
-  checkboxBg: string;
-  checkboxDone: string;
-  border: string;
-  separator: string;
-  text: string;
-  textSub: string;
-  textDone: string;
-  textDepth: [string, string, string];
-  iconColor: string;
-  accent: string;
-  danger: string;
-  priorityElevated: string;
-  priorityTop: string;
-  gradientColors: string[] | null;
-  gradientLocations: number[] | null;
-};
 ```
-
----
-
-## Adding a Theme to Code
-
-```ts
-// in lib/theme.tsx, add to the themes object:
-'theme-id': {
-  id: 'theme-id',
-  name: 'Theme Display Name',
-  enabled: true,
-  bg: '#000000',
-  // ... all 25 tokens
-  gradientColors: ['#000000', '#000000', '#000000'],
-  gradientLocations: [0, 0.5, 1],
-},
+[0] bg          RECTANGLE  162×140, fill #1c1f27, cornerRadius 5
+[1] outline     RECTANGLE  162×140, no fill, 1px stroke, cornerRadius 5
+[2] description TEXT       semantic label
+[3] name        TEXT       code component name (e.g. "IconCreateNew")
+[4] swatch      RECTANGLE  color swatch
+[5] hex         TEXT       hex value
+[6] icon FRAME  FRAME      24×24 (42×42 for logo) — FRONTMOST, no fill/stroke
+      └─ SVG artwork inside at (0,0)
 ```
-
-Set `enabled: false` to hide from the picker without deleting.

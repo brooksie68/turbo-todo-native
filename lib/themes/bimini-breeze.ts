@@ -1,0 +1,35 @@
+import type { Theme } from '../theme';
+
+const biminiBreeze: Theme = {
+  id: 'bimini-breeze',
+  name: 'Bimini Breeze',
+  enabled: true,
+  statusBarStyle: 'light',
+  bg: '#004455',
+  headerBg: '#c8f0e8',
+  headerBorder: '#8ecdc0',
+  surface: '#f0fbf7',
+  border: '#8ecdc0',
+  text: '#1a3a35',
+  textSub: '#2a7060',
+  textDone: '#99c4bb',
+  textDepth: ['#1a3a35', '#2a7060', '#2a7060'],
+  accent: '#00998a',
+  danger: '#cc3300',
+  priorityElevated: '#ff8800',
+  priorityTop: '#cc2200',
+  iconColor: '#007766',
+  listSelectorBg: '#dff5ee',
+  listSelectorText: '#1a3a35',
+  listSelectorBorder: '#00998a',
+  checkboxBg: '#f0fbf7',
+  checkboxDone: '#007766',
+  checkmarkColor: '#ffffff',
+  separator: '#b0ddd4',
+  menuBg: '#f5fdfb',
+  footerBorder: '#006655',
+  gradientColors: ['#fdf5e0', '#c8f0e8', '#7dd8cc'],
+  gradientLocations: [0, 0.6, 1],
+};
+
+export default biminiBreeze;
