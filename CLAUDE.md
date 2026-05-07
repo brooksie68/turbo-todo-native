@@ -10,7 +10,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ## Current state (as of 2026-05-07)
 
-**Git HEAD:** `4c4d0d2` — "Promote Default 2 to Default; retire old default theme"
+**Git HEAD:** `30d691d` — "Add Forest Canopy and Golden Hour themes"
 **Active branch:** `themes/exploration` — not yet merged to main
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
@@ -88,7 +88,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Images on depth-0 and depth-1 items (local file system, up to 5); AddChildMenu has "Image" (gallery, multi-select) and "Take photo" (camera, single shot)
 - Links on depth-0 and depth-1 items (SQLite task_links table)
 - Export for AI (share sheet, markdown outline)
-- 4 themes: Default (gold gradient), Dark Slate, Slate, Bimini Breeze — theme picker via logo button dropdown
+- 6 themes: Default, Dark Slate, Slate, Bimini Breeze, Forest Canopy, Golden Hour — theme picker via logo button dropdown
 - Child count badge on collapsed parents ("- N")
 - Pin to top: depth-0 only, floats above incomplete list, blocks drag
 - Row UI: IconCreateNew (add subtask) + IconOptions (kebab)
@@ -172,10 +172,11 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ### Next up (one at a time, test each before committing)
 1. Merge `themes/exploration` branch to main
-2. Re-add send-to-list
-3. Re-add list picker fix (anchored dropdown position)
-4. Re-add notes in Export for AI
-5. Re-add checked styling (lighter checkbox / darker done text)
+2. Add Forest Canopy + Golden Hour as pages in todo-app-themes Figma file (T2 + cards 3/4/5)
+3. Re-add send-to-list
+4. Re-add list picker fix (anchored dropdown position)
+5. Re-add notes in Export for AI
+6. Re-add checked styling (lighter checkbox / darker done text)
 
 ### Backlog
 - [ ] Print export / Tear Sheet — needs proper Android PDF fix (use `width: 612` only, no height; wrap entire dynamic import in try/catch)
