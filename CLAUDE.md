@@ -5,42 +5,50 @@
 React Native + Expo conversion of TurboTodo web app. Target: native Android. **Local-first storage (SQLite on device).** Supabase is optional future sync feature only.
 
 **Project dir:** `C:/Users/brook/ai-projects/turbo-todo-native/`
-**JS-only changes:** `eas update --branch preview --message "..."` — no build needed, OTA to device
+**JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-03 session 2)
+## Current state (as of 2026-05-07)
 
-**Git HEAD:** `3846b73` — "Add App Info section to Help modal with share button"
-**Base:** `6de6e5e` — "Mark help illustrations done; update features date and help modal description; clean up sound-effects/new"
+**Git HEAD:** `4c4d0d2` — "Promote Default 2 to Default; retire old default theme"
+**Active branch:** `themes/exploration` — not yet merged to main
+**Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** Clean. New APK (build 10, versionCode 10) installed from `6de6e5e`. OTA delivery confirmed working (red icon test). Data restored. No Tear Sheet, no auto-collapse.
+**Device state:** Default 2 promoted to Default and OTA-confirmed working. Theme system fully refactored. 4 themes in picker.
 
 ### What was done this session
-- Built new APK from `6de6e5e` (versionCode defaulted to 10 by EAS)
-- Confirmed OTA delivery works with red help icon test
-- Added **App Info section** to bottom of Help modal:
-  - Version + build number (fallback hardcoded to `'10'` until native value available)
-  - Launch type (Embedded APK vs OTA update)
-  - OTA ID (first 8 chars of UUID)
-  - OTA published timestamp
-  - OTA message (from manifest metadata, shown if available)
-  - Channel, Runtime version, Android OS API level
-  - Share button (IconShare) → Share.share() sheet to export all fields as text
-- Added `IconShare` to `components/Icons.tsx`
-- Added `versionCode: 10` to `app.json`
-- OTA message field not yet confirmed working (manifest metadata path may be wrong — monitor)
+- Built comprehensive Figma ↔ code attribute map for Default theme
+- Implemented all pixel-perfect corrections as "Default 2" (non-destructive)
+  - `IconCheckmark` SVG added to Icons.tsx (replaces text ✓)
+  - New tokens: `footerBorder`, `checkmarkColor`
+  - `TodoItem`: indent base 12→8, paddingVertical 7→8, checkbox borderRadius 2→1, rowActions gap 14→12, icon sizes 20→18, `IconCreateNew` replaces text `+` in add button
+  - `TodoList`: marginHorizontal 6→8, shadow height 8→5, opacity 0.10→0.08
+  - `TodoListHeader`: 1px top border, logo 42→40, selector 202→189px, gear/help 28→24
+  - `TodoListToolbar`: border moved top→bottom, uses `footerBorder` token
+- QA tested Default 2 (red icon OTA delivery test — confirmed)
+- Replaced text `+` with `IconCreateNew` SVG in row add buttons (matches Figma)
+- Full theme system QA and refactor:
+  - Themes split into individual files: `lib/themes/*.ts`
+  - `lib/themes/index.ts` — single registration point
+  - `lib/theme.tsx` — type + provider + hooks only, with inline token docs
+  - `enabled: true` normalized across all themes
+  - Hardcoded `#cc3300` → `theme.danger` in drag indicator
+  - `themes.md` fully rewritten — 27-token reference, consumption map, authoring workflow, icon size table
+- Promoted Default 2 to Default; retired old default
+- Added `--platform android` to OTA push command (skips unnecessary iOS bundle)
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
 - **Rule going forward: one feature at a time, implement → test on device → commit**
 - OTA fingerprint is computed from `node_modules` content — leftover packages after rollback cause mismatch
 - `npm ci` before APK build ensures clean fingerprint
+- `eas update` without `--platform android` also builds + uploads iOS bundles unnecessarily — always use `--platform android`
 
 ### Features from `2ce078c` — still to re-add (one at a time)
 - **Send to list** — working, safe to re-add ✓
 - **List picker fix** (anchored dropdown position) — working, safe to re-add ✓
 - **Notes in Export for AI** — working, safe to re-add ✓
-- **Checked styling** (lighter checkbox, darker done text) — working, safe to re-add ✓
+- **Checked styling** (lighter checkbox / darker done text) — working, safe to re-add ✓
 - **Print export / Tear Sheet** — crashed Android; needs proper fix before re-adding
 - **Auto-collapse at 10+ completed** — crashed app; needs requirements clarification before re-adding
 - **Close-X accent recolor** — James does not want this
@@ -62,7 +70,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - OTA updates via expo-updates, channel: preview
 - runtimeVersion policy: appVersion (currently "1.0.0")
 - Current APK: build 10 (versionCode 10), built from `6de6e5e`
-- **Workflow: edit code → `eas update --branch preview` → kill + relaunch app. No Metro server needed.**
+- **Workflow: edit code → `eas update --branch preview --platform android --message "..."` → kill + relaunch app. No Metro server needed.**
 
 ## App icon
 - Adaptive icon: `assets/adaptive-icon-fg.png` (1024x1024, logo centered in safe zone, transparent bg) + `assets/adaptive-icon-bg.png` (1024x1024, gold gradient)
@@ -80,24 +88,27 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Images on depth-0 and depth-1 items (local file system, up to 5); AddChildMenu has "Image" (gallery, multi-select) and "Take photo" (camera, single shot)
 - Links on depth-0 and depth-1 items (SQLite task_links table)
 - Export for AI (share sheet, markdown outline)
-- 2 themes: Default (gold gradient), Bimini Breeze (teal gradient)
-- Theme picker via logo button dropdown
+- 4 themes: Default (gold gradient), Dark Slate, Slate, Bimini Breeze — theme picker via logo button dropdown
 - Child count badge on collapsed parents ("- N")
 - Pin to top: depth-0 only, floats above incomplete list, blocks drag
-- Row UI: + button (add subtask) + kebab (options)
+- Row UI: IconCreateNew (add subtask) + IconOptions (kebab)
 - **Gear menu (header):** New list / Rename / Delete list with confirm; Rename + Delete hidden for Daily List
 - **Help modal:** Full scrollable help, all 17 sections documented, themed. Each section has a UI illustration built from real theme tokens + existing Icon components (HelpIllustrations.tsx). Section headers: 15pt / 800 weight / uppercase. App Info section at bottom with share button.
 - **Backup system:** zip archive containing JSON (all lists/todos/links) + image files organized by todo ID. Export via share sheet, restore via file picker. One zip = complete backup.
-  - Export: toolbar options → Back up → share sheet → save zip to Google Drive
-  - Restore: toolbar options → Restore → confirm → file picker → pick zip → full restore
-  - lib/backup.ts: `exportBackup()` and `importBackup()`
-  - react-native-zip-archive@7.0.2 for zip/unzip, expo-sharing for share sheet, expo-document-picker for file picker
 - **Daily List:** On/Off toggle in toolbar options. Daily list sorted to front of list picker. Items sent from any list land at top of Daily List as depth-0 singletons. At midnight (checked before first render), items with a source list restore to their origin list as depth-0 orphans above completed items; natively-added daily items are deleted. Daily List hides Subtask in AddChildMenu; gear menu shows only New List.
 - **Alarms:** daily repeating notifications via expo-notifications; "Set alarm" in depth-0/1 kebab menus; bell icon on row; auto-cancel on complete/delete
 - **Text size:** 5 steps (small/normal/large/xlarge/xxlarge), toolbar options +/− control, persisted to AsyncStorage
 - **Clear completed per group:** "Clear completed" in depth-0 kebab (conditional on having completed children); recursively removes all completed descendants
-- **Computed position labels:** FlatItem carries `positionLabel` string ("1", "2.3", "1.1.2") — internal, not displayed; foundation for future features
+- **Computed position labels:** FlatItem carries `positionLabel` string — internal, not displayed; foundation for future features
 - **Sound effects:** expo-av, 10 sounds mapped to actions, on/off toggle in toolbar options
+
+## Theme system
+- Themes live in `lib/themes/*.ts` — one file per theme
+- `lib/themes/index.ts` — register themes here (one import + one line)
+- `lib/theme.tsx` — Theme type (27 tokens), ThemeProvider, useTheme, useThemeContext
+- Full token reference + authoring workflow in `themes.md` — **read before any theme work**
+- Adding a theme: create file → add to index.ts. Hiding a theme: set `enabled: false`.
+- Each theme's values are canon for that theme — never compare across themes
 
 ## Toolbar options menu (bottom sheet)
 1. Back up | Restore (split row, top)
@@ -118,7 +129,9 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Key files
 - `lib/db.ts` — SQLite init, schema, WAL mode, migrations
 - `lib/types.ts` — List, Todo types (includes daily_source_* fields)
-- `lib/theme.tsx` — ThemeContext, themes, ThemeBg
+- `lib/theme.tsx` — Theme type, ThemeProvider, useTheme, useThemeContext
+- `lib/themes/index.ts` — theme registry
+- `lib/themes/*.ts` — individual theme files
 - `lib/backup.ts` — exportBackup, importBackup
 - `lib/imageStore.ts` — AsyncStorage image helpers
 - `lib/linkStore.ts` — SQLite link helpers
@@ -133,7 +146,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - `components/ToolbarOptionsMenu.tsx` — bottom sheet options
 - `components/ItemOptionsMenu.tsx` — per-item dropdown
 - `components/HelpModal.tsx` — full-screen help overlay; App Info section at bottom
-- `components/Icons.tsx` — all SVG icons (includes IconShare)
+- `components/Icons.tsx` — all SVG icons (includes IconShare, IconCheckmark)
 
 ## Data model (SQLite)
 - `lists`: id, name, sort_order, inserted_at
@@ -151,17 +164,18 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Daily list midnight check runs in `_layout.tsx` before first render — `useState(false)` for `ready`, returns null until resolved
 - DB migrations are idempotent try/catch ALTER TABLE calls — safe to re-run
 - `removeCompletedRecursive` is a module-level pure helper in useTodoData.ts — used by both clearCompleted and clearCompletedInGroup
-- **OTA channel is `preview` not `production`** — always use `eas update --branch preview`
+- **OTA channel is `preview` not `production`** — always use `eas update --branch preview --platform android`
 - **One feature at a time rule:** implement → test on device → commit. No batch commits on untested features.
 - `Constants.nativeBuildVersion` currently falls back to `'10'` in HelpModal — will return real value once next APK is built with versionCode set
 
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. Re-add send-to-list
-2. Re-add list picker fix (anchored dropdown position)
-3. Re-add notes in Export for AI
-4. Re-add checked styling (lighter checkbox / darker done text)
+1. Merge `themes/exploration` branch to main
+2. Re-add send-to-list
+3. Re-add list picker fix (anchored dropdown position)
+4. Re-add notes in Export for AI
+5. Re-add checked styling (lighter checkbox / darker done text)
 
 ### Backlog
 - [ ] Print export / Tear Sheet — needs proper Android PDF fix (use `width: 612` only, no height; wrap entire dynamic import in try/catch)
