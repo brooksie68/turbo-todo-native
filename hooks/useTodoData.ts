@@ -125,9 +125,13 @@ function removeTodoFromTree(todos: Todo[], id: number): Todo[] {
 export function formatItemTree(node: Todo, d: number): string {
   const indent = '  '.repeat(d);
   const label = d === 0 ? `- **${node.task}**` : `${indent}- ${node.task}`;
+  const noteLine = node.note ? `${indent}  > ${node.note}` : '';
   const incompleteChildren = (node.children ?? []).filter(c => !c.is_complete);
   const childLines = incompleteChildren.map(c => formatItemTree(c, d + 1)).join('\n');
-  return childLines ? `${label}\n${childLines}` : label;
+  const parts: string[] = [label];
+  if (noteLine) parts.push(noteLine);
+  if (childLines) parts.push(childLines);
+  return parts.join('\n');
 }
 
 // ── Hook ────────────────────────────────────────────────────────────────────

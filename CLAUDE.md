@@ -179,22 +179,38 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 6. Re-add checked styling (lighter checkbox / darker done text)
 
 ### Backlog
+
+#### Bugs
+- [ ] Bug: Logo briefly shows with no background on app load — looks unprofessional
+- [ ] Bug: Row-level Add menu near bottom of screen gets clipped before flip point triggers
+- [ ] Bug: Note/URL close X should use `theme.iconColor` not `theme.accent` — same as URL close X
+
+#### Features
 - [ ] Print export / Tear Sheet — needs proper Android PDF fix (use `width: 612` only, no height; wrap entire dynamic import in try/catch)
-- [ ] Auto-collapse completed subtasks after 10 — needs requirements clarification from James before building
+- [ ] Auto-collapse completed subtasks after 10 — show collapse arrow + count ("11 more") instead of hiding
 - [ ] Progress bar and/or percentage completion
 - [ ] Reverse logo teeth direction
-- [ ] Teach Claude to read JSON backup files
+- [ ] Density toggle in toolbar options — tighter/looser padding and margins
+- [ ] Tappable phone numbers on tasks
+- [ ] Full calendar items (not just timed alarms)
+- [ ] Teach Claude to read JSON backup files → foundation for desktop app
 - [ ] Android widget
 - [ ] Archive completed items — stored, downloadable as JSON; long-term: trends chart
+- [ ] Calendar view for archived/completed items — days where the user checked off regular tasks show a ✓; days where Daily List tasks were completed show a ★; tap any day to review or export those items
 - [ ] Android emulator autonomous debug workflow
 - [ ] Animate logo in splash screen
 - [ ] Export to CSV and XLSX
+- [ ] Finish Figma theme builder template
+- [ ] Clean up current themes and make new ones
 - [ ] Magic meal machine integration
 - [ ] Gardening app integration (planting windows, works with this app)
 - [ ] Categories
-- [ ] Supabase sync as optional paid backup feature (long-term)
-- [ ] Clean up current themes and make new ones
 - [ ] Verify OTA message field appears in App Info (manifest metadata path may not be correct)
+
+#### Paid / Monetization (long-term)
+- [ ] Paid tiers: extra depth levels, online backups, long archive time
+- [ ] Paid feature: shared lists
+- [ ] Supabase sync as optional paid backup feature
 
 ### App Name Shortlist
 TaskBlast, TaskBlaster, TaskSaw, TaskTree, Stacked, Momentum, StackFlow, TaskMaster, Getterdunn, Giterdone, Buzzsaw, Mobile Mind, Don't Forget!
