@@ -32,6 +32,7 @@ const goldenHour: Theme = {
   gradientLocations: [0, 0.5, 1],
   iconGradient: null,
   backgroundImage: null,
+  fontFamily: null,
 };
 
 export default goldenHour;

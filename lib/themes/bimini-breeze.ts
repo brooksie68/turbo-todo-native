@@ -32,6 +32,7 @@ const biminiBreeze: Theme = {
   gradientLocations: [0, 0.6, 1],
   iconGradient: null,
   backgroundImage: null,
+  fontFamily: null,
 };
 
 export default biminiBreeze;

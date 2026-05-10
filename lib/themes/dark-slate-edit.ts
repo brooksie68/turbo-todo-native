@@ -32,6 +32,7 @@ const darkSlateEditTheme: Theme = {
   gradientLocations: [0, 0.5],
   iconGradient: ['#005684', '#004075'],
   backgroundImage: null,
+  fontFamily: null,
 };
 
 export default darkSlateEditTheme;

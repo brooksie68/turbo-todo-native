@@ -64,6 +64,7 @@ export type Theme = {
   // Extended visual tokens (optional — null = not used)
   iconGradient: [string, string] | null;  // top→bottom gradient on all iconColor icons; overrides iconColor when set
   backgroundImage: number | null;          // require()'d image asset; gradient overlays on top as tint
+  fontFamily: string | null;               // custom font family name; null = system default
 };
 
 export { themes };
