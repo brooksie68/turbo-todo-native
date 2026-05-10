@@ -30,6 +30,7 @@ import { exportBackup, importBackup } from '../lib/backup';
 import { isSoundEnabled, setSoundEnabled, loadSoundSetting, playSound } from '../lib/sounds';
 import HelpModal from './HelpModal';
 import AlarmModal from './AlarmModal';
+import SendToListModal from './SendToListModal';
 
 // Renders LinearGradient for themes that define gradientColors, plain View otherwise.
 function ThemeBg({ style, children }: { style: object; children: React.ReactNode }) {
@@ -330,6 +331,7 @@ export default function TodoList() {
           onClearCompletedInGroup={overlay.handleMenuClearCompletedInGroup}
           onSendToDaily={overlay.handleMenuSendToDaily}
           onRestoreFromDaily={overlay.handleMenuRestoreFromDaily}
+          onSendToList={overlay.handleMenuSendToList}
           imageCount={overlay.itemMenuImageCount}
           hasNote={!!(overlay.itemMenuTodo?.note)}
           hasCompletedChildren={overlay.itemMenuHasCompletedChildren}
@@ -433,6 +435,15 @@ export default function TodoList() {
         />
 
         <HelpModal visible={showHelp} onClose={() => setShowHelp(false)} />
+
+        <SendToListModal
+          visible={overlay.sendToListTodo !== null}
+          lists={data.lists}
+          activeListId={data.activeListId}
+          dailyListId={data.dailyListId}
+          onSelect={overlay.handleSendToList}
+          onClose={() => overlay.setSendToListTodo(null)}
+        />
 
       </ThemeBg>
     </SafeAreaView>

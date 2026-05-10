@@ -8,34 +8,22 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-07)
+## Current state (as of 2026-05-09)
 
-**Git HEAD:** `30d691d` — "Add Forest Canopy and Golden Hour themes"
+**Git HEAD:** `a5111a1` — "Re-add list picker fix; center gear menu on icon" (send-to-list uncommitted)
 **Active branch:** `themes/exploration` — not yet merged to main
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** Default 2 promoted to Default and OTA-confirmed working. Theme system fully refactored. 4 themes in picker.
+**Device state:** All four rolled-back features re-added and OTA-confirmed working. Backlog merged from phone list. App officially named Buzzsaw (rename deferred).
 
 ### What was done this session
-- Built comprehensive Figma ↔ code attribute map for Default theme
-- Implemented all pixel-perfect corrections as "Default 2" (non-destructive)
-  - `IconCheckmark` SVG added to Icons.tsx (replaces text ✓)
-  - New tokens: `footerBorder`, `checkmarkColor`
-  - `TodoItem`: indent base 12→8, paddingVertical 7→8, checkbox borderRadius 2→1, rowActions gap 14→12, icon sizes 20→18, `IconCreateNew` replaces text `+` in add button
-  - `TodoList`: marginHorizontal 6→8, shadow height 8→5, opacity 0.10→0.08
-  - `TodoListHeader`: 1px top border, logo 42→40, selector 202→189px, gear/help 28→24
-  - `TodoListToolbar`: border moved top→bottom, uses `footerBorder` token
-- QA tested Default 2 (red icon OTA delivery test — confirmed)
-- Replaced text `+` with `IconCreateNew` SVG in row add buttons (matches Figma)
-- Full theme system QA and refactor:
-  - Themes split into individual files: `lib/themes/*.ts`
-  - `lib/themes/index.ts` — single registration point
-  - `lib/theme.tsx` — type + provider + hooks only, with inline token docs
-  - `enabled: true` normalized across all themes
-  - Hardcoded `#cc3300` → `theme.danger` in drag indicator
-  - `themes.md` fully rewritten — 27-token reference, consumption map, authoring workflow, icon size table
-- Promoted Default 2 to Default; retired old default
-- Added `--platform android` to OTA push command (skips unnecessary iOS bundle)
+- **Re-added notes in Export for AI** — `formatItemTree` appends note as `> blockquote` after task label
+- **Re-added checked item styling** — lighter `checkboxDone`, darker `textDone` across all 6 themes
+- **Re-added list picker fix** — dropdown anchored to selector button via `measure()`
+- **Gear menu fix** — dropdown centers on icon with `Dimensions`-based screen-edge clamping
+- **Re-added send-to-list** — `SendToListModal.tsx` + `sendToList()` in `useTodoData`; full subtree move with depth normalization; available at all kebab depths
+- **Backlog merged** from James's phone list ("Shamus Primary") — new items added, duplicates removed, reorganized into Bugs / Features / Paid sections
+- **App name decided:** Buzzsaw — full rename plan made (dir, package, AsyncStorage keys, app.json, EAS, GitHub) but deferred
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -43,15 +31,6 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - OTA fingerprint is computed from `node_modules` content — leftover packages after rollback cause mismatch
 - `npm ci` before APK build ensures clean fingerprint
 - `eas update` without `--platform android` also builds + uploads iOS bundles unnecessarily — always use `--platform android`
-
-### Features from `2ce078c` — still to re-add (one at a time)
-- **Send to list** — working, safe to re-add ✓
-- **List picker fix** (anchored dropdown position) — working, safe to re-add ✓
-- **Notes in Export for AI** — working, safe to re-add ✓
-- **Checked styling** (lighter checkbox / darker done text) — working, safe to re-add ✓
-- **Print export / Tear Sheet** — crashed Android; needs proper fix before re-adding
-- **Auto-collapse at 10+ completed** — crashed app; needs requirements clarification before re-adding
-- **Close-X accent recolor** — James does not want this
 
 ## Stack
 - Expo SDK 54, Expo Router, TypeScript
@@ -173,10 +152,6 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ### Next up (one at a time, test each before committing)
 1. Merge `themes/exploration` branch to main
 2. Add Forest Canopy + Golden Hour as pages in todo-app-themes Figma file (T2 + cards 3/4/5)
-3. Re-add send-to-list
-4. Re-add list picker fix (anchored dropdown position)
-5. Re-add notes in Export for AI
-6. Re-add checked styling (lighter checkbox / darker done text)
 
 ### Backlog
 

@@ -498,6 +498,30 @@ export function useTodoData() {
     setTodos(prev => removeTodoFromTree(prev, todo.id));
   }, [dailyListId, activeListId]);
 
+  const sendToList = useCallback(async (todo: Todo, targetListId: number) => {
+    if (!activeListId || targetListId === activeListId) return;
+    const rows = await db.getAllAsync<{ sort_order: number }>(
+      'SELECT sort_order FROM todos WHERE list_id = ? AND parent_id IS NULL', [targetListId],
+    );
+    const maxOrder = rows.length ? Math.max(...rows.map(r => r.sort_order)) : -1;
+    // Move root to target list as depth-0
+    await db.runAsync(
+      'UPDATE todos SET list_id = ?, parent_id = NULL, sort_order = ? WHERE id = ?',
+      [targetListId, maxOrder + 10, todo.id],
+    );
+    // Move all descendants — parent_id refs within subtree stay correct, just update list_id
+    const subtreeIds = getSubtreeIds(todo.id, todos);
+    const descendantIds = subtreeIds.filter(id => id !== todo.id);
+    if (descendantIds.length > 0) {
+      const placeholders = descendantIds.map(() => '?').join(',');
+      await db.runAsync(
+        `UPDATE todos SET list_id = ? WHERE id IN (${placeholders})`,
+        [targetListId, ...descendantIds],
+      );
+    }
+    setTodos(prev => removeTodoFromTree(prev, todo.id));
+  }, [activeListId, todos]);
+
   const restoreFromDaily = useCallback(async (todo: Todo) => {
     if (!todo.daily_source_list_id) return;
     let parentId: number | null = todo.daily_source_parent_id ?? null;
@@ -735,7 +759,7 @@ export function useTodoData() {
     activeList, incomplete, complete, incompleteFlat, completeFlat, anyDepth0Expanded,
     // daily list
     dailyListId, dailyEnabled, isDailyList,
-    enableDaily, disableDaily, getDailyItemCount, sendToDaily, restoreFromDaily,
+    enableDaily, disableDaily, getDailyItemCount, sendToDaily, restoreFromDaily, sendToList,
     // list management
     fetchTodos, fetchLists, switchToList, createList, renameList, deleteList,
     // collapse

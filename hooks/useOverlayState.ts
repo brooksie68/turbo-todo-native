@@ -12,7 +12,7 @@ import { formatItemTree } from './useTodoData';
 export function useOverlayState(data: TodoData) {
   const {
     deleteTask, saveNote, setPinned, clearCompletedInGroup,
-    sendToDaily, restoreFromDaily,
+    sendToDaily, restoreFromDaily, sendToList,
     activeListId, activeList, todos, openEdit, refreshMedia, expandItem,
   } = data;
 
@@ -43,6 +43,9 @@ export function useOverlayState(data: TodoData) {
   // Alarm modal
   const [alarmModalVisible, setAlarmModalVisible] = useState(false);
   const [alarmModalTodo, setAlarmModalTodo] = useState<Todo | null>(null);
+
+  // Send to list modal
+  const [sendToListTodo, setSendToListTodo] = useState<Todo | null>(null);
 
   // ── Add-child menu ───────────────────────────────────────────────────────
 
@@ -253,6 +256,17 @@ export function useOverlayState(data: TodoData) {
     if (itemMenuTodo) restoreFromDaily(itemMenuTodo);
   }, [itemMenuTodo, restoreFromDaily]);
 
+  const handleMenuSendToList = useCallback(() => {
+    if (!itemMenuTodo) return;
+    setSendToListTodo(itemMenuTodo);
+  }, [itemMenuTodo]);
+
+  const handleSendToList = useCallback(async (targetListId: number) => {
+    if (!sendToListTodo) return;
+    setSendToListTodo(null);
+    await sendToList(sendToListTodo, targetListId);
+  }, [sendToListTodo, sendToList]);
+
   const handleMenuSetAlarm = useCallback(() => {
     if (!itemMenuTodo) return;
     setAlarmModalTodo(itemMenuTodo);
@@ -299,6 +313,7 @@ export function useOverlayState(data: TodoData) {
     handleMenuEdit, handleMenuSetStatus, handleMenuAddImage, handleMenuAddUrl,
     handleMenuPin, handleMenuClearCompletedInGroup,
     handleMenuSendToDaily, handleMenuRestoreFromDaily,
+    sendToListTodo, setSendToListTodo, handleMenuSendToList, handleSendToList,
     itemMenuHasCompletedChildren, itemMenuIsSingleton, itemMenuHasSource,
     handleEditNote, handleDeleteNote, handleExportForAI, handleItemDelete,
     // note modal

@@ -36,6 +36,7 @@ type Props = {
   onClearCompletedInGroup: () => void;
   onSendToDaily: () => void;
   onRestoreFromDaily: () => void;
+  onSendToList: () => void;
   imageCount?: number;
   hasNote: boolean;
   hasCompletedChildren: boolean;
@@ -71,6 +72,7 @@ export default function ItemOptionsMenu({
   onClearCompletedInGroup,
   onSendToDaily,
   onRestoreFromDaily,
+  onSendToList,
   imageCount = 0,
   hasNote,
   hasCompletedChildren,
@@ -170,6 +172,9 @@ export default function ItemOptionsMenu({
                 <Text style={[styles.itemText, { color: theme.text }]}>Send to Daily List</Text>
               </TouchableOpacity>
             )}
+            <TouchableOpacity style={styles.item} onPress={() => handle(onSendToList)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>Send to list</Text>
+            </TouchableOpacity>
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
               <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>
@@ -205,6 +210,9 @@ export default function ItemOptionsMenu({
                 <Text style={[styles.itemText, { color: theme.text }]}>Send to Daily List</Text>
               </TouchableOpacity>
             )}
+            <TouchableOpacity style={styles.item} onPress={() => handle(onSendToList)}>
+              <Text style={[styles.itemText, { color: theme.text }]}>Send to list</Text>
+            </TouchableOpacity>
             <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
             <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
