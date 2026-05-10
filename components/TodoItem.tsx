@@ -123,7 +123,7 @@ const TodoItem = memo(function TodoItem({
           <Text
             style={[
               styles.label,
-              { color: labelColor, fontSize },
+              { color: labelColor, fontSize, fontFamily: theme.fontFamily ? `${theme.fontFamily}-Regular` : undefined },
               todo.is_complete && styles.labelDone,
             ]}
             numberOfLines={0}

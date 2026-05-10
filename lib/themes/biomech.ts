@@ -1,0 +1,38 @@
+import type { Theme } from '../theme';
+
+const biomech: Theme = {
+  id: 'biomech',
+  name: 'Biomech',
+  enabled: true,
+  statusBarStyle: 'light',
+  bg: '#0a0d0d',
+  headerBg: '#0a0d0d',
+  headerBorder: '#080a0a',
+  surface: '#0e1414e8',
+  border: '#2a3a36',
+  text: '#d4f4e8',
+  textSub: '#7aa898',
+  textDone: '#3a5a4a',
+  textDepth: ['#d4f4e8', '#a4d4c4', '#7aa898'],
+  accent: '#3aeed4',
+  danger: '#ff3a78',
+  priorityElevated: '#a8ee3a',
+  priorityTop: '#ff3a78',
+  iconColor: '#3aeed4',
+  listSelectorBg: '#0e1414',
+  listSelectorText: '#d4f4e8',
+  listSelectorBorder: '#3aeed4',
+  checkboxBg: '#080a0a',
+  checkboxDone: '#3aeed4',
+  checkmarkColor: '#080a0a',
+  separator: '#1a2422',
+  menuBg: '#0e1414',
+  footerBorder: '#080a0a',
+  gradientColors: ['#0a0d0d', '#0e1612', '#0a1818'],
+  gradientLocations: [0, 0.5, 1],
+  iconGradient: ['#3aeed4', '#a8ee3a'],
+  backgroundImage: null,
+  fontFamily: 'IBMPlexMono',
+};
+
+export default biomech;

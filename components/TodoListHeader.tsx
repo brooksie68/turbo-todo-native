@@ -39,6 +39,7 @@ export default function TodoListHeader({
   onHelp,
 }: Props) {
   const { theme, themeId, setThemeId } = useThemeContext();
+  const ff = theme.fontFamily ? `${theme.fontFamily}-Regular` : undefined;
   const [listPickerLayout, setListPickerLayout] = useState<{ top: number; left: number } | null>(null);
   const [themePickerLayout, setThemePickerLayout] = useState<{ top: number; left: number } | null>(null);
   const [gearMenuLayout, setGearMenuLayout] = useState<{ top: number; left: number } | null>(null);
@@ -128,10 +129,10 @@ export default function TodoListHeader({
               });
             }}
           >
-            <Text style={[styles.listSelectorText, { color: theme.listSelectorText }]} numberOfLines={1}>
+            <Text style={[styles.listSelectorText, { color: theme.listSelectorText, fontFamily: ff }]} numberOfLines={1}>
               {activeList?.name ?? '…'}
             </Text>
-            <Text style={[styles.listSelectorArrow, { color: theme.listSelectorText }]}>▼</Text>
+            <Text style={[styles.listSelectorArrow, { color: theme.listSelectorText, fontFamily: ff }]}>▼</Text>
           </TouchableOpacity>
         </View>
 
@@ -172,7 +173,7 @@ export default function TodoListHeader({
               >
                 <Text style={[
                   styles.listPickerText,
-                  { color: theme.listSelectorText },
+                  { color: theme.listSelectorText, fontFamily: ff },
                   l.id === activeListId && styles.listPickerTextActive,
                 ]}>
                   {l.name}
@@ -203,7 +204,7 @@ export default function TodoListHeader({
               >
                 <Text style={[
                   styles.dropdownItemText,
-                  { color: themeId === th.id ? theme.accent : theme.text },
+                  { color: themeId === th.id ? theme.accent : theme.text, fontFamily: ff },
                   themeId === th.id && styles.dropdownItemActive,
                 ]}>
                   {th.name}
@@ -231,14 +232,14 @@ export default function TodoListHeader({
               style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
               onPress={handleNewList}
             >
-              <Text style={[styles.dropdownItemText, { color: theme.text }]}>New list</Text>
+              <Text style={[styles.dropdownItemText, { color: theme.text, fontFamily: ff }]}>New list</Text>
             </TouchableOpacity>
             {!isDailyList && (
               <TouchableOpacity
                 style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
                 onPress={handleRename}
               >
-                <Text style={[styles.dropdownItemText, { color: theme.text }]}>Rename</Text>
+                <Text style={[styles.dropdownItemText, { color: theme.text, fontFamily: ff }]}>Rename</Text>
               </TouchableOpacity>
             )}
             {!isDailyList && (
@@ -246,7 +247,7 @@ export default function TodoListHeader({
                 style={styles.dropdownItem}
                 onPress={handleDelete}
               >
-                <Text style={[styles.dropdownItemText, { color: theme.danger }]}>Delete list</Text>
+                <Text style={[styles.dropdownItemText, { color: theme.danger, fontFamily: ff }]}>Delete list</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -265,11 +266,11 @@ export default function TodoListHeader({
             onPress={() => setListNameModal(null)}
           />
           <View style={[styles.nameModalBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.nameModalTitle, { color: theme.accent }]}>
+            <Text style={[styles.nameModalTitle, { color: theme.accent, fontFamily: ff }]}>
               {listNameModal === 'new' ? 'New list' : 'Rename list'}
             </Text>
             <TextInput
-              style={[styles.nameModalInput, { color: theme.text, borderColor: theme.border }]}
+              style={[styles.nameModalInput, { color: theme.text, borderColor: theme.border, fontFamily: ff }]}
               value={listNameInput}
               onChangeText={setListNameInput}
               placeholder="List name"
@@ -283,13 +284,13 @@ export default function TodoListHeader({
                 style={[styles.nameModalBtn, { backgroundColor: theme.border }]}
                 onPress={() => setListNameModal(null)}
               >
-                <Text style={[styles.nameModalBtnText, { color: theme.text }]}>Cancel</Text>
+                <Text style={[styles.nameModalBtnText, { color: theme.text, fontFamily: ff }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.nameModalBtn, { backgroundColor: theme.accent }]}
                 onPress={handleListNameSave}
               >
-                <Text style={[styles.nameModalBtnText, { color: '#fff' }]}>Save</Text>
+                <Text style={[styles.nameModalBtnText, { color: '#fff', fontFamily: ff }]}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
