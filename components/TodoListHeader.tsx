@@ -9,6 +9,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { useThemeContext, themes } from '../lib/theme';
 import type { List } from '../lib/types';
@@ -38,17 +39,21 @@ export default function TodoListHeader({
   onHelp,
 }: Props) {
   const { theme, themeId, setThemeId } = useThemeContext();
-  const [showListPicker, setShowListPicker] = useState(false);
+  const [listPickerLayout, setListPickerLayout] = useState<{ top: number; left: number } | null>(null);
   const [themePickerLayout, setThemePickerLayout] = useState<{ top: number; left: number } | null>(null);
-  const [gearMenuLayout, setGearMenuLayout] = useState<{ top: number; right: number } | null>(null);
+  const [gearMenuLayout, setGearMenuLayout] = useState<{ top: number; left: number } | null>(null);
   const [listNameModal, setListNameModal] = useState<'new' | 'rename' | null>(null);
   const [listNameInput, setListNameInput] = useState('');
   const logoBtnRef = useRef<View>(null);
   const gearBtnRef = useRef<View>(null);
+  const listSelectorRef = useRef<View>(null);
 
   function openGearMenu() {
+    const screenWidth = Dimensions.get('window').width;
     gearBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
-      setGearMenuLayout({ top: pageY + h + 4, right: 0 });
+      const centerX = pageX + w / 2;
+      const left = Math.max(8, Math.min(centerX - 80, screenWidth - 168));
+      setGearMenuLayout({ top: pageY + h + 4, left });
     });
   }
 
@@ -113,15 +118,22 @@ export default function TodoListHeader({
         </View>
 
         {/* List selector */}
-        <TouchableOpacity
-          style={[styles.listSelector, { backgroundColor: theme.listSelectorBg, borderBottomColor: theme.listSelectorBorder }]}
-          onPress={() => setShowListPicker(true)}
-        >
-          <Text style={[styles.listSelectorText, { color: theme.listSelectorText }]} numberOfLines={1}>
-            {activeList?.name ?? '…'}
-          </Text>
-          <Text style={[styles.listSelectorArrow, { color: theme.listSelectorText }]}>▼</Text>
-        </TouchableOpacity>
+        <View ref={listSelectorRef} collapsable={false} style={[styles.listSelector, { backgroundColor: theme.listSelectorBg, borderBottomColor: theme.listSelectorBorder }]}>
+          <TouchableOpacity
+            style={styles.listSelectorInner}
+            onPress={() => {
+              if (listPickerLayout) { setListPickerLayout(null); return; }
+              listSelectorRef.current?.measure((x, y, w, h, pageX, pageY) => {
+                setListPickerLayout({ top: pageY + h + 4, left: pageX });
+              });
+            }}
+          >
+            <Text style={[styles.listSelectorText, { color: theme.listSelectorText }]} numberOfLines={1}>
+              {activeList?.name ?? '…'}
+            </Text>
+            <Text style={[styles.listSelectorArrow, { color: theme.listSelectorText }]}>▼</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Gear / list options */}
         <View ref={gearBtnRef} collapsable={false} style={styles.gearBtn}>
@@ -137,13 +149,17 @@ export default function TodoListHeader({
       </View>
 
       {/* List picker */}
-      <Modal visible={showListPicker} transparent animationType="fade">
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowListPicker(false)}
-        >
-          <View style={[styles.listPickerDropdown, { backgroundColor: theme.listSelectorBg, borderColor: theme.border }]}>
+      {listPickerLayout && (
+        <Modal visible transparent animationType="none" onRequestClose={() => setListPickerLayout(null)}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setListPickerLayout(null)}
+          />
+          <View style={[
+            styles.listPickerDropdown,
+            { backgroundColor: theme.listSelectorBg, borderColor: theme.border, top: listPickerLayout.top, left: listPickerLayout.left },
+          ]}>
             {lists.map(l => (
               <TouchableOpacity
                 key={l.id}
@@ -152,7 +168,7 @@ export default function TodoListHeader({
                   { borderBottomColor: theme.border },
                   l.id === activeListId && { backgroundColor: theme.surface },
                 ]}
-                onPress={() => { onSwitchList(l.id); setShowListPicker(false); }}
+                onPress={() => { onSwitchList(l.id); setListPickerLayout(null); }}
               >
                 <Text style={[
                   styles.listPickerText,
@@ -164,8 +180,8 @@ export default function TodoListHeader({
               </TouchableOpacity>
             ))}
           </View>
-        </TouchableOpacity>
-      </Modal>
+        </Modal>
+      )}
 
       {/* Theme picker */}
       {themePickerLayout && (
@@ -209,7 +225,7 @@ export default function TodoListHeader({
           <View style={[
             styles.dropdown,
             styles.gearDropdown,
-            { backgroundColor: theme.surface, borderColor: theme.border, top: gearMenuLayout.top, right: gearMenuLayout.right + 8 },
+            { backgroundColor: theme.surface, borderColor: theme.border, top: gearMenuLayout.top, left: gearMenuLayout.left },
           ]}>
             <TouchableOpacity
               style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
@@ -304,10 +320,14 @@ const styles = StyleSheet.create({
     top: 15,
     width: 189,
     height: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
     borderBottomWidth: 1,
     borderRadius: 3,
+    overflow: 'hidden',
+  },
+  listSelectorInner: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 8,
     gap: 6,
   },
@@ -348,7 +368,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   gearDropdown: {
-    minWidth: 140,
+    width: 160,
   },
   dropdownItem: { paddingVertical: 11, paddingHorizontal: 12 },
   dropdownItemText: { fontSize: 16 },
@@ -361,9 +381,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   listPickerDropdown: {
+    position: 'absolute',
     borderRadius: 4,
     borderWidth: 1,
     overflow: 'hidden',
+    minWidth: 189,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
   },
   listPickerItem: {
     paddingVertical: 12,
