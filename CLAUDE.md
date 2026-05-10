@@ -82,12 +82,80 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - **Sound effects:** expo-av, 10 sounds mapped to actions, on/off toggle in toolbar options
 
 ## Theme system
-- Themes live in `lib/themes/*.ts` — one file per theme
-- `lib/themes/index.ts` — register themes here (one import + one line)
-- `lib/theme.tsx` — Theme type (27 tokens), ThemeProvider, useTheme, useThemeContext
-- Full token reference + authoring workflow in `themes.md` — **read before any theme work**
-- Adding a theme: create file → add to index.ts. Hiding a theme: set `enabled: false`.
+
+### Files
+- `lib/themes/*.ts` — one file per theme (add theme = create file + one line in index)
+- `lib/themes/index.ts` — theme registry
+- `lib/theme.tsx` — `Theme` type, `ThemeProvider`, `useTheme`, `useThemeContext`
+- `themes.md` — deep reference: full token table, Figma layer map, authoring workflow
+
+### Rules
+- Adding a theme: create `lib/themes/your-theme.ts` → import + register in `index.ts`
+- Hiding a theme: set `enabled: false` in the theme file
 - Each theme's values are canon for that theme — never compare across themes
+- Read `themes.md` before any Figma theme work
+
+### Figma
+- **Theme authoring file:** `wUMtjlawjc3wFuROGfYuO6` — https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
+- Default Theme page: id `2:5`, T2 frame node: `5:2`
+- Each theme page has 5 frames: `page-layout` | `[Theme Name]` (T2) | `theme-values` | `menus-modals-and-values` | `icons-and-values`
+- Use `get_design_context` (REST) to read across pages; `use_figma` (Plugin API) for writes — must call on current page
+
+### 27 tokens (what each controls)
+| Token | Controls |
+|---|---|
+| `bg` | Status bar fill; app background fallback |
+| `headerBg` | Header bar bg — reserved, not yet in code |
+| `headerBorder` | 1px line at top of header |
+| `footerBorder` | 1px line at bottom of toolbar |
+| `surface` | Scroll area, modals, card backgrounds |
+| `menuBg` | Bottom sheet, dropdowns, AddChild menu |
+| `border` | Scroll area border, checkbox border, modal outlines |
+| `separator` | Row separator lines |
+| `listSelectorBg` | List selector pill background |
+| `listSelectorText` | List name text + arrow |
+| `listSelectorBorder` | List selector bottom underline |
+| `text` | Primary body text, modal titles, menu items |
+| `textSub` | Notes, badges, secondary info |
+| `textDone` | Struck-through completed item text |
+| `textDepth` | `[d0, d1, d2]` task label color by depth |
+| `accent` | Active states, Save buttons, selected list item |
+| `danger` | Destructive actions, invalid drag indicator |
+| `iconColor` | All SVG icons — header, toolbar, row |
+| `priorityElevated` | Bolt icon + elevated task label |
+| `priorityTop` | Exclamation icon + top-priority task label |
+| `checkboxBg` | Unchecked checkbox fill |
+| `checkboxDone` | Checked checkbox fill + border |
+| `checkmarkColor` | SVG checkmark inside done checkbox |
+| `gradientColors` | ThemeBg gradient stops (min 2) |
+| `gradientLocations` | Gradient stop positions 0–1 |
+| `statusBarStyle` | `'dark'` or `'light'` for Android status bar icons |
+
+### Structural attributes (not tokenized — same across all themes)
+| Element | Attribute | Value |
+|---|---|---|
+| Header | height | 64px |
+| Logo btn | size / left / top | 40px / 8 / 12 |
+| List selector | width / height / left / top / borderRadius / paddingH | 189 / 34 / 60 / 15 / 3 / 8 |
+| Gear btn | size / left / top | 24px / 262 / 20 |
+| Help btn | size / right / top | 24px / 19 / 20 |
+| Scroll area | marginH / borderWidth / borderRadius | 8 / 1 / 2 |
+| Inset shadow | height / opacity | 5px / 0.08 |
+| Row | paddingVertical / paddingRight / gap | 8 / 12 / 8 |
+| Row indent | base + per-depth | 8 + (depth × 20) |
+| Checkbox | size / borderWidth / borderRadius | 20 / 1 / 1 |
+| Checkmark icon | size | 12px |
+| Row add icon | size | 18px |
+| Row options icon | size | 18px |
+| Row pin icon | size | 18px |
+| Row bell icon | size | 14px |
+| Priority icons | size | 16px |
+| rowActions gap | gap | 12px |
+| Note text | fontSize / style | 12px / italic |
+| Separator | height | 1px |
+| Toolbar | inner height | 46px |
+| Toolbar icons | size | 24px |
+| Typography (normal) | d0 / d1 / d2 | 16 / 15 / 14px |
 
 ## Toolbar options menu (bottom sheet)
 1. Back up | Restore (split row, top)
