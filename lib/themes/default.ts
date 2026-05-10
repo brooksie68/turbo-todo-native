@@ -30,6 +30,8 @@ const defaultTheme: Theme = {
   footerBorder: '#43350c',
   gradientColors: ['#ffcb58', '#eeddba', '#ffbe30'],
   gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: null,
 };
 
 export default defaultTheme;

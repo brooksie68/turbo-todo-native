@@ -113,7 +113,7 @@ export default function TodoListHeader({
               });
             }}
           >
-            <IconLogo size={40} color={theme.iconColor} />
+            <IconLogo size={40} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
           </TouchableOpacity>
         </View>
 
@@ -138,13 +138,13 @@ export default function TodoListHeader({
         {/* Gear / list options */}
         <View ref={gearBtnRef} collapsable={false} style={styles.gearBtn}>
           <TouchableOpacity style={styles.gearBtnInner} onPress={openGearMenu}>
-            <IconGear size={24} color={theme.iconColor} />
+            <IconGear size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
           </TouchableOpacity>
         </View>
 
         {/* Help */}
         <TouchableOpacity style={styles.helpBtn} onPress={onHelp}>
-          <IconHelp size={24} color={theme.iconColor} />
+          <IconHelp size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
         </TouchableOpacity>
       </View>
 

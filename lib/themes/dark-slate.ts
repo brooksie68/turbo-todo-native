@@ -30,6 +30,8 @@ const darkSlateTheme: Theme = {
   footerBorder: '#1a1815',
   gradientColors: ['#2e2b27', '#272421', '#2a2724'],
   gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: null,
 };
 
 export default darkSlateTheme;

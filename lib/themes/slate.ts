@@ -30,6 +30,8 @@ const slateTheme: Theme = {
   footerBorder: '#3c3935',
   gradientColors: ['#d6d2cc', '#e4e0da', '#ccc8c2'],
   gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: null,
 };
 
 export default slateTheme;

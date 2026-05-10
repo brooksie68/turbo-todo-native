@@ -30,6 +30,8 @@ const darkSlateEditTheme: Theme = {
   footerBorder: '#1a1815',
   gradientColors: ['#0a1e2a', '#030f1f'],
   gradientLocations: [0, 0.5],
+  iconGradient: ['#005684', '#004075'],
+  backgroundImage: null,
 };
 
 export default darkSlateEditTheme;

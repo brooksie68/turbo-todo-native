@@ -30,6 +30,8 @@ const forestCanopy: Theme = {
   footerBorder: '#506848',
   gradientColors: ['#e8ede0', '#f0f2e8', '#dde4d0'],
   gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: null,
 };
 
 export default forestCanopy;

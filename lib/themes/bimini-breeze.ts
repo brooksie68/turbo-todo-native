@@ -30,6 +30,8 @@ const biminiBreeze: Theme = {
   footerBorder: '#006655',
   gradientColors: ['#fdf5e0', '#c8f0e8', '#7dd8cc'],
   gradientLocations: [0, 0.6, 1],
+  iconGradient: null,
+  backgroundImage: null,
 };
 
 export default biminiBreeze;

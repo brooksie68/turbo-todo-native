@@ -157,7 +157,7 @@ const TodoItem = memo(function TodoItem({
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 style={styles.rowActionBtn}
               >
-                <IconCreateNew size={18} color={theme.iconColor} />
+                <IconCreateNew size={18} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
               </TouchableOpacity>
             </View>
           )}
@@ -171,7 +171,7 @@ const TodoItem = memo(function TodoItem({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={styles.rowActionBtn}
             >
-              <IconOptions size={18} color={theme.iconColor} />
+              <IconOptions size={18} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
             </TouchableOpacity>
           </View>
         </View>

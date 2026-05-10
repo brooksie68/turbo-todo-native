@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
   ToastAndroid,
+  ImageBackground,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
@@ -32,21 +33,30 @@ import HelpModal from './HelpModal';
 import AlarmModal from './AlarmModal';
 import SendToListModal from './SendToListModal';
 
-// Renders LinearGradient for themes that define gradientColors, plain View otherwise.
+// Renders background: ImageBackground (if set) → LinearGradient tint → children.
 function ThemeBg({ style, children }: { style: object; children: React.ReactNode }) {
   const { theme } = useThemeContext();
-  if (theme.gradientColors) {
+
+  const gradient = theme.gradientColors ? (
+    <LinearGradient
+      colors={theme.gradientColors as [string, string, ...string[]]}
+      locations={(theme.gradientLocations ?? undefined) as [number, number, ...number[]] | undefined}
+      style={theme.backgroundImage ? StyleSheet.absoluteFill : style}
+    >
+      {!theme.backgroundImage && children}
+    </LinearGradient>
+  ) : null;
+
+  if (theme.backgroundImage) {
     return (
-      <LinearGradient
-        colors={theme.gradientColors as [string, string, ...string[]]}
-        locations={(theme.gradientLocations ?? undefined) as [number, number, ...number[]] | undefined}
-        style={style}
-      >
+      <ImageBackground source={theme.backgroundImage} style={style} resizeMode="cover">
+        {gradient}
         {children}
-      </LinearGradient>
+      </ImageBackground>
     );
   }
-  return <View style={[style, { backgroundColor: theme.bg }]}>{children}</View>;
+
+  return gradient ?? <View style={[style, { backgroundColor: theme.bg }]}>{children}</View>;
 }
 
 export default function TodoList() {

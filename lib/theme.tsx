@@ -60,6 +60,10 @@ export type Theme = {
   checkboxBg: string;          // unchecked checkbox fill
   checkboxDone: string;        // checked checkbox fill + border
   checkmarkColor: string;      // SVG checkmark color inside done checkbox
+
+  // Extended visual tokens (optional — null = not used)
+  iconGradient: [string, string] | null;  // top→bottom gradient on all iconColor icons; overrides iconColor when set
+  backgroundImage: number | null;          // require()'d image asset; gradient overlays on top as tint
 };
 
 export { themes };

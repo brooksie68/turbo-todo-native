@@ -30,6 +30,8 @@ const goldenHour: Theme = {
   footerBorder: '#8a5a30',
   gradientColors: ['#f5e0c0', '#fdf0dc', '#f0d8b8'],
   gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: null,
 };
 
 export default goldenHour;

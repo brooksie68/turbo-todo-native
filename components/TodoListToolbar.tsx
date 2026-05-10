@@ -24,17 +24,17 @@ export default function TodoListToolbar({
     <View style={[styles.toolbarOuter, { backgroundColor: 'transparent', borderBottomColor: theme.footerBorder, paddingBottom: insets.bottom }]}>
       <View style={styles.toolbarInner}>
         <TouchableOpacity style={styles.toolbarLeft} onPress={onOpenMenu}>
-          <IconOptions size={24} color={theme.iconColor} />
+          <IconOptions size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarCenter} onPress={onAddNew}>
-          <IconCreateNew size={24} color={theme.iconColor} />
+          <IconCreateNew size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarRight} onPress={onToggleAll}>
           {allExpanded
-            ? <IconExpandUp size={24} color={theme.iconColor} />
-            : <IconExpandDown size={24} color={theme.iconColor} />
+            ? <IconExpandUp size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
+            : <IconExpandDown size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
           }
         </TouchableOpacity>
       </View>
