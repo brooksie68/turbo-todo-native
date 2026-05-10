@@ -248,6 +248,39 @@ T2 is a 360×800 frame. Layer names must stay stable — they're how Claude maps
 
 ---
 
+## Iterative Edit Workflow (theme tuning)
+
+Used when refining an existing theme — not creating from scratch. The Edit section is a sandbox; the main T2 and info cards are not touched until the final commit.
+
+### Setup (done once per theme)
+
+On the theme's Figma page, James creates a **Section** named `[Theme Name] - Edit` (e.g. `Dark Slate - Edit`). Inside it lives a duplicate of the T2 frame. This is where all iterative edits happen.
+
+Dark Slate edit section: node `170:2` on page `122:2`.
+
+### Iteration loop
+
+1. James edits the T2 frame inside the Edit section in Figma
+2. Claude reads values: `get_design_context` on the Edit T2 node
+3. Claude updates `lib/themes/[theme].ts` with new token values
+4. Claude outputs the OTA command — James runs it, kills + relaunches app
+5. James reviews on device → repeat from step 1 until satisfied
+
+### Final commit (when happy)
+
+1. Claude reads final values from the Edit T2
+2. Overwrites the main `[Theme Name]` T2 frame in Figma with the final fills/strokes (use `use_figma`)
+3. Deletes the Edit section from the Figma page (use `use_figma`)
+4. Commits the updated theme `.ts` file to git
+
+### Claude must
+
+- **Never edit the main T2 or info cards during iteration** — all reads are from the Edit T2
+- Always give James the exact `eas update` command string to run; never execute it
+- After final commit: verify the Edit section is gone from the Figma page before closing out
+
+---
+
 ## Icons
 
 All icons are SVG components in `components/Icons.tsx`. Every call site passes `color={theme.iconColor}` — the defaults in the function signatures are irrelevant in practice.

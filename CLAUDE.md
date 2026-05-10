@@ -95,6 +95,15 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Each theme's values are canon for that theme — never compare across themes
 - Read `themes.md` before any Figma theme work
 
+### Iterative edit workflow (theme tuning — full steps in `themes.md`)
+1. James edits the `[Theme] - Edit` Section in Figma (sandbox T2 — never the main T2)
+2. Claude reads Edit T2 → updates `lib/themes/[theme].ts` → outputs OTA command for James to run
+3. Repeat until happy
+4. Final: Claude overwrites main T2 in Figma with final values, deletes Edit section, commits `.ts` file
+- Dark Slate edit section: node `170:2` on Figma page `122:2`
+- **Never edit main T2 or info cards during iteration**
+- **Never run the OTA command — always give James the string to run himself**
+
 ### Figma
 - **Theme authoring file:** `wUMtjlawjc3wFuROGfYuO6` — https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
 - Default Theme page: id `2:5`, T2 frame node: `5:2`
