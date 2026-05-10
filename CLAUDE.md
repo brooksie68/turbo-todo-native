@@ -8,22 +8,23 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-09)
+## Current state (as of 2026-05-10)
 
-**Git HEAD:** `a5111a1` — "Re-add list picker fix; center gear menu on icon" (send-to-list uncommitted)
+**Git HEAD:** `fd7db7b` — "Document iterative theme edit workflow in themes.md + CLAUDE.md"
 **Active branch:** `themes/exploration` — not yet merged to main
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** All four rolled-back features re-added and OTA-confirmed working. Backlog merged from phone list. App officially named Buzzsaw (rename deferred).
+**Device state:** `Dark Slate - Edit` theme live on device for side-by-side comparison with original Dark Slate. Iterative edit workflow established and working.
 
-### What was done this session
-- **Re-added notes in Export for AI** — `formatItemTree` appends note as `> blockquote` after task label
-- **Re-added checked item styling** — lighter `checkboxDone`, darker `textDone` across all 6 themes
-- **Re-added list picker fix** — dropdown anchored to selector button via `measure()`
-- **Gear menu fix** — dropdown centers on icon with `Dimensions`-based screen-edge clamping
-- **Re-added send-to-list** — `SendToListModal.tsx` + `sendToList()` in `useTodoData`; full subtree move with depth normalization; available at all kebab depths
-- **Backlog merged** from James's phone list ("Shamus Primary") — new items added, duplicates removed, reorganized into Bugs / Features / Paid sections
-- **App name decided:** Buzzsaw — full rename plan made (dir, package, AsyncStorage keys, app.json, EAS, GitHub) but deferred
+### What was done this session (2026-05-10)
+- **Figma ui-attributes card** — built card 6 (`171:2`) on Default Theme page: 8 sections, 34 rows of structural UI attributes (sizes, positions, padding for every UI element)
+- **Dark Slate Figma alignment** — repositioned all DS frames to match Default Theme canvas layout (T2 at x=0, cards at x=600/1068/1528/1948); applied borders + cornerRadius 6 to info cards
+- **Dark Slate ui-attributes card** — built matching card 6 (`176:2`) on Dark Slate page
+- **Iterative edit workflow** — documented in `themes.md` + `CLAUDE.md`; Dark Slate - Edit is a full Figma page duplicate (not a section) — T2 at node `170:34`
+- **Dark Slate - Edit icons** — applied logo btn gradient fill + drop shadow to all app icons (header, toolbar, row-level: IconPin, IconCreateNew, IconOptions); gradient border on all checkboxBg strokes
+- **Full T2 diff** — compared Edit T2 to main Dark Slate T2, identified 17 token changes across bg, surface, border, gradients, text depths, checkbox, icon colors
+- **`dark-slate-edit` theme** — new theme file + registered in index; original `dark-slate.ts` restored to pre-session values; both live on device for comparison
+- **OTA pushed** — update group `b81d788b`
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -100,9 +101,11 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 2. Claude reads Edit T2 → updates `lib/themes/[theme].ts` → outputs OTA command for James to run
 3. Repeat until happy
 4. Final: Claude overwrites main T2 in Figma with final values, deletes Edit section, commits `.ts` file
-- Dark Slate edit section: node `170:2` on Figma page `122:2`
+- Dark Slate - Edit is a **full Figma page** (not a section) — page name: `Dark Slate - Edit`, T2 node: `170:34`
+- `dark-slate-edit` theme (`lib/themes/dark-slate-edit.ts`) is the in-app counterpart — overwrite this file each iteration
+- **"App icons" = ALL icons**: header (logo, gear, help), toolbar (kebab, add, collapse, expand), AND row-level (IconPin, IconCreateNew, IconOptions)**
 - **Never edit main T2 or info cards during iteration**
-- **Never run the OTA command — always give James the string to run himself**
+- **Never run the OTA command — always give James the string to run himself** (unless James explicitly grants permission for the session)
 
 ### Figma
 - **Theme authoring file:** `wUMtjlawjc3wFuROGfYuO6` — https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
@@ -227,8 +230,15 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. Merge `themes/exploration` branch to main
-2. Add Forest Canopy + Golden Hour as pages in todo-app-themes Figma file (T2 + cards 3/4/5)
+1. Finish iterating Dark Slate - Edit → decide if it replaces Dark Slate or becomes its own theme
+2. Final commit: overwrite main Dark Slate T2 in Figma, delete Edit page, commit `.ts` file
+3. Merge `themes/exploration` branch to main
+4. Add Forest Canopy + Golden Hour as pages in todo-app-themes Figma file (T2 + cards 3/4/5)
+
+### Theme system improvements identified
+- [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
+- [ ] Add `iconGradient: string[] | null` token — app falls back to `iconColor` solid if null
+- [ ] Split `checkboxDone` into `checkboxDoneBg` + `checkboxDoneBorder` — currently one token controls both
 
 ### Backlog
 
