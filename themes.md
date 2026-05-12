@@ -139,8 +139,11 @@ Every token is required. No nullables. See the `Theme` type in `lib/theme.tsx` f
 |---|---|---|---|
 | `default` | Default | Production | Pixel-corrected. `headerBorder: #d4b24d`, `checkmarkColor: #eae2ca` |
 | `dark-slate` | Dark Slate | Enabled | Values are canon for this theme — do not compare against Default |
-| `slate` | Slate | Enabled | Same |
+| `deep-blue` | Deep Blue | Enabled | Same |
 | `bimini-breeze` | Bimini Breeze | Enabled | Same |
+| `forest-canopy` | Forest Canopy | Enabled | Same |
+| `muir-light` | Muir Light | Enabled | backgroundImage: muir-light.png |
+| `biomech` | Biomech | Enabled | iconGradient, fontFamily: IBMPlexMono |
 
 **Rule:** each theme's values are correct for that theme. Differences between themes are intentional. Only compare a theme against its own Figma page.
 
@@ -153,8 +156,16 @@ Every token is required. No nullables. See the `Theme` type in `lib/theme.tsx` f
 **File key:** `wUMtjlawjc3wFuROGfYuO6`
 
 **Pages:**
-- `Page 1` (id: `0:1`) — original reference, do not modify
-- `Default Theme` (id: `2:5`) — T1 frame node: `5:2` — live Default template
+| # | Page name | Page ID | Theme ID |
+|---|---|---|---|
+| 00 | Default | `2:5` | `default` |
+| 01 | Dark Slate | `122:2` | `dark-slate` |
+| 02 | Deep Blue | `170:2` | `deep-blue` |
+| 03 | Forest Canopy | `199:2` | `forest-canopy` |
+| 04 | Muir Light | `199:698` | `muir-light` |
+| 05 | Biomech | `199:1394` | `biomech` |
+| 06 | Bimini Breeze | `223:2` | `bimini-breeze` |
+| — | ARCHIVE - DO NOT TOUCH | `0:1` | — |
 
 Each new theme gets its own page. Page name = theme display name = code `name` field.
 

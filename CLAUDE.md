@@ -8,23 +8,26 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-10)
+## Current state (as of 2026-05-11)
 
-**Git HEAD:** `fd7db7b` — "Document iterative theme edit workflow in themes.md + CLAUDE.md"
-**Active branch:** `themes/exploration` — not yet merged to main
+**Git HEAD:** `75b43f7` — "docs: rename T1→removed, T2→T1..."
+**Active branch:** `main` (themes/exploration merged)
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** `Dark Slate - Edit` theme live on device for side-by-side comparison with original Dark Slate. Iterative edit workflow established and working.
+**Device state:** 7 themes live (default, dark-slate, deep-blue, bimini-breeze, forest-canopy, muir-light, biomech). OTA not yet pushed for this session's removals.
 
-### What was done this session (2026-05-10)
-- **Figma ui-attributes card** — built card 6 (`171:2`) on Default Theme page: 8 sections, 34 rows of structural UI attributes (sizes, positions, padding for every UI element)
-- **Dark Slate Figma alignment** — repositioned all DS frames to match Default Theme canvas layout (T2 at x=0, cards at x=600/1068/1528/1948); applied borders + cornerRadius 6 to info cards
-- **Dark Slate ui-attributes card** — built matching card 6 (`176:2`) on Dark Slate page
-- **Iterative edit workflow** — documented in `themes.md` + `CLAUDE.md`; Dark Slate - Edit is a full Figma page duplicate (not a section) — T2 at node `170:34`
-- **Dark Slate - Edit icons** — applied logo btn gradient fill + drop shadow to all app icons (header, toolbar, row-level: IconPin, IconCreateNew, IconOptions); gradient border on all checkboxBg strokes
-- **Full T2 diff** — compared Edit T2 to main Dark Slate T2, identified 17 token changes across bg, surface, border, gradients, text depths, checkbox, icon colors
-- **`dark-slate-edit` theme** — new theme file + registered in index; original `dark-slate.ts` restored to pre-session values; both live on device for comparison
-- **OTA pushed** — update group `b81d788b`
+### What was done this session (2026-05-11)
+- **Removed themes:** `slate.ts`, `golden-hour.ts`, `dark-slate-edit.ts` deleted; `index.ts` cleaned up — down from 9 to 7 themes
+- **Figma Bimini Breeze page** — created page "06 - Bimini Breeze" (id: `223:2`) with T1 populated + T2/T3/T4 info frames
+- **Figma icon FRAME cleanup** — all 7 pages: FRAME+VECTOR wrappers flattened to bare named vectors (help-icon, list-gear-btn, IconPin, IconCreateNew, IconOptions, checkmark, toolbar icons)
+- **Figma logo GROUP promotion** — all pages: turbo-todo-logo-btn GROUP→bare VECTOR at x=8, y=12
+- **Figma T1 frame names fixed** — pages 02–05 renamed from `[Default]`/`[Dark Slate]` to their correct theme names
+- **Figma annotations cleanup** — annotations GROUP deleted from pages 03/04/05/06
+- **Figma light template** — applied to T2–T5 on Default/Forest Canopy/Bimini Breeze pages (bg #f5f0e8 palette)
+- **Figma dark template** — uniform dark bg (#13151a) applied to Dark Slate/Deep Blue/Muir Light/Biomech info frames
+- **themes.md updated** — Theme Status table reflects current 7 themes with correct page IDs
+- **⚠ Light template visual** — needs rework; James showed screenshot indicating result doesn't look right (unresolved)
+- **OTA not pushed** — pending commit
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -68,7 +71,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Images on depth-0 and depth-1 items (local file system, up to 5); AddChildMenu has "Image" (gallery, multi-select) and "Take photo" (camera, single shot)
 - Links on depth-0 and depth-1 items (SQLite task_links table)
 - Export for AI (share sheet, markdown outline)
-- 6 themes: Default, Dark Slate, Slate, Bimini Breeze, Forest Canopy, Golden Hour — theme picker via logo button dropdown
+- 7 themes: Default, Dark Slate, Deep Blue, Bimini Breeze, Forest Canopy, Muir Light, Biomech — theme picker via logo button dropdown
 - Child count badge on collapsed parents ("- N")
 - Pin to top: depth-0 only, floats above incomplete list, blocks drag
 - Row UI: IconCreateNew (add subtask) + IconOptions (kebab)
@@ -230,10 +233,10 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. Finish iterating Dark Slate - Edit → decide if it replaces Dark Slate or becomes its own theme
-2. Final commit: overwrite main Dark Slate T2 in Figma, delete Edit page, commit `.ts` file
-3. Merge `themes/exploration` branch to main
-4. Add Forest Canopy + Golden Hour as pages in todo-app-themes Figma file (T2 + cards 3/4/5)
+1. OTA push: `eas update --branch preview --platform android --message "remove slate/golden-hour, add bimini-breeze"` — then commit + push
+2. Rework light info frame template in Figma (T2–T5 on Default/Forest Canopy/Bimini Breeze) — result doesn't look right yet
+3. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
+4. /drop-themes for remaining pages that haven't been updated yet
 
 ### Theme system improvements identified
 - [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
