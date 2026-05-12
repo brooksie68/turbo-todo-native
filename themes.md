@@ -154,39 +154,39 @@ Every token is required. No nullables. See the `Theme` type in `lib/theme.tsx` f
 
 **Pages:**
 - `Page 1` (id: `0:1`) — original reference, do not modify
-- `Default Theme` (id: `2:5`) — T2 frame node: `5:2` — live Default template
+- `Default Theme` (id: `2:5`) — T1 frame node: `5:2` — live Default template
 
 Each new theme gets its own page. Page name = theme display name = code `name` field.
 
 ---
 
-## 5-Frame Template Structure (per page)
+## Frame Structure (per page, T1–T5)
 
-| # | Frame name | Purpose |
+| Frame | Name | Purpose |
 |---|---|---|
-| 1 | `page-layout` | Engineering spec — zone labels, pixel dimensions, token names. Static. |
-| 2 | `[Theme Name]` | **T2 — the live theme frame.** James edits this. Layer names match token names. |
-| 3 | `theme-values` | Info card — token names + color swatches + hex values. Claude writes this. |
-| 4 | `menus-modals-and-values` | Info card — menus, modals, priority tokens. Claude writes this. |
-| 5 | `icons-and-values` | Icon grid — real icon shapes + token + hex. Claude writes this. |
+| T1 | `[Theme Name]` | **Primary edit frame.** James edits this. Layer names match token names. |
+| T2 | `theme-values` | Info card — token names + color swatches + hex values. Claude writes this. |
+| T3 | `menus-modals-and-values` | Info card — menus, modals, priority tokens. Claude writes this. |
+| T4 | `icons-and-values` | Icon grid — real icon shapes + token + hex. Claude writes this. |
+| T5 | `ui-attributes` | Structural UI attributes — sizes, positions, padding. Claude writes this. |
 
 Frame positions (Default Theme page):
 
 | Frame | x | Width |
 |---|---|---|
-| page-layout | -640 | 360 |
-| [Default] | 368 | 360 |
-| theme-values | 928 | 408 |
-| menus-modals-and-values | 1448 | 400 |
-| icons-and-values | 1968 | 360 |
+| T1 `[Theme Name]` | 0 | 360 |
+| T2 `theme-values` | 600 | 408 |
+| T3 `menus-modals-and-values` | 1068 | 400 |
+| T4 `icons-and-values` | 1528 | 360 |
+| T5 `ui-attributes` | 1948 | 360 |
 
-Cards 3, 4, 5 auto-resize to content height. Never move or resize them manually.
+T2–T5 auto-resize to content height. Never move or resize them manually.
 
 ---
 
-## T2 Layer Structure
+## T1 Layer Structure
 
-T2 is a 360×800 frame. Layer names must stay stable — they're how Claude maps Figma values to tokens.
+T1 is a 360×800 frame. Layer names must stay stable — they're how Claude maps Figma values to tokens.
 
 ```
 [Default]  (360×800, fill = none)
@@ -227,13 +227,13 @@ T2 is a 360×800 frame. Layer names must stay stable — they're how Claude maps
 
 1. In Figma, duplicate the `Default Theme` page
 2. Rename the page to the new theme name (e.g. `Cape Cod Shore`)
-3. In T2, rename the outer frame from `[Default]` to `[Cape Cod Shore]`
-4. Edit T2 visually — change fills, strokes, gradient stops
-5. When ready, tell Claude: "read T2 on the Cape Cod Shore page and generate the theme"
+3. In T1, rename the outer frame from `[Default]` to `[Cape Cod Shore]`
+4. Edit T1 visually — change fills, strokes, gradient stops
+5. When ready, tell Claude: "read T1 on the Cape Cod Shore page and generate the theme"
 
 ### Claude's read-back process
 
-1. Call `get_design_context` on the T2 node (REST API — works across pages)
+1. Call `get_design_context` on the T1 node (REST API — works across pages)
 2. Extract hex values from named layers
 3. Generate a `Theme` object matching the `Theme` type exactly
 4. Create `lib/themes/your-theme.ts` with the object
@@ -242,7 +242,7 @@ T2 is a 360×800 frame. Layer names must stay stable — they're how Claude maps
 
 ### Diff workflow
 
-- "Take a snapshot" → Claude reads and stores current T2 values
+- "Take a snapshot" → Claude reads and stores current T1 values
 - James edits in Figma
 - "Diff and update cards" → Claude reports what changed and rewrites cards
 
@@ -254,28 +254,28 @@ Used when refining an existing theme — not creating from scratch. The Edit sec
 
 ### Setup (done once per theme)
 
-On the theme's Figma page, James creates a **Section** named `[Theme Name] - Edit` (e.g. `Dark Slate - Edit`). Inside it lives a duplicate of the T2 frame. This is where all iterative edits happen.
+On the theme's Figma page, James creates a **Section** named `[Theme Name] - Edit` (e.g. `Dark Slate - Edit`). Inside it lives a duplicate of the T1 frame. This is where all iterative edits happen.
 
 Dark Slate edit section: node `170:2` on page `122:2`.
 
 ### Iteration loop
 
-1. James edits the T2 frame inside the Edit section in Figma
-2. Claude reads values: `get_design_context` on the Edit T2 node
+1. James edits the T1 frame inside the Edit section in Figma
+2. Claude reads values: `get_design_context` on the Edit T1 node
 3. Claude updates `lib/themes/[theme].ts` with new token values
 4. Claude outputs the OTA command — James runs it, kills + relaunches app
 5. James reviews on device → repeat from step 1 until satisfied
 
 ### Final commit (when happy)
 
-1. Claude reads final values from the Edit T2
-2. Overwrites the main `[Theme Name]` T2 frame in Figma with the final fills/strokes (use `use_figma`)
+1. Claude reads final values from the Edit T1
+2. Overwrites the main `[Theme Name]` T1 frame in Figma with the final fills/strokes (use `use_figma`)
 3. Deletes the Edit section from the Figma page (use `use_figma`)
 4. Commits the updated theme `.ts` file to git
 
 ### Claude must
 
-- **Never edit the main T2 or info cards during iteration** — all reads are from the Edit T2
+- **Never edit the main T1 or info frames during iteration** — all reads are from the Edit T1
 - Always give James the exact `eas update` command string to run; never execute it
 - After final commit: verify the Edit section is gone from the Figma page before closing out
 
@@ -311,19 +311,20 @@ All icons are SVG components in `components/Icons.tsx`. Every call site passes `
 
 ---
 
-## Info Card Design (Cards 3, 4, 5)
+## Info Frame Design (T2–T5)
 
-Dark background (`#13151a`), three accent colors:
+Dark background (`#13151a`), accent colors per frame:
 
-| Card | Accent | Content |
+| Frame | Accent | Content |
 |---|---|---|
-| 3 — theme-values | Amber `#f5a623` | All tokens: semantic label + token name + swatch + hex |
-| 4 — menus-modals-and-values | Coral `#ff6b6b` | Menu, modal, priority tokens |
-| 5 — icons-and-values | Cyan `#38d9e8` | 2-col icon grid: shape + label + token + hex |
+| T2 — theme-values | Amber `#f5a623` | All tokens: semantic label + token name + swatch + hex |
+| T3 — menus-modals-and-values | Coral `#ff6b6b` | Menu, modal, priority tokens |
+| T4 — icons-and-values | Cyan `#38d9e8` | 2-col icon grid: shape + label + token + hex |
+| T5 — ui-attributes | Teal `#38e8c8` | Structural attributes: sizes, positions, padding |
 
 Typography: Roboto. 10px semantic labels (white), 8.5px token names (muted), 9px hex values (light blue mono).
 
-### Icon card GROUP structure (card 5)
+### Icon frame GROUP structure (T4)
 
 ```
 [0] bg          RECTANGLE  162×140, fill #1c1f27, cornerRadius 5

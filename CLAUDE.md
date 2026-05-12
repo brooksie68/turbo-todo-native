@@ -97,20 +97,20 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Read `themes.md` before any Figma theme work
 
 ### Iterative edit workflow (theme tuning — full steps in `themes.md`)
-1. James edits the `[Theme] - Edit` Section in Figma (sandbox T2 — never the main T2)
+1. James edits the `[Theme] - Edit` Section in Figma (sandbox T1 — never the main T1)
 2. Claude reads Edit T2 → updates `lib/themes/[theme].ts` → outputs OTA command for James to run
 3. Repeat until happy
 4. Final: Claude overwrites main T2 in Figma with final values, deletes Edit section, commits `.ts` file
-- Dark Slate - Edit is a **full Figma page** (not a section) — page name: `Dark Slate - Edit`, T2 node: `170:34`
+- Dark Slate - Edit is a **full Figma page** (not a section) — page name: `Dark Slate - Edit`, T1 node: `170:34`
 - `dark-slate-edit` theme (`lib/themes/dark-slate-edit.ts`) is the in-app counterpart — overwrite this file each iteration
 - **"App icons" = ALL icons**: header (logo, gear, help), toolbar (kebab, add, collapse, expand), AND row-level (IconPin, IconCreateNew, IconOptions)**
-- **Never edit main T2 or info cards during iteration**
+- **Never edit main T1 or info frames during iteration**
 - **Never run the OTA command — always give James the string to run himself** (unless James explicitly grants permission for the session)
 
 ### Figma
 - **Theme authoring file:** `wUMtjlawjc3wFuROGfYuO6` — https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
-- Default Theme page: id `2:5`, T2 frame node: `5:2`
-- Each theme page has 5 frames: `page-layout` | `[Theme Name]` (T2) | `theme-values` | `menus-modals-and-values` | `icons-and-values`
+- Default Theme page: id `2:5`, T1 frame node: `5:2`
+- Each theme page has 5 frames: `[Theme Name]` (T1) | `theme-values` (T2) | `menus-modals-and-values` (T3) | `icons-and-values` (T4) | `ui-attributes` (T5)
 - Use `get_design_context` (REST) to read across pages; `use_figma` (Plugin API) for writes — must call on current page
 
 ### 27 tokens (what each controls)
