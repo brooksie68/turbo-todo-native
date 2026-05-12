@@ -4,18 +4,34 @@
  */
 
 import React from 'react';
-import Svg, { G, Path, Line, Polyline, Rect } from 'react-native-svg';
+import Svg, { G, Path, Line, Polyline, Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
+
+// Renders gradient defs inside an SVG when iconGradient is set.
+function IconGradDefs({ gradient }: { gradient?: [string, string] | null }) {
+  if (!gradient) return null;
+  return (
+    <Defs>
+      <SvgLinearGradient id="iconGrad" x1="0" y1="0" x2="0" y2="1">
+        <Stop offset="0" stopColor={gradient[0]} />
+        <Stop offset="1" stopColor={gradient[1]} />
+      </SvgLinearGradient>
+    </Defs>
+  );
+}
 
 type IconProps = {
   size?: number;
   color?: string;
+  gradient?: [string, string] | null;
 };
 
 // ─── Logo ─────────────────────────────────────────────────────
 
-export function IconLogo({ size = 42, color = '#025f96' }: IconProps) {
+export function IconLogo({ size = 42, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 42 42" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 42 42" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <G transform="matrix(0.094597,0,0,0.094597,-3.329268,-3.045936)">
         <Path
           fillRule="evenodd"
@@ -29,9 +45,11 @@ export function IconLogo({ size = 42, color = '#025f96' }: IconProps) {
 
 // ─── Gear (list settings) ─────────────────────────────────────
 
-export function IconGear({ size = 24, color = '#025f96' }: IconProps) {
+export function IconGear({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <Path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -43,9 +61,11 @@ export function IconGear({ size = 24, color = '#025f96' }: IconProps) {
 
 // ─── Help ─────────────────────────────────────────────────────
 
-export function IconHelp({ size = 24, color = '#025f96' }: IconProps) {
+export function IconHelp({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <Path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -57,9 +77,11 @@ export function IconHelp({ size = 24, color = '#025f96' }: IconProps) {
 
 // ─── Options / kebab (toolbar + row) ─────────────────────────
 
-export function IconOptions({ size = 24, color = '#025f96' }: IconProps) {
+export function IconOptions({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <Path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -71,9 +93,11 @@ export function IconOptions({ size = 24, color = '#025f96' }: IconProps) {
 
 // ─── Create new (toolbar FAB + row add child) ─────────────────
 
-export function IconCreateNew({ size = 24, color = '#025f96' }: IconProps) {
+export function IconCreateNew({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <Path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -85,9 +109,11 @@ export function IconCreateNew({ size = 24, color = '#025f96' }: IconProps) {
 
 // ─── Expand down (collapsed — tap to expand) ──────────────────
 
-export function IconExpandDown({ size = 24, color = '#025f96' }: IconProps) {
+export function IconExpandDown({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <Path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -99,9 +125,11 @@ export function IconExpandDown({ size = 24, color = '#025f96' }: IconProps) {
 
 // ─── Expand up (expanded — tap to collapse) ───────────────────
 
-export function IconExpandUp({ size = 24, color = '#025f96' }: IconProps) {
+export function IconExpandUp({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <Path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -150,27 +178,48 @@ export function IconClose({ size = 24, color = '#025f96' }: IconProps) {
   );
 }
 
-export function IconBell({ size = 24, color = '#025f96' }: IconProps) {
+export function IconBell({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fillValue}>
+      <IconGradDefs gradient={gradient} />
       <Path d="M12 2a1 1 0 0 0-1 1v.5A6 6 0 0 0 6 9v4l-1.5 2.5A1 1 0 0 0 5.4 17H9a3 3 0 0 0 6 0h3.6a1 1 0 0 0 .9-1.5L18 13V9a6 6 0 0 0-5-5.5V3a1 1 0 0 0-1-1z" />
     </Svg>
   );
 }
 
-export function IconPin({ size = 24, color = '#025f96' }: IconProps) {
+export function IconPin({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path d="M16 3H8v7l-2 3h5v7l1 2 1-2v-7h5l-2-3V3z" fill={color} />
+      <IconGradDefs gradient={gradient} />
+      <Path d="M16 3H8v7l-2 3h5v7l1 2 1-2v-7h5l-2-3V3z" fill={fillValue} />
     </Svg>
   );
 }
 
-export function IconShare({ size = 24, color = '#025f96' }: IconProps) {
+export function IconShare({ size = 24, color = '#025f96', gradient }: IconProps) {
+  const fillValue = gradient ? 'url(#iconGrad)' : color;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d="M12 3l-4 4h3v7h2V7h3l-4-4z" fill={color} />
-      <Path d="M5 13v6h14v-6h-2v4H7v-4H5z" fill={color} />
+      <IconGradDefs gradient={gradient} />
+      <Path d="M12 3l-4 4h3v7h2V7h3l-4-4z" fill={fillValue} />
+      <Path d="M5 13v6h14v-6h-2v4H7v-4H5z" fill={fillValue} />
+    </Svg>
+  );
+}
+
+// ─── Checkmark (checkbox done state) ─────────────────────────
+
+export function IconCheckmark({ size = 11, color = '#ffffff' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 11 9" fill="none">
+      <Path
+        d="M9.3676 0.328125C9.52005 0.223722 9.72294 0.22379 9.87541 0.328125L9.94768 0.389648L10.4731 0.94043C10.6386 1.11416 10.6384 1.38769 10.4731 1.56152L3.92717 8.43066C3.7499 8.61668 3.45314 8.61657 3.2758 8.43066L0.374435 5.38672C0.208426 5.21251 0.208901 4.93833 0.375412 4.76465L0.905685 4.21191L0.976974 4.15137C1.1297 4.04726 1.3325 4.04756 1.48479 4.15234L1.55608 4.21289L3.601 6.35938L9.29631 0.389648L9.3676 0.328125Z"
+        fill={color}
+        stroke={color}
+        strokeWidth={0.5}
+      />
     </Svg>
   );
 }

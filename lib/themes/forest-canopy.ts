@@ -1,0 +1,38 @@
+import type { Theme } from '../theme';
+
+const forestCanopy: Theme = {
+  id: 'forest-canopy',
+  name: 'Forest Canopy',
+  enabled: true,
+  statusBarStyle: 'dark',
+  bg: '#3d5c3a',
+  headerBg: '#e8ede0',
+  headerBorder: '#8a9a7a',
+  surface: '#f0f2e8',
+  border: '#b8c4a4',
+  text: '#2d4a2b',
+  textSub: '#7d8471',
+  textDone: '#7a8870',
+  textDepth: ['#1a3018', '#2d4a2b', '#506848'],
+  accent: '#2d4a2b',
+  danger: '#8b3a3a',
+  priorityElevated: '#7a6a20',
+  priorityTop: '#8b3a3a',
+  iconColor: '#2d4a2b',
+  listSelectorBg: '#e4ead8',
+  listSelectorText: '#2d4a2b',
+  listSelectorBorder: '#2d4a2b',
+  checkboxBg: '#f5f7f0',
+  checkboxDone: '#5a7a58',
+  checkmarkColor: '#f0f2e8',
+  separator: '#cdd4be',
+  menuBg: '#edf0e4',
+  footerBorder: '#506848',
+  gradientColors: ['#e8ede0', '#f0f2e8', '#dde4d0'],
+  gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: null,
+  fontFamily: null,
+};
+
+export default forestCanopy;

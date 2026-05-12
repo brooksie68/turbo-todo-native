@@ -1,0 +1,38 @@
+import type { Theme } from '../theme';
+
+const deepBlue: Theme = {
+  id: 'deep-blue',
+  name: 'Deep Blue',
+  enabled: true,
+  statusBarStyle: 'light',
+  bg: '#000d13',
+  headerBg: '#2e2b27',
+  headerBorder: '#3e3a36',
+  surface: '#0d161e',
+  border: '#0d2b46',
+  text: '#e6e2dc',
+  textSub: '#968e84',
+  textDone: '#524e4a',
+  textDepth: ['#b4a48d', '#968772', '#83745d'],
+  accent: '#c4beb6',
+  danger: '#e05040',
+  priorityElevated: '#e08030',
+  priorityTop: '#e04030',
+  iconColor: '#005684',
+  listSelectorBg: '#121920',
+  listSelectorText: '#7b7b7b',
+  listSelectorBorder: '#004063',
+  checkboxBg: '#161a1c',
+  checkboxDone: '#224a77',
+  checkmarkColor: '#0f82cb',
+  separator: '#0d2b46',
+  menuBg: '#302d29',
+  footerBorder: '#1a1815',
+  gradientColors: ['#0a1e2a', '#030f1f'],
+  gradientLocations: [0, 0.5],
+  iconGradient: ['#005684', '#004075'],
+  backgroundImage: null,
+  fontFamily: null,
+};
+
+export default deepBlue;

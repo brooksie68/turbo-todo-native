@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
   ToastAndroid,
+  ImageBackground,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
@@ -30,22 +31,32 @@ import { exportBackup, importBackup } from '../lib/backup';
 import { isSoundEnabled, setSoundEnabled, loadSoundSetting, playSound } from '../lib/sounds';
 import HelpModal from './HelpModal';
 import AlarmModal from './AlarmModal';
+import SendToListModal from './SendToListModal';
 
-// Renders LinearGradient for themes that define gradientColors, plain View otherwise.
+// Renders background: ImageBackground (if set) → LinearGradient tint → children.
 function ThemeBg({ style, children }: { style: object; children: React.ReactNode }) {
   const { theme } = useThemeContext();
-  if (theme.gradientColors) {
+
+  const gradient = theme.gradientColors ? (
+    <LinearGradient
+      colors={theme.gradientColors as [string, string, ...string[]]}
+      locations={(theme.gradientLocations ?? undefined) as [number, number, ...number[]] | undefined}
+      style={theme.backgroundImage ? StyleSheet.absoluteFill : style}
+    >
+      {!theme.backgroundImage && children}
+    </LinearGradient>
+  ) : null;
+
+  if (theme.backgroundImage) {
     return (
-      <LinearGradient
-        colors={theme.gradientColors as [string, string, ...string[]]}
-        locations={(theme.gradientLocations ?? undefined) as [number, number, ...number[]] | undefined}
-        style={style}
-      >
+      <ImageBackground source={theme.backgroundImage} style={style} resizeMode="cover">
+        {gradient}
         {children}
-      </LinearGradient>
+      </ImageBackground>
     );
   }
-  return <View style={[style, { backgroundColor: theme.bg }]}>{children}</View>;
+
+  return gradient ?? <View style={[style, { backgroundColor: theme.bg }]}>{children}</View>;
 }
 
 export default function TodoList() {
@@ -330,6 +341,7 @@ export default function TodoList() {
           onClearCompletedInGroup={overlay.handleMenuClearCompletedInGroup}
           onSendToDaily={overlay.handleMenuSendToDaily}
           onRestoreFromDaily={overlay.handleMenuRestoreFromDaily}
+          onSendToList={overlay.handleMenuSendToList}
           imageCount={overlay.itemMenuImageCount}
           hasNote={!!(overlay.itemMenuTodo?.note)}
           hasCompletedChildren={overlay.itemMenuHasCompletedChildren}
@@ -389,7 +401,7 @@ export default function TodoList() {
                 return (
                   <View style={[
                     styles.dropIndicator,
-                    { backgroundColor: valid ? themeCtx.accent : '#cc3300', height: valid ? 2 : 3 },
+                    { backgroundColor: valid ? themeCtx.accent : themeCtx.danger, height: valid ? 2 : 3 },
                   ]} />
                 );
               }}
@@ -400,12 +412,12 @@ export default function TodoList() {
             />
           )}
           <LinearGradient
-            colors={['rgba(0,0,0,0.10)', 'rgba(0,0,0,0)']}
+            colors={['rgba(0,0,0,0.08)', 'rgba(0,0,0,0)']}
             style={styles.shadowTop}
             pointerEvents="none"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.10)']}
+            colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.08)']}
             style={styles.shadowBottom}
             pointerEvents="none"
           />
@@ -434,6 +446,15 @@ export default function TodoList() {
 
         <HelpModal visible={showHelp} onClose={() => setShowHelp(false)} />
 
+        <SendToListModal
+          visible={overlay.sendToListTodo !== null}
+          lists={data.lists}
+          activeListId={data.activeListId}
+          dailyListId={data.dailyListId}
+          onSelect={overlay.handleSendToList}
+          onClose={() => overlay.setSendToListTodo(null)}
+        />
+
       </ThemeBg>
     </SafeAreaView>
   );
@@ -442,21 +463,21 @@ export default function TodoList() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scrollWrapper: { flex: 1, marginHorizontal: 6, position: 'relative' },
+  scrollWrapper: { flex: 1, marginHorizontal: 8, position: 'relative' },
   scrollArea: { flex: 1, borderWidth: 1, borderRadius: 2 },
   shadowTop: {
     position: 'absolute',
     top: 1,
     left: 1,
     right: 1,
-    height: 8,
+    height: 5,
   },
   shadowBottom: {
     position: 'absolute',
     bottom: 1,
     left: 1,
     right: 1,
-    height: 8,
+    height: 5,
   },
   scrollContent: { paddingBottom: 8 },
   section: { margin: 8, borderRadius: 4, borderWidth: 1 },

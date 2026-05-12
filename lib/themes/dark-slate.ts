@@ -1,0 +1,38 @@
+import type { Theme } from '../theme';
+
+const darkSlateTheme: Theme = {
+  id: 'dark-slate',
+  name: 'Dark Slate',
+  enabled: true,
+  statusBarStyle: 'light',
+  bg: '#1c1a18',
+  headerBg: '#2e2b27',
+  headerBorder: '#3e3a36',
+  surface: '#272421',
+  border: '#3e3a36',
+  text: '#e6e2dc',
+  textSub: '#968e84',
+  textDone: '#464240',
+  textDepth: ['#e6e2dc', '#c8c4be', '#a8a49e'],
+  accent: '#c4beb6',
+  danger: '#e05040',
+  priorityElevated: '#e08030',
+  priorityTop: '#e04030',
+  iconColor: '#7aa0b8',
+  listSelectorBg: '#322f2b',
+  listSelectorText: '#e6e2dc',
+  listSelectorBorder: '#5a5652',
+  checkboxBg: '#2e2b27',
+  checkboxDone: '#9ab8cc',
+  checkmarkColor: '#ffffff',
+  separator: '#363230',
+  menuBg: '#302d29',
+  footerBorder: '#1a1815',
+  gradientColors: ['#2e2b27', '#272421', '#2a2724'],
+  gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: null,
+  fontFamily: null,
+};
+
+export default darkSlateTheme;

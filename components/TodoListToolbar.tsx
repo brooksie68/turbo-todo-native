@@ -21,20 +21,20 @@ export default function TodoListToolbar({
   const theme = useTheme();
 
   return (
-    <View style={[styles.toolbarOuter, { backgroundColor: 'transparent', borderTopColor: theme.headerBorder, paddingBottom: insets.bottom }]}>
+    <View style={[styles.toolbarOuter, { backgroundColor: 'transparent', borderBottomColor: theme.footerBorder, paddingBottom: insets.bottom }]}>
       <View style={styles.toolbarInner}>
         <TouchableOpacity style={styles.toolbarLeft} onPress={onOpenMenu}>
-          <IconOptions size={24} color={theme.iconColor} />
+          <IconOptions size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarCenter} onPress={onAddNew}>
-          <IconCreateNew size={24} color={theme.iconColor} />
+          <IconCreateNew size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.toolbarRight} onPress={onToggleAll}>
           {allExpanded
-            ? <IconExpandUp size={24} color={theme.iconColor} />
-            : <IconExpandDown size={24} color={theme.iconColor} />
+            ? <IconExpandUp size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
+            : <IconExpandDown size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
           }
         </TouchableOpacity>
       </View>
@@ -43,7 +43,7 @@ export default function TodoListToolbar({
 }
 
 const styles = StyleSheet.create({
-  toolbarOuter: { borderTopWidth: 1 },
+  toolbarOuter: { borderBottomWidth: 1 },
   toolbarInner: { height: 46 },
   toolbarLeft: {
     position: 'absolute',

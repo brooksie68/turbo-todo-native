@@ -1,0 +1,38 @@
+import type { Theme } from '../theme';
+
+const muirLight: Theme = {
+  id: 'muir-light',
+  name: 'Muir Light',
+  enabled: true,
+  statusBarStyle: 'light',
+  bg: '#0e1a14',
+  headerBg: '#0e1a14',
+  headerBorder: '#0a140e',
+  surface: '#162018f0',
+  border: '#3a4a34',
+  text: '#e8dcb8',
+  textSub: '#a8a080',
+  textDone: '#5a5a44',
+  textDepth: ['#e8dcb8', '#c4ba94', '#9a9268'],
+  accent: '#d4a64a',
+  danger: '#c8642a',
+  priorityElevated: '#d4a64a',
+  priorityTop: '#c8642a',
+  iconColor: '#d4a64a',
+  listSelectorBg: '#1a2a1e',
+  listSelectorText: '#e8dcb8',
+  listSelectorBorder: '#d4a64a',
+  checkboxBg: '#0e1a14',
+  checkboxDone: '#d4a64a',
+  checkmarkColor: '#0e1a14',
+  separator: '#2a3a2a',
+  menuBg: '#1a2a1e',
+  footerBorder: '#0a140e',
+  gradientColors: ['#0a141080', '#1a2a1e60', '#3e3a1e40'],
+  gradientLocations: [0, 0.5, 1],
+  iconGradient: null,
+  backgroundImage: require('../../assets/backgrounds/muir-light.png'),
+  fontFamily: null,
+};
+
+export default muirLight;

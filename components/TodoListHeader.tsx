@@ -9,6 +9,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { useThemeContext, themes } from '../lib/theme';
 import type { List } from '../lib/types';
@@ -38,17 +39,22 @@ export default function TodoListHeader({
   onHelp,
 }: Props) {
   const { theme, themeId, setThemeId } = useThemeContext();
-  const [showListPicker, setShowListPicker] = useState(false);
+  const ff = theme.fontFamily ? `${theme.fontFamily}-Regular` : undefined;
+  const [listPickerLayout, setListPickerLayout] = useState<{ top: number; left: number } | null>(null);
   const [themePickerLayout, setThemePickerLayout] = useState<{ top: number; left: number } | null>(null);
-  const [gearMenuLayout, setGearMenuLayout] = useState<{ top: number; right: number } | null>(null);
+  const [gearMenuLayout, setGearMenuLayout] = useState<{ top: number; left: number } | null>(null);
   const [listNameModal, setListNameModal] = useState<'new' | 'rename' | null>(null);
   const [listNameInput, setListNameInput] = useState('');
   const logoBtnRef = useRef<View>(null);
   const gearBtnRef = useRef<View>(null);
+  const listSelectorRef = useRef<View>(null);
 
   function openGearMenu() {
+    const screenWidth = Dimensions.get('window').width;
     gearBtnRef.current?.measure((x, y, w, h, pageX, pageY) => {
-      setGearMenuLayout({ top: pageY + h + 4, right: 0 });
+      const centerX = pageX + w / 2;
+      const left = Math.max(8, Math.min(centerX - 80, screenWidth - 168));
+      setGearMenuLayout({ top: pageY + h + 4, left });
     });
   }
 
@@ -96,7 +102,7 @@ export default function TodoListHeader({
 
   return (
     <>
-      <View style={[styles.header, { backgroundColor: 'transparent' }]}>
+      <View style={[styles.header, { backgroundColor: 'transparent', borderTopWidth: 1, borderTopColor: theme.headerBorder }]}>
         {/* Logo / theme picker */}
         <View ref={logoBtnRef} collapsable={false} style={styles.logoBtn}>
           <TouchableOpacity
@@ -108,42 +114,53 @@ export default function TodoListHeader({
               });
             }}
           >
-            <IconLogo size={42} color={theme.iconColor} />
+            <IconLogo size={40} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
           </TouchableOpacity>
         </View>
 
         {/* List selector */}
-        <TouchableOpacity
-          style={[styles.listSelector, { backgroundColor: theme.listSelectorBg, borderBottomColor: theme.listSelectorBorder }]}
-          onPress={() => setShowListPicker(true)}
-        >
-          <Text style={[styles.listSelectorText, { color: theme.listSelectorText }]} numberOfLines={1}>
-            {activeList?.name ?? '…'}
-          </Text>
-          <Text style={[styles.listSelectorArrow, { color: theme.listSelectorText }]}>▼</Text>
-        </TouchableOpacity>
+        <View ref={listSelectorRef} collapsable={false} style={[styles.listSelector, { backgroundColor: theme.listSelectorBg, borderBottomColor: theme.listSelectorBorder }]}>
+          <TouchableOpacity
+            style={styles.listSelectorInner}
+            onPress={() => {
+              if (listPickerLayout) { setListPickerLayout(null); return; }
+              listSelectorRef.current?.measure((x, y, w, h, pageX, pageY) => {
+                setListPickerLayout({ top: pageY + h + 4, left: pageX });
+              });
+            }}
+          >
+            <Text style={[styles.listSelectorText, { color: theme.listSelectorText, fontFamily: ff }]} numberOfLines={1}>
+              {activeList?.name ?? '…'}
+            </Text>
+            <Text style={[styles.listSelectorArrow, { color: theme.listSelectorText, fontFamily: ff }]}>▼</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Gear / list options */}
         <View ref={gearBtnRef} collapsable={false} style={styles.gearBtn}>
           <TouchableOpacity style={styles.gearBtnInner} onPress={openGearMenu}>
-            <IconGear size={28} color={theme.iconColor} />
+            <IconGear size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
           </TouchableOpacity>
         </View>
 
         {/* Help */}
         <TouchableOpacity style={styles.helpBtn} onPress={onHelp}>
-          <IconHelp size={28} color={theme.iconColor} />
+          <IconHelp size={24} color={theme.iconColor} gradient={theme.iconGradient ?? undefined} />
         </TouchableOpacity>
       </View>
 
       {/* List picker */}
-      <Modal visible={showListPicker} transparent animationType="fade">
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowListPicker(false)}
-        >
-          <View style={[styles.listPickerDropdown, { backgroundColor: theme.listSelectorBg, borderColor: theme.border }]}>
+      {listPickerLayout && (
+        <Modal visible transparent animationType="none" onRequestClose={() => setListPickerLayout(null)}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setListPickerLayout(null)}
+          />
+          <View style={[
+            styles.listPickerDropdown,
+            { backgroundColor: theme.listSelectorBg, borderColor: theme.border, top: listPickerLayout.top, left: listPickerLayout.left },
+          ]}>
             {lists.map(l => (
               <TouchableOpacity
                 key={l.id}
@@ -152,11 +169,11 @@ export default function TodoListHeader({
                   { borderBottomColor: theme.border },
                   l.id === activeListId && { backgroundColor: theme.surface },
                 ]}
-                onPress={() => { onSwitchList(l.id); setShowListPicker(false); }}
+                onPress={() => { onSwitchList(l.id); setListPickerLayout(null); }}
               >
                 <Text style={[
                   styles.listPickerText,
-                  { color: theme.listSelectorText },
+                  { color: theme.listSelectorText, fontFamily: ff },
                   l.id === activeListId && styles.listPickerTextActive,
                 ]}>
                   {l.name}
@@ -164,8 +181,8 @@ export default function TodoListHeader({
               </TouchableOpacity>
             ))}
           </View>
-        </TouchableOpacity>
-      </Modal>
+        </Modal>
+      )}
 
       {/* Theme picker */}
       {themePickerLayout && (
@@ -187,7 +204,7 @@ export default function TodoListHeader({
               >
                 <Text style={[
                   styles.dropdownItemText,
-                  { color: themeId === th.id ? theme.accent : theme.text },
+                  { color: themeId === th.id ? theme.accent : theme.text, fontFamily: ff },
                   themeId === th.id && styles.dropdownItemActive,
                 ]}>
                   {th.name}
@@ -209,20 +226,20 @@ export default function TodoListHeader({
           <View style={[
             styles.dropdown,
             styles.gearDropdown,
-            { backgroundColor: theme.surface, borderColor: theme.border, top: gearMenuLayout.top, right: gearMenuLayout.right + 8 },
+            { backgroundColor: theme.surface, borderColor: theme.border, top: gearMenuLayout.top, left: gearMenuLayout.left },
           ]}>
             <TouchableOpacity
               style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
               onPress={handleNewList}
             >
-              <Text style={[styles.dropdownItemText, { color: theme.text }]}>New list</Text>
+              <Text style={[styles.dropdownItemText, { color: theme.text, fontFamily: ff }]}>New list</Text>
             </TouchableOpacity>
             {!isDailyList && (
               <TouchableOpacity
                 style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
                 onPress={handleRename}
               >
-                <Text style={[styles.dropdownItemText, { color: theme.text }]}>Rename</Text>
+                <Text style={[styles.dropdownItemText, { color: theme.text, fontFamily: ff }]}>Rename</Text>
               </TouchableOpacity>
             )}
             {!isDailyList && (
@@ -230,7 +247,7 @@ export default function TodoListHeader({
                 style={styles.dropdownItem}
                 onPress={handleDelete}
               >
-                <Text style={[styles.dropdownItemText, { color: theme.danger }]}>Delete list</Text>
+                <Text style={[styles.dropdownItemText, { color: theme.danger, fontFamily: ff }]}>Delete list</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -249,11 +266,11 @@ export default function TodoListHeader({
             onPress={() => setListNameModal(null)}
           />
           <View style={[styles.nameModalBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.nameModalTitle, { color: theme.accent }]}>
+            <Text style={[styles.nameModalTitle, { color: theme.accent, fontFamily: ff }]}>
               {listNameModal === 'new' ? 'New list' : 'Rename list'}
             </Text>
             <TextInput
-              style={[styles.nameModalInput, { color: theme.text, borderColor: theme.border }]}
+              style={[styles.nameModalInput, { color: theme.text, borderColor: theme.border, fontFamily: ff }]}
               value={listNameInput}
               onChangeText={setListNameInput}
               placeholder="List name"
@@ -267,13 +284,13 @@ export default function TodoListHeader({
                 style={[styles.nameModalBtn, { backgroundColor: theme.border }]}
                 onPress={() => setListNameModal(null)}
               >
-                <Text style={[styles.nameModalBtnText, { color: theme.text }]}>Cancel</Text>
+                <Text style={[styles.nameModalBtnText, { color: theme.text, fontFamily: ff }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.nameModalBtn, { backgroundColor: theme.accent }]}
                 onPress={handleListNameSave}
               >
-                <Text style={[styles.nameModalBtnText, { color: '#fff' }]}>Save</Text>
+                <Text style={[styles.nameModalBtnText, { color: '#fff', fontFamily: ff }]}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -288,13 +305,13 @@ const styles = StyleSheet.create({
   logoBtn: {
     position: 'absolute',
     left: 8,
-    top: 10,
-    width: 42,
-    height: 42,
+    top: 12,
+    width: 40,
+    height: 40,
   },
   logoBtnInner: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -302,36 +319,40 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 60,
     top: 15,
-    width: 202,
+    width: 189,
     height: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
     borderBottomWidth: 1,
     borderRadius: 3,
-    paddingHorizontal: 10,
+    overflow: 'hidden',
+  },
+  listSelectorInner: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
     gap: 6,
   },
   listSelectorText: { flex: 1, fontSize: 15 },
   listSelectorArrow: { fontSize: 10 },
   gearBtn: {
     position: 'absolute',
-    left: 271,
-    top: 18,
-    width: 28,
-    height: 28,
+    left: 262,
+    top: 20,
+    width: 24,
+    height: 24,
   },
   gearBtnInner: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   helpBtn: {
     position: 'absolute',
     right: 19,
-    top: 18,
-    width: 28,
-    height: 28,
+    top: 20,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -348,7 +369,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   gearDropdown: {
-    minWidth: 140,
+    width: 160,
   },
   dropdownItem: { paddingVertical: 11, paddingHorizontal: 12 },
   dropdownItemText: { fontSize: 16 },
@@ -361,9 +382,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   listPickerDropdown: {
+    position: 'absolute',
     borderRadius: 4,
     borderWidth: 1,
     overflow: 'hidden',
+    minWidth: 189,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
   },
   listPickerItem: {
     paddingVertical: 12,
