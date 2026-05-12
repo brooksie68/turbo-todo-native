@@ -1,7 +1,7 @@
 import type { Theme } from '../theme';
 import defaultTheme from './default';
 import darkSlateTheme from './dark-slate';
-import darkSlateEditTheme from './dark-slate-edit';
+import deepBlue from './deep-blue';
 import slateTheme from './slate';
 import biminiBreeze from './bimini-breeze';
 import forestCanopy from './forest-canopy';
@@ -14,7 +14,7 @@ import biomech from './biomech';
 export const themes: Record<string, Theme> = {
   'default':        defaultTheme,
   'dark-slate':     darkSlateTheme,
-  'dark-slate-edit': darkSlateEditTheme,
+  'deep-blue':      deepBlue,
   'slate':          slateTheme,
   'bimini-breeze':  biminiBreeze,
   'forest-canopy':  forestCanopy,
