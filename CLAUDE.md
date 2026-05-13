@@ -26,8 +26,11 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - **Figma light template** — applied to T2–T5 on Default/Forest Canopy/Bimini Breeze pages (bg #f5f0e8 palette)
 - **Figma dark template** — uniform dark bg (#13151a) applied to Dark Slate/Deep Blue/Muir Light/Biomech info frames
 - **themes.md updated** — Theme Status table reflects current 7 themes with correct page IDs
-- **⚠ Light template visual** — needs rework; James showed screenshot indicating result doesn't look right (unresolved)
-- **OTA not pushed** — pending commit
+- **Light template fixed** — T2/T3 alt rows (dark rects), T4 outer bg, T5 (fully dark) all corrected; 113 rect fixes + 27 text fixes (lime green → #007060 warm teal)
+- **Light info frame bg fixed (again)** — frames were inheriting page canvas color; read James's fixed T3 (node 12:2): fill `#f0e7d7`, stroke `rgba(97,97,97,0.4)` 5px inside, cornerRadius 6; applied to all T2–T5 on pages 00/03/06
+- **Dark Slate T1 icon positions fixed** — IconCreateNew and IconOptions on rows 2+ were shifted right (~13–17px); corrected to x=279 / x=313 across all rows to match Default
+- **OTA pushed** — update group `cfb88da9` (theme removals/additions)
+- **Background image prompt** — created plain-text prompt for GPT image generation; 720×1600px zone map in pixels; strong negative to prevent GPT from drawing UI chrome
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -233,10 +236,10 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. OTA push: `eas update --branch preview --platform android --message "remove slate/golden-hour, add bimini-breeze"` — then commit + push
-2. Rework light info frame template in Figma (T2–T5 on Default/Forest Canopy/Bimini Breeze) — result doesn't look right yet
-3. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
-4. /drop-themes for remaining pages that haven't been updated yet
+1. Run /drop-themes on all pages to sync T2–T5 info frames with actual theme token values
+2. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
+3. Background images: James is generating via GPT — add new ones to `assets/backgrounds/` and wire up as themes
+4. Git push (2 commits ahead of origin)
 
 ### Theme system improvements identified
 - [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
