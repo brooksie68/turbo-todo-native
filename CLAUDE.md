@@ -8,29 +8,30 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-11)
+## Current state (as of 2026-05-12)
 
-**Git HEAD:** `75b43f7` — "docs: rename T1→removed, T2→T1..."
-**Active branch:** `main` (themes/exploration merged)
+**Git HEAD:** `bb50b0d` — "docs: session updates — light frame fixes, Dark Slate icon positions, bg image prompt"
+**Active branch:** `main`
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** 7 themes live (default, dark-slate, deep-blue, bimini-breeze, forest-canopy, muir-light, biomech). OTA not yet pushed for this session's removals.
+**Device state:** 8 themes on device (default, dark-slate, deep-blue, bimini-breeze, forest-canopy, muir-light, biomech, cape-cod-sunset). OTA pushed. Cape Cod Sunset gradient is BROKEN — see todo.
 
-### What was done this session (2026-05-11)
+### What was done this session (2026-05-12)
+- **Cape Cod Sunset theme added** — new `lib/themes/cape-cod-sunset.ts`, `assets/backgrounds/capecod.png` bundled, registered in `index.ts`
+- **gradientColors fixed from Figma** — read `todo-scroll-area` fills directly: `#172735d9` → `#744325d9` (2 stops, 85% opacity)
+- **OTA pushed** — update group `7c8be6f0` (cape-cod-sunset gradient fix)
+- **⚠ BUG: Cape Cod Sunset gradient still wrong on device** — scroll area renders as nearly opaque dark slab; background image not visible. Need to re-examine Figma layer structure to understand why. Do NOT guess — go back to Figma first.
+- **`/drop-themes` copied to global commands** — now works from worktrees (`~/.claude/commands/drop-themes.md`)
+- **5 tokens inferred (not from Figma):** `menuBg`, `text`, `textSub`, `accent`, `surface` — flagged with ⚠ in theme file; need proper named layers in T1
+
+### What was done last session (2026-05-11)
 - **Removed themes:** `slate.ts`, `golden-hour.ts`, `dark-slate-edit.ts` deleted; `index.ts` cleaned up — down from 9 to 7 themes
 - **Figma Bimini Breeze page** — created page "06 - Bimini Breeze" (id: `223:2`) with T1 populated + T2/T3/T4 info frames
-- **Figma icon FRAME cleanup** — all 7 pages: FRAME+VECTOR wrappers flattened to bare named vectors (help-icon, list-gear-btn, IconPin, IconCreateNew, IconOptions, checkmark, toolbar icons)
+- **Figma icon FRAME cleanup** — all 7 pages: FRAME+VECTOR wrappers flattened to bare named vectors
 - **Figma logo GROUP promotion** — all pages: turbo-todo-logo-btn GROUP→bare VECTOR at x=8, y=12
-- **Figma T1 frame names fixed** — pages 02–05 renamed from `[Default]`/`[Dark Slate]` to their correct theme names
-- **Figma annotations cleanup** — annotations GROUP deleted from pages 03/04/05/06
-- **Figma light template** — applied to T2–T5 on Default/Forest Canopy/Bimini Breeze pages (bg #f5f0e8 palette)
-- **Figma dark template** — uniform dark bg (#13151a) applied to Dark Slate/Deep Blue/Muir Light/Biomech info frames
-- **themes.md updated** — Theme Status table reflects current 7 themes with correct page IDs
-- **Light template fixed** — T2/T3 alt rows (dark rects), T4 outer bg, T5 (fully dark) all corrected; 113 rect fixes + 27 text fixes (lime green → #007060 warm teal)
-- **Light info frame bg fixed (again)** — frames were inheriting page canvas color; read James's fixed T3 (node 12:2): fill `#f0e7d7`, stroke `rgba(97,97,97,0.4)` 5px inside, cornerRadius 6; applied to all T2–T5 on pages 00/03/06
-- **Dark Slate T1 icon positions fixed** — IconCreateNew and IconOptions on rows 2+ were shifted right (~13–17px); corrected to x=279 / x=313 across all rows to match Default
-- **OTA pushed** — update group `cfb88da9` (theme removals/additions)
-- **Background image prompt** — created plain-text prompt for GPT image generation; 720×1600px zone map in pixels; strong negative to prevent GPT from drawing UI chrome
+- **Light info frame bg fixed** — fill `#f0e7d7`, stroke `rgba(97,97,97,0.4)` 5px inside, cornerRadius 6; applied to all T2–T5 on pages 00/03/06
+- **Dark Slate T1 icon positions fixed** — IconCreateNew x=279, IconOptions x=313 across all rows
+- **Background image GPT prompt** — 720×1600px zone map in pixels, strong UI-avoidance framing
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -236,10 +237,12 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. Run /drop-themes on all pages to sync T2–T5 info frames with actual theme token values
-2. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
-3. Background images: James is generating via GPT — add new ones to `assets/backgrounds/` and wire up as themes
-4. Git push (2 commits ahead of origin)
+1. **Fix Cape Cod Sunset gradient** — re-examine Figma `todo-scroll-area` layer structure; do NOT guess; image must show through like in Figma design
+2. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent`, `surface` are inferred; need proper swatches in Figma T1
+3. Run /drop-themes on all pages to sync T2–T5 info frames with actual theme token values
+4. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
+5. Background images: James is generating via GPT — add new ones to `assets/backgrounds/` and wire up as themes
+6. Git push (3 commits ahead of origin + uncommitted cape-cod-sunset files)
 
 ### Theme system improvements identified
 - [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma

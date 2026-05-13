@@ -144,6 +144,7 @@ Every token is required. No nullables. See the `Theme` type in `lib/theme.tsx` f
 | `forest-canopy` | Forest Canopy | Enabled | Same |
 | `muir-light` | Muir Light | Enabled | backgroundImage: muir-light.png |
 | `biomech` | Biomech | Enabled | iconGradient, fontFamily: IBMPlexMono |
+| `cape-cod-sunset` | Cape Cod Sunset | Enabled | NEW — ⚠ surface/menuBg/text/textSub/accent inferred; T1 missing named layers for those tokens |
 
 **Rule:** each theme's values are correct for that theme. Differences between themes are intentional. Only compare a theme against its own Figma page.
 
@@ -165,6 +166,7 @@ Every token is required. No nullables. See the `Theme` type in `lib/theme.tsx` f
 | 04 | Muir Light | `199:698` | `muir-light` |
 | 05 | Biomech | `199:1394` | `biomech` |
 | 06 | Bimini Breeze | `223:2` | `bimini-breeze` |
+| 07 | Cape Sunset | `287:33` | `cape-cod-sunset` |
 | — | ARCHIVE - DO NOT TOUCH | `0:1` | — |
 
 Each new theme gets its own page. Page name = theme display name = code `name` field.
