@@ -8,31 +8,28 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-13)
+## Current state (as of 2026-05-14)
 
-**Git HEAD:** `c800240` — "feat(themes): add Cape Cod Sunset theme (gradient WIP)" — uncommitted session changes pending
+**Git HEAD:** `282c42b` — "refactor(themes): 3-layer bg architecture + L/D classification"
 **Active branch:** `main`
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** 8 themes on device, OTA current. Cape Cod Sunset FIXED — image bleeds full screen + through status bar, scroll area shows amber→blue gradient at 85% opacity. Muir Light also fixed (same image-backed pattern).
+**Device state:** 8 themes on device, OTA current. No app code changed this session — Figma work only.
 
-### What was done this session (2026-05-13)
+### What was done this session (2026-05-14)
+- **Figma T1 audit** — verified all 8 pages: `appBgLayer`, `statusBarBg`, `scrollAreaBg` renames landed correctly; no old names remaining; Cape Cod Sunset T1 was missing brackets on frame name (James fixed)
+- **scroll-area restructured on all 8 pages** — `scrollAreaBg` frame renamed to `scroll-area` GROUP; `scrollAreaBg` rect added at bottom of stack carrying the fill; border stroke moved to `scrollAreaBg` rect (reads fill=`scrollAreaBg` token, stroke=`border` token)
+- **[Default] T1 fully reorganized** — all text layers renamed to token names (`textDepth_0/1/2`, `textDone`, `textSub`, `priorityElevated`, `priorityTop`); `text`, `textSub` text nodes added; `checkmarkColor` vector moved in; `listSelectorText` renamed; `theme-meta` hidden group added (`themeClass`, `themeLabel`, `fontFamily`, `backgroundImage`); `token-map` group added for homeless tokens (`accent`, `danger`, `menuBg`) — to be replaced with natural UX elements next session
+- **All frames → groups** — `todo-container`, `scroll-area`, `todo-bottom-toolbar` converted to GROUPs; only `[Default]` outer frame remains as FRAME
+- **`listSelectorBg` stroke** = `listSelectorBorder` token value (same pattern as `scrollAreaBg` carrying `border`)
+- **CLAUDE.md rule updated** — `use_figma` for ALL Figma reads and writes; `get_design_context` deprecated (only returns active page)
+
+### What was done last session (2026-05-13)
 - **Full background layer architecture refactor** — new 3-layer model: `appBgLayer` / `statusBarBg` / `scrollAreaBg`
-- **Theme type refactored** (`lib/theme.tsx`) — discriminated union types for appBgLayer (solid/gradient/image) and scrollAreaBg (solid/gradient); removed `bg`, `surface`, `gradientColors`, `gradientLocations`, `backgroundImage`; added `themeClass`, `themeLabel`
+- **Theme type refactored** (`lib/theme.tsx`) — discriminated union types; removed `bg`, `surface`, `gradientColors`, `gradientLocations`; added `themeClass`, `themeLabel`
 - **All 8 theme files migrated** to new token structure with L/D classification labels
-- **ThemeBg component rewritten** — switches on `appBgLayer.type`; image type = raw ImageBackground, no overlay
-- **ScrollAreaBgView component added** — handles solid or gradient scroll area background
-- **Status bar fixed** — `ThemeBg` moved outside `SafeAreaView`; `statusBarBg: 'transparent'` enables full image bleed behind status bar
-- **`surface` token removed** — all UI modals/dropdowns/cards migrated to `menuBg`
-- **Theme picker reordered** — L themes first (L1→L4), D themes after (D1→D4); `index.ts` updated
-- **Cape Cod Sunset fixed** — `appBgLayer: image`, `scrollAreaBg: gradient` (`#172735d9`→`#744325d9`), `statusBarBg: transparent`
-- **Muir Light fixed** — same image-backed pattern; erroneous full-screen gradient overlay dropped
-- **Figma updated** — pages renamed/reordered to L1-L4/D1-D4 scheme; layer names updated (`bg-gradient`→`appBgLayer`, `android_status_bar`→`statusBarBg`, `todo-scroll-area`→`scrollAreaBg`); CLASSIFICATION section added to all 8 T2 frames
-- **2 OTA pushes** — update groups `b69123c6` (main refactor) + `0174367b` (status bar fix)
-
-### What was done last session (2026-05-12)
-- **Cape Cod Sunset theme added** — new `lib/themes/cape-cod-sunset.ts`, `assets/backgrounds/capecod.png` bundled
-- **`/drop-themes` copied to global commands** — now works from worktrees
+- **Figma pages renamed/reordered** to L1-L4/D1-D4 scheme; layer names updated; CLASSIFICATION section added to all 8 T2 frames
+- **2 OTA pushes** — update groups `b69123c6` + `0174367b`
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -119,7 +116,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - L1 - Default T1 frame node: `5:2`
 - Each theme page has 5 frames: `[Theme Name]` (T1) | `theme-values` (T2) | `menus-modals-and-values` (T3) | `icons-and-values` (T4) | `ui-attributes` (T5)
 - T2 layer names: `appBgLayer` (full-screen base) · `statusBarBg` · `scrollAreaBg` (scroll area) · `themeClass` + `themeLabel` in CLASSIFICATION section at bottom
-- Use `get_design_context` (REST) to read across pages; `use_figma` (Plugin API) for writes — must call on current page
+- Use `use_figma` (Plugin API) for ALL Figma reads and writes — iterate pages with `await figma.setCurrentPageAsync(page)`. Do NOT use `get_design_context` for multi-page reads; it only returns the active page.
 
 ### Theme classification
 - `themeClass: 'light' | 'dark'` — picker grouping; all light themes listed before dark
@@ -251,11 +248,13 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. **Git commit + push** — session changes uncommitted; stage all modified files in `lib/` and `components/`
-2. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
-3. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
-4. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
-5. Background images: James is generating via GPT — add new ones to `assets/backgrounds/` and wire up as themes
+1. **Begin some type of more advanced archiving of Claude.md updates to maintain context better**
+2. **Git commit + push** — session changes uncommitted; stage all modified files in `lib/` and `components/`
+3. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
+4. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
+5. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
+6. Update `themes.md` — rewrite to reflect new 3-layer architecture, new token names, and canonical T1 path map
+7. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
 
 ### Theme system improvements identified
 - [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
