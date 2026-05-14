@@ -13,6 +13,13 @@ const TEXT_SIZES = [
 ];
 export const TEXT_SIZE_COUNT = TEXT_SIZES.length;
 
+// ─── Background layer types ───────────────────────────────────
+export type SolidBg    = { type: 'solid';    color: string };
+export type GradientBg = { type: 'gradient'; colors: string[]; locations: number[] };
+export type ImageBg    = { type: 'image';    source: number }; // source = require()'d asset (number)
+export type AppBgLayer  = SolidBg | GradientBg | ImageBg;
+export type ScrollAreaBg = SolidBg | GradientBg;
+
 // ─── Theme type ───────────────────────────────────────────────
 // Every theme must supply all tokens. See lib/themes/*.ts for values.
 // See themes.md for the full token reference and authoring workflow.
@@ -20,15 +27,20 @@ export type Theme = {
   id: string;
   name: string;
   enabled: boolean;            // false = hidden from picker but still loadable
+  themeClass: 'light' | 'dark';
+  themeLabel: string;          // 'L1', 'L2', ... / 'D1', 'D2', ...
   statusBarStyle: 'dark' | 'light';
+  statusBarBg: string | 'transparent';
 
-  // Backgrounds
-  bg: string;                  // app bg fallback (when no gradient)
+  // Layer 1 — full-screen opaque base (solid color, gradient, or photo)
+  appBgLayer: AppBgLayer;
+  // Layer 2 — reserved: optional semi-opaque tint above appBgLayer, below scroll area (not yet implemented)
+  // Layer 3 — scroll area rectangle (solid or gradient, any opacity)
+  scrollAreaBg: ScrollAreaBg;
+
+  // Other backgrounds
   headerBg: string;            // header bar background (reserved — not yet used in code)
-  surface: string;             // card / scroll area / modal backgrounds
   menuBg: string;              // bottom sheet / dropdown backgrounds
-  gradientColors: string[];    // ThemeBg gradient stops (min 2)
-  gradientLocations: number[]; // gradient stop positions (must match gradientColors length)
 
   // Borders
   border: string;              // general borders, inputs, scroll area
@@ -63,7 +75,6 @@ export type Theme = {
 
   // Extended visual tokens (optional — null = not used)
   iconGradient: [string, string] | null;  // top→bottom gradient on all iconColor icons; overrides iconColor when set
-  backgroundImage: number | null;          // require()'d image asset; gradient overlays on top as tint
   fontFamily: string | null;               // custom font family name; null = system default
 };
 

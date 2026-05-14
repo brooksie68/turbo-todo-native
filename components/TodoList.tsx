@@ -33,30 +33,50 @@ import HelpModal from './HelpModal';
 import AlarmModal from './AlarmModal';
 import SendToListModal from './SendToListModal';
 
-// Renders background: ImageBackground (if set) → LinearGradient tint → children.
+// Layer 1: full-screen app background — solid, gradient, or photo. No overlays.
 function ThemeBg({ style, children }: { style: object; children: React.ReactNode }) {
   const { theme } = useThemeContext();
+  const { appBgLayer } = theme;
 
-  const gradient = theme.gradientColors ? (
-    <LinearGradient
-      colors={theme.gradientColors as [string, string, ...string[]]}
-      locations={(theme.gradientLocations ?? undefined) as [number, number, ...number[]] | undefined}
-      style={theme.backgroundImage ? StyleSheet.absoluteFill : style}
-    >
-      {!theme.backgroundImage && children}
-    </LinearGradient>
-  ) : null;
-
-  if (theme.backgroundImage) {
+  if (appBgLayer.type === 'image') {
     return (
-      <ImageBackground source={theme.backgroundImage} style={style} resizeMode="cover">
-        {gradient}
+      <ImageBackground source={appBgLayer.source} style={style} resizeMode="cover">
         {children}
       </ImageBackground>
     );
   }
+  if (appBgLayer.type === 'gradient') {
+    return (
+      <LinearGradient
+        colors={appBgLayer.colors as [string, string, ...string[]]}
+        locations={appBgLayer.locations as [number, number, ...number[]]}
+        style={style}
+      >
+        {children}
+      </LinearGradient>
+    );
+  }
+  return <View style={[style, { backgroundColor: appBgLayer.color }]}>{children}</View>;
+}
 
-  return gradient ?? <View style={[style, { backgroundColor: theme.bg }]}>{children}</View>;
+// Layer 3: scroll area rectangle — solid or gradient at any opacity, sits above appBgLayer.
+function ScrollAreaBgView({ borderColor, style, children }: { borderColor: string; style?: object; children: React.ReactNode }) {
+  const { theme } = useThemeContext();
+  const { scrollAreaBg } = theme;
+  const baseStyle = [styles.scrollArea, { borderColor }, style];
+
+  if (scrollAreaBg.type === 'gradient') {
+    return (
+      <LinearGradient
+        colors={scrollAreaBg.colors as [string, string, ...string[]]}
+        locations={scrollAreaBg.locations as [number, number, ...number[]]}
+        style={baseStyle}
+      >
+        {children}
+      </LinearGradient>
+    );
+  }
+  return <View style={[...baseStyle, { backgroundColor: scrollAreaBg.color }]}>{children}</View>;
 }
 
 export default function TodoList() {
@@ -274,7 +294,7 @@ export default function TodoList() {
       keyExtractor={item => String(item.todo.id)}
       renderItem={renderCompletedItem}
       scrollEnabled={false}
-      style={[styles.section, { backgroundColor: themeCtx.surface, borderColor: themeCtx.border }, styles.sectionDone]}
+      style={[styles.section, { backgroundColor: themeCtx.scrollAreaBg.type === 'solid' ? themeCtx.scrollAreaBg.color : themeCtx.scrollAreaBg.colors[0], borderColor: themeCtx.border }, styles.sectionDone]}
       ListHeaderComponent={<Text style={[styles.sectionLabel, { color: themeCtx.accent }]}>Completed</Text>}
     />
   ) : null;
@@ -282,9 +302,9 @@ export default function TodoList() {
   // ── Render ─────────────────────────────���─────────────────────────────���───
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeCtx.bg }]} edges={['top']}>
-      <StatusBar style={themeCtx.statusBarStyle} backgroundColor={themeCtx.bg} />
-      <ThemeBg style={styles.container}>
+    <ThemeBg style={styles.container}>
+      <StatusBar style={themeCtx.statusBarStyle} backgroundColor={themeCtx.statusBarBg === 'transparent' ? 'transparent' : themeCtx.statusBarBg} translucent={themeCtx.statusBarBg === 'transparent'} />
+      <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
 
         <TodoListHeader
           lists={data.lists}
@@ -379,16 +399,17 @@ export default function TodoList() {
         {/* Todo list */}
         <View style={styles.scrollWrapper}>
           {data.loading ? (
-            <View style={[styles.loadingContainer, styles.scrollArea, { backgroundColor: themeCtx.surface, borderColor: themeCtx.listSelectorBorder }]}>
+            <ScrollAreaBgView borderColor={themeCtx.listSelectorBorder} style={styles.loadingContainer}>
               <ActivityIndicator color={themeCtx.iconColor} />
-            </View>
+            </ScrollAreaBgView>
           ) : (
+            <ScrollAreaBgView borderColor={themeCtx.listSelectorBorder}>
             <DraggableFlatList
               key={listKey}
               overScrollMode="always"
               data={data.incompleteFlat}
               keyExtractor={item => String(item.todo.id)}
-              containerStyle={[styles.scrollArea, { backgroundColor: themeCtx.surface, borderColor: themeCtx.listSelectorBorder }]}
+              containerStyle={{ flex: 1 }}
               contentContainerStyle={styles.scrollContent}
               onDragBegin={handleDragBegin}
               onDragEnd={handleDragEnd}
@@ -410,6 +431,7 @@ export default function TodoList() {
               ) : null}
               ListFooterComponent={listFooter}
             />
+            </ScrollAreaBgView>
           )}
           <LinearGradient
             colors={['rgba(0,0,0,0.08)', 'rgba(0,0,0,0)']}
@@ -455,8 +477,8 @@ export default function TodoList() {
           onClose={() => overlay.setSendToListTodo(null)}
         />
 
-      </ThemeBg>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ThemeBg>
   );
 }
 

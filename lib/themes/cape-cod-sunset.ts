@@ -4,54 +4,35 @@ const capeCodSunset: Theme = {
   id: 'cape-cod-sunset',
   name: 'Cape Cod Sunset',
   enabled: true,
-  statusBarStyle: 'dark',
+  themeClass: 'dark',
+  themeLabel: 'D4',
+  statusBarStyle: 'light',
+  statusBarBg: 'transparent',  // image bleeds into status bar; fallback solid: #0e2839
+  appBgLayer: { type: 'image', source: require('../../assets/backgrounds/capecod.png') },
+  scrollAreaBg: { type: 'gradient', colors: ['#172735d9', '#744325d9'], locations: [0, 1] },
 
-  // Backgrounds
-  bg: '#ffbe30',
-  headerBg: '#ffbe30',
-  surface: '#172735d9',        // scroll area gradient first stop at 85% opacity (gradient: #172735→#744325 @85%)
-  menuBg: '#2a1a0e',           // ⚠ no named layer — palette-inferred dark warm
-
-  // Gradient
-  gradientColors: ['#172735d9', '#744325d9'],
-  gradientLocations: [0, 1],
-
-  // Borders
-  border: '#025f96',
+  headerBg: '#0e2839',
   headerBorder: '#d4b24d',
+  menuBg: '#2a1a0e',
+  border: '#025f96',
   footerBorder: '#43350c',
   separator: '#7b5e29',
-  listSelectorBorder: '#c67739',
-
-  // Text
-  text: '#f5e6c8',             // ⚠ no named layer — palette-inferred warm light
-  textSub: '#c9a870',          // ⚠ no named layer — palette-inferred muted warm
-  textDone: '#977f5d',
-  textDepth: ['#da9d44', '#bf8530', '#ffc064'],
-
-  // Interactive
-  accent: '#025f96',           // ⚠ no named layer — ocean blue (matches border + row icons)
-  danger: '#f02109',
-
-  // Icons
-  iconColor: '#fcaf51',
-  iconGradient: null,
-
-  // Priority
-  priorityElevated: '#ff8600',
-  priorityTop: '#f02109',
-
-  // List selector
   listSelectorBg: '#795139',
   listSelectorText: '#ffffff',
-
-  // Checkbox
+  listSelectorBorder: '#c67739',
+  text: '#f5e6c8',
+  textSub: '#c9a870',
+  textDone: '#977f5d',
+  textDepth: ['#da9d44', '#bf8530', '#ffc064'],
+  accent: '#025f96',
+  danger: '#f02109',
+  iconColor: '#fcaf51',
+  priorityElevated: '#ff8600',
+  priorityTop: '#f02109',
   checkboxBg: '#454036',
   checkboxDone: '#6a3f1f',
   checkmarkColor: '#eae2ca',
-
-  // Extended
-  backgroundImage: require('../../assets/backgrounds/capecod.png'),
+  iconGradient: null,
   fontFamily: null,
 };
 

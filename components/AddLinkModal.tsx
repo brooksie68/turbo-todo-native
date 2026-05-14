@@ -66,7 +66,7 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
         </Animated.View>
 
         {/* Sheet */}
-        <Animated.View style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: keyboardHeight > 0 ? keyboardHeight + 72 : Math.max(20, insets.bottom), opacity: fadeAnim }]}>
+        <Animated.View style={[styles.sheet, { backgroundColor: theme.menuBg, paddingBottom: keyboardHeight > 0 ? keyboardHeight + 72 : Math.max(20, insets.bottom), opacity: fadeAnim }]}>
           <Text style={[styles.title, { color: theme.accent }]}>Add URL</Text>
 
           <TextInput

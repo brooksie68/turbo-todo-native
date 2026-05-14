@@ -167,7 +167,7 @@ export default function TodoListHeader({
                 style={[
                   styles.listPickerItem,
                   { borderBottomColor: theme.border },
-                  l.id === activeListId && { backgroundColor: theme.surface },
+                  l.id === activeListId && { backgroundColor: theme.menuBg },
                 ]}
                 onPress={() => { onSwitchList(l.id); setListPickerLayout(null); }}
               >
@@ -194,7 +194,7 @@ export default function TodoListHeader({
           />
           <View style={[
             styles.dropdown,
-            { backgroundColor: theme.surface, borderColor: theme.border, top: themePickerLayout.top, left: themePickerLayout.left },
+            { backgroundColor: theme.menuBg, borderColor: theme.border, top: themePickerLayout.top, left: themePickerLayout.left },
           ]}>
             {Object.values(themes).filter(th => th.enabled !== false).map((th, i, arr) => (
               <TouchableOpacity
@@ -226,7 +226,7 @@ export default function TodoListHeader({
           <View style={[
             styles.dropdown,
             styles.gearDropdown,
-            { backgroundColor: theme.surface, borderColor: theme.border, top: gearMenuLayout.top, left: gearMenuLayout.left },
+            { backgroundColor: theme.menuBg, borderColor: theme.border, top: gearMenuLayout.top, left: gearMenuLayout.left },
           ]}>
             <TouchableOpacity
               style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
@@ -265,7 +265,7 @@ export default function TodoListHeader({
             activeOpacity={1}
             onPress={() => setListNameModal(null)}
           />
-          <View style={[styles.nameModalBox, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={[styles.nameModalBox, { backgroundColor: theme.menuBg, borderColor: theme.border }]}>
             <Text style={[styles.nameModalTitle, { color: theme.accent, fontFamily: ff }]}>
               {listNameModal === 'new' ? 'New list' : 'Rename list'}
             </Text>

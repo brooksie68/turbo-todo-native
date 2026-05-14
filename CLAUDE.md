@@ -8,30 +8,31 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-12)
+## Current state (as of 2026-05-13)
 
-**Git HEAD:** `bb50b0d` — "docs: session updates — light frame fixes, Dark Slate icon positions, bg image prompt"
+**Git HEAD:** `c800240` — "feat(themes): add Cape Cod Sunset theme (gradient WIP)" — uncommitted session changes pending
 **Active branch:** `main`
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** 8 themes on device (default, dark-slate, deep-blue, bimini-breeze, forest-canopy, muir-light, biomech, cape-cod-sunset). OTA pushed. Cape Cod Sunset gradient is BROKEN — see todo.
+**Device state:** 8 themes on device, OTA current. Cape Cod Sunset FIXED — image bleeds full screen + through status bar, scroll area shows amber→blue gradient at 85% opacity. Muir Light also fixed (same image-backed pattern).
 
-### What was done this session (2026-05-12)
-- **Cape Cod Sunset theme added** — new `lib/themes/cape-cod-sunset.ts`, `assets/backgrounds/capecod.png` bundled, registered in `index.ts`
-- **gradientColors fixed from Figma** — read `todo-scroll-area` fills directly: `#172735d9` → `#744325d9` (2 stops, 85% opacity)
-- **OTA pushed** — update group `7c8be6f0` (cape-cod-sunset gradient fix)
-- **⚠ BUG: Cape Cod Sunset gradient still wrong on device** — scroll area renders as nearly opaque dark slab; background image not visible. Need to re-examine Figma layer structure to understand why. Do NOT guess — go back to Figma first.
-- **`/drop-themes` copied to global commands** — now works from worktrees (`~/.claude/commands/drop-themes.md`)
-- **5 tokens inferred (not from Figma):** `menuBg`, `text`, `textSub`, `accent`, `surface` — flagged with ⚠ in theme file; need proper named layers in T1
+### What was done this session (2026-05-13)
+- **Full background layer architecture refactor** — new 3-layer model: `appBgLayer` / `statusBarBg` / `scrollAreaBg`
+- **Theme type refactored** (`lib/theme.tsx`) — discriminated union types for appBgLayer (solid/gradient/image) and scrollAreaBg (solid/gradient); removed `bg`, `surface`, `gradientColors`, `gradientLocations`, `backgroundImage`; added `themeClass`, `themeLabel`
+- **All 8 theme files migrated** to new token structure with L/D classification labels
+- **ThemeBg component rewritten** — switches on `appBgLayer.type`; image type = raw ImageBackground, no overlay
+- **ScrollAreaBgView component added** — handles solid or gradient scroll area background
+- **Status bar fixed** — `ThemeBg` moved outside `SafeAreaView`; `statusBarBg: 'transparent'` enables full image bleed behind status bar
+- **`surface` token removed** — all UI modals/dropdowns/cards migrated to `menuBg`
+- **Theme picker reordered** — L themes first (L1→L4), D themes after (D1→D4); `index.ts` updated
+- **Cape Cod Sunset fixed** — `appBgLayer: image`, `scrollAreaBg: gradient` (`#172735d9`→`#744325d9`), `statusBarBg: transparent`
+- **Muir Light fixed** — same image-backed pattern; erroneous full-screen gradient overlay dropped
+- **Figma updated** — pages renamed/reordered to L1-L4/D1-D4 scheme; layer names updated (`bg-gradient`→`appBgLayer`, `android_status_bar`→`statusBarBg`, `todo-scroll-area`→`scrollAreaBg`); CLASSIFICATION section added to all 8 T2 frames
+- **2 OTA pushes** — update groups `b69123c6` (main refactor) + `0174367b` (status bar fix)
 
-### What was done last session (2026-05-11)
-- **Removed themes:** `slate.ts`, `golden-hour.ts`, `dark-slate-edit.ts` deleted; `index.ts` cleaned up — down from 9 to 7 themes
-- **Figma Bimini Breeze page** — created page "06 - Bimini Breeze" (id: `223:2`) with T1 populated + T2/T3/T4 info frames
-- **Figma icon FRAME cleanup** — all 7 pages: FRAME+VECTOR wrappers flattened to bare named vectors
-- **Figma logo GROUP promotion** — all pages: turbo-todo-logo-btn GROUP→bare VECTOR at x=8, y=12
-- **Light info frame bg fixed** — fill `#f0e7d7`, stroke `rgba(97,97,97,0.4)` 5px inside, cornerRadius 6; applied to all T2–T5 on pages 00/03/06
-- **Dark Slate T1 icon positions fixed** — IconCreateNew x=279, IconOptions x=313 across all rows
-- **Background image GPT prompt** — 720×1600px zone map in pixels, strong UI-avoidance framing
+### What was done last session (2026-05-12)
+- **Cape Cod Sunset theme added** — new `lib/themes/cape-cod-sunset.ts`, `assets/backgrounds/capecod.png` bundled
+- **`/drop-themes` copied to global commands** — now works from worktrees
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -108,27 +109,42 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 2. Claude reads Edit T2 → updates `lib/themes/[theme].ts` → outputs OTA command for James to run
 3. Repeat until happy
 4. Final: Claude overwrites main T2 in Figma with final values, deletes Edit section, commits `.ts` file
-- Dark Slate - Edit is a **full Figma page** (not a section) — page name: `Dark Slate - Edit`, T1 node: `170:34`
-- `dark-slate-edit` theme (`lib/themes/dark-slate-edit.ts`) is the in-app counterpart — overwrite this file each iteration
 - **"App icons" = ALL icons**: header (logo, gear, help), toolbar (kebab, add, collapse, expand), AND row-level (IconPin, IconCreateNew, IconOptions)**
 - **Never edit main T1 or info frames during iteration**
 - **Never run the OTA command — always give James the string to run himself** (unless James explicitly grants permission for the session)
 
 ### Figma
 - **Theme authoring file:** `wUMtjlawjc3wFuROGfYuO6` — https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
-- Default Theme page: id `2:5`, T1 frame node: `5:2`
+- Pages: **L1 - Default** · L2 - Forest Canopy · L3 - Bimini Breeze · L4 - Muir Light · **D1 - Dark Slate** · D2 - Deep Blue · D3 - Biomech · D4 - Cape Cod Sunset · ARCHIVE - DO NOT TOUCH
+- L1 - Default T1 frame node: `5:2`
 - Each theme page has 5 frames: `[Theme Name]` (T1) | `theme-values` (T2) | `menus-modals-and-values` (T3) | `icons-and-values` (T4) | `ui-attributes` (T5)
+- T2 layer names: `appBgLayer` (full-screen base) · `statusBarBg` · `scrollAreaBg` (scroll area) · `themeClass` + `themeLabel` in CLASSIFICATION section at bottom
 - Use `get_design_context` (REST) to read across pages; `use_figma` (Plugin API) for writes — must call on current page
 
-### 27 tokens (what each controls)
+### Theme classification
+- `themeClass: 'light' | 'dark'` — picker grouping; all light themes listed before dark
+- `themeLabel: string` — sort label: L1, L2, L3, L4 (light) / D1, D2, D3, D4 (dark)
+- Current: **L1** Default · **L2** Forest Canopy · **L3** Bimini Breeze · **L4** Muir Light · **D1** Dark Slate · **D2** Deep Blue · **D3** Biomech · **D4** Cape Cod Sunset
+- Add new light themes at bottom of L group, dark at bottom of D group
+
+### Background layers (3-layer model)
+| Layer | Token | Type | Notes |
+|---|---|---|---|
+| 1 — full-screen base | `appBgLayer` | `SolidBg \| GradientBg \| ImageBg` | Raw — no overlay. Image type = `{ type: 'image', source: require(...) }` |
+| 2 — mid tint | *(reserved)* | — | Not implemented. Future optional semi-opaque tint above appBgLayer |
+| 3 — scroll area | `scrollAreaBg` | `SolidBg \| GradientBg` | Any opacity. Sits on top of appBgLayer |
+| — | `statusBarBg` | `string \| 'transparent'` | `'transparent'` = image bleeds behind status bar |
+
+### 26 tokens (what each controls)
 | Token | Controls |
 |---|---|
-| `bg` | Status bar fill; app background fallback |
+| `appBgLayer` | Full-screen base — solid, gradient, or photo |
+| `statusBarBg` | Android status bar fill; `'transparent'` = image bleeds through |
+| `scrollAreaBg` | Todo scroll area background — solid or gradient, any opacity |
 | `headerBg` | Header bar bg — reserved, not yet in code |
 | `headerBorder` | 1px line at top of header |
 | `footerBorder` | 1px line at bottom of toolbar |
-| `surface` | Scroll area, modals, card backgrounds |
-| `menuBg` | Bottom sheet, dropdowns, AddChild menu |
+| `menuBg` | Bottom sheet, dropdowns, modals, card backgrounds |
 | `border` | Scroll area border, checkbox border, modal outlines |
 | `separator` | Row separator lines |
 | `listSelectorBg` | List selector pill background |
@@ -146,8 +162,6 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 | `checkboxBg` | Unchecked checkbox fill |
 | `checkboxDone` | Checked checkbox fill + border |
 | `checkmarkColor` | SVG checkmark inside done checkbox |
-| `gradientColors` | ThemeBg gradient stops (min 2) |
-| `gradientLocations` | Gradient stop positions 0–1 |
 | `statusBarStyle` | `'dark'` or `'light'` for Android status bar icons |
 
 ### Structural attributes (not tokenized — same across all themes)
@@ -237,12 +251,11 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. **Fix Cape Cod Sunset gradient** — re-examine Figma `todo-scroll-area` layer structure; do NOT guess; image must show through like in Figma design
-2. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent`, `surface` are inferred; need proper swatches in Figma T1
-3. Run /drop-themes on all pages to sync T2–T5 info frames with actual theme token values
+1. **Git commit + push** — session changes uncommitted; stage all modified files in `lib/` and `components/`
+2. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
+3. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
 4. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
 5. Background images: James is generating via GPT — add new ones to `assets/backgrounds/` and wire up as themes
-6. Git push (3 commits ahead of origin + uncommitted cape-cod-sunset files)
 
 ### Theme system improvements identified
 - [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma

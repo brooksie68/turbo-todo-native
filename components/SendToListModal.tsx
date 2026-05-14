@@ -33,7 +33,7 @@ export default function SendToListModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onClose} />
-      <View style={[styles.container, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+      <View style={[styles.container, { backgroundColor: theme.menuBg, borderColor: theme.border }]}>
         <Text style={[styles.title, { color: theme.accent }]}>Send to list</Text>
         {eligible.length === 0 ? (
           <Text style={[styles.empty, { color: theme.textSub }]}>No other lists available.</Text>

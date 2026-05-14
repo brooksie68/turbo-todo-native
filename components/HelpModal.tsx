@@ -252,7 +252,7 @@ export default function HelpModal({ visible, onClose }: Props) {
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={[styles.container, { backgroundColor: t.surface, paddingTop: insets.top }]}>
+      <View style={[styles.container, { backgroundColor: t.menuBg, paddingTop: insets.top }]}>
         <View style={[styles.header, { borderBottomColor: t.border }]}>
           <Text style={[styles.title, { color: t.text }]}>Help</Text>
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>

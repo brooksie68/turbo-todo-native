@@ -47,7 +47,7 @@ export default function AddChildMenu({
       <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onClose} />
       <View style={[
         styles.dropdown,
-        { backgroundColor: theme.surface, borderColor: theme.border },
+        { backgroundColor: theme.menuBg, borderColor: theme.border },
         flipAbove ? { bottom, right } : { top, right },
       ]}>
         {!hideSubtask && (

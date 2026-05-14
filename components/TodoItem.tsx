@@ -95,7 +95,7 @@ const TodoItem = memo(function TodoItem({
       borderWidth: 1.5,
       borderColor: theme.accent,
       borderRadius: 4,
-      backgroundColor: theme.surface,
+      backgroundColor: theme.menuBg,
       zIndex: 999,
     } : undefined}>
       <TouchableOpacity
