@@ -73,7 +73,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - Images on depth-0 and depth-1 items (local file system, up to 5); AddChildMenu has "Image" (gallery, multi-select) and "Take photo" (camera, single shot)
 - Links on depth-0 and depth-1 items (SQLite task_links table)
 - Export for AI (share sheet, markdown outline)
-- 7 themes: Default, Dark Slate, Deep Blue, Bimini Breeze, Forest Canopy, Muir Light, Biomech — theme picker via logo button dropdown
+- 8 themes: Default, Dark Slate, Deep Blue, Bimini Breeze, Forest Canopy, Muir Light, Biomech, Cape Cod Sunset — theme picker via logo button dropdown
 - Child count badge on collapsed parents ("- N")
 - Pin to top: depth-0 only, floats above incomplete list, blocks drag
 - Row UI: IconCreateNew (add subtask) + IconOptions (kebab)
@@ -89,103 +89,12 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ## Theme system
 
-### Files
-- `lib/themes/*.ts` — one file per theme (add theme = create file + one line in index)
-- `lib/themes/index.ts` — theme registry
+- `lib/themes/*.ts` — one file per theme (add = create file + one line in `index.ts`)
 - `lib/theme.tsx` — `Theme` type, `ThemeProvider`, `useTheme`, `useThemeContext`
-- `themes.md` — deep reference: full token table, Figma layer map, authoring workflow
-
-### Rules
-- Adding a theme: create `lib/themes/your-theme.ts` → import + register in `index.ts`
-- Hiding a theme: set `enabled: false` in the theme file
 - Each theme's values are canon for that theme — never compare across themes
-- Read `themes.md` before any Figma theme work
-
-### Iterative edit workflow (theme tuning — full steps in `themes.md`)
-1. James edits the `[Theme] - Edit` Section in Figma (sandbox T1 — never the main T1)
-2. Claude reads Edit T2 → updates `lib/themes/[theme].ts` → outputs OTA command for James to run
-3. Repeat until happy
-4. Final: Claude overwrites main T2 in Figma with final values, deletes Edit section, commits `.ts` file
-- **"App icons" = ALL icons**: header (logo, gear, help), toolbar (kebab, add, collapse, expand), AND row-level (IconPin, IconCreateNew, IconOptions)**
-- **Never edit main T1 or info frames during iteration**
+- All icons (header, toolbar, row) must share the same `iconColor` — no exceptions
 - **Never run the OTA command — always give James the string to run himself** (unless James explicitly grants permission for the session)
-
-### Figma
-- **Theme authoring file:** `wUMtjlawjc3wFuROGfYuO6` — https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
-- Pages: **L1 - Default** · L2 - Forest Canopy · L3 - Bimini Breeze · L4 - Muir Light · **D1 - Dark Slate** · D2 - Deep Blue · D3 - Biomech · D4 - Cape Cod Sunset · ARCHIVE - DO NOT TOUCH
-- L1 - Default T1 frame node: `5:2`
-- Each theme page has 5 frames: `[Theme Name]` (T1) | `theme-values` (T2) | `menus-modals-and-values` (T3) | `icons-and-values` (T4) | `ui-attributes` (T5)
-- T2 layer names: `appBgLayer` (full-screen base) · `statusBarBg` · `scrollAreaBg` (scroll area) · `themeClass` + `themeLabel` in CLASSIFICATION section at bottom
-- Use `use_figma` (Plugin API) for ALL Figma reads and writes — iterate pages with `await figma.setCurrentPageAsync(page)`. Do NOT use `get_design_context` for multi-page reads; it only returns the active page.
-
-### Theme classification
-- `themeClass: 'light' | 'dark'` — picker grouping; all light themes listed before dark
-- `themeLabel: string` — sort label: L1, L2, L3, L4 (light) / D1, D2, D3, D4 (dark)
-- Current: **L1** Default · **L2** Forest Canopy · **L3** Bimini Breeze · **L4** Muir Light · **D1** Dark Slate · **D2** Deep Blue · **D3** Biomech · **D4** Cape Cod Sunset
-- Add new light themes at bottom of L group, dark at bottom of D group
-
-### Background layers (3-layer model)
-| Layer | Token | Type | Notes |
-|---|---|---|---|
-| 1 — full-screen base | `appBgLayer` | `SolidBg \| GradientBg \| ImageBg` | Raw — no overlay. Image type = `{ type: 'image', source: require(...) }` |
-| 2 — mid tint | *(reserved)* | — | Not implemented. Future optional semi-opaque tint above appBgLayer |
-| 3 — scroll area | `scrollAreaBg` | `SolidBg \| GradientBg` | Any opacity. Sits on top of appBgLayer |
-| — | `statusBarBg` | `string \| 'transparent'` | `'transparent'` = image bleeds behind status bar |
-
-### 26 tokens (what each controls)
-| Token | Controls |
-|---|---|
-| `appBgLayer` | Full-screen base — solid, gradient, or photo |
-| `statusBarBg` | Android status bar fill; `'transparent'` = image bleeds through |
-| `scrollAreaBg` | Todo scroll area background — solid or gradient, any opacity |
-| `headerBg` | Header bar bg — reserved, not yet in code |
-| `headerBorder` | 1px line at top of header |
-| `footerBorder` | 1px line at bottom of toolbar |
-| `menuBg` | Bottom sheet, dropdowns, modals, card backgrounds |
-| `border` | Scroll area border, checkbox border, modal outlines |
-| `separator` | Row separator lines |
-| `listSelectorBg` | List selector pill background |
-| `listSelectorText` | List name text + arrow |
-| `listSelectorBorder` | List selector bottom underline |
-| `text` | Primary body text, modal titles, menu items |
-| `textSub` | Notes, badges, secondary info |
-| `textDone` | Struck-through completed item text |
-| `textDepth` | `[d0, d1, d2]` task label color by depth |
-| `accent` | Active states, Save buttons, selected list item |
-| `danger` | Destructive actions, invalid drag indicator |
-| `iconColor` | All SVG icons — header, toolbar, row |
-| `priorityElevated` | Bolt icon + elevated task label |
-| `priorityTop` | Exclamation icon + top-priority task label |
-| `checkboxBg` | Unchecked checkbox fill |
-| `checkboxDone` | Checked checkbox fill + border |
-| `checkmarkColor` | SVG checkmark inside done checkbox |
-| `statusBarStyle` | `'dark'` or `'light'` for Android status bar icons |
-
-### Structural attributes (not tokenized — same across all themes)
-| Element | Attribute | Value |
-|---|---|---|
-| Header | height | 64px |
-| Logo btn | size / left / top | 40px / 8 / 12 |
-| List selector | width / height / left / top / borderRadius / paddingH | 189 / 34 / 60 / 15 / 3 / 8 |
-| Gear btn | size / left / top | 24px / 262 / 20 |
-| Help btn | size / right / top | 24px / 19 / 20 |
-| Scroll area | marginH / borderWidth / borderRadius | 8 / 1 / 2 |
-| Inset shadow | height / opacity | 5px / 0.08 |
-| Row | paddingVertical / paddingRight / gap | 8 / 12 / 8 |
-| Row indent | base + per-depth | 8 + (depth × 20) |
-| Checkbox | size / borderWidth / borderRadius | 20 / 1 / 1 |
-| Checkmark icon | size | 12px |
-| Row add icon | size | 18px |
-| Row options icon | size | 18px |
-| Row pin icon | size | 18px |
-| Row bell icon | size | 14px |
-| Priority icons | size | 16px |
-| rowActions gap | gap | 12px |
-| Note text | fontSize / style | 12px / italic |
-| Separator | height | 1px |
-| Toolbar | inner height | 46px |
-| Toolbar icons | size | 24px |
-| Typography (normal) | d0 / d1 / d2 | 16 / 15 / 14px |
+- **Read `themes.md` before any theme authoring, layout work, or pixel-level audit.** Full token reference, structural spec, Figma layer map, authoring workflow, and pixel-perfect standards all live there.
 
 ## Toolbar options menu (bottom sheet)
 1. Back up | Restore (split row, top)
@@ -197,10 +106,9 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 7. Clear entire list (with confirm)
 
 ## Figma
-- **Design file:** https://www.figma.com/design/1j3iOtMrXTHjyuWXLekcEh/Turbo-Todo (file key: `1j3iOtMrXTHjyuWXLekcEh`, 360×800 template node: `91:25`)
-- **Theme authoring file:** https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes (file key: `wUMtjlawjc3wFuROGfYuO6`)
-- Claude can read AND write both files via the Figma MCP (`use_figma` Plugin API, `get_design_context` for reading)
-- **Full theme workflow documented in `themes.md`** — read that file before doing any theme work
+- **Design file:** `1j3iOtMrXTHjyuWXLekcEh` — https://www.figma.com/design/1j3iOtMrXTHjyuWXLekcEh/Turbo-Todo (360×800 template node: `91:25`)
+- **Theme authoring file:** `wUMtjlawjc3wFuROGfYuO6` — https://www.figma.com/design/wUMtjlawjc3wFuROGfYuO6/todo-app-themes
+- **Use `use_figma` for ALL reads and writes.** `get_design_context` is deprecated — it only returns the active page.
 - Never use expiring Figma MCP asset URLs in code — they expire in 7 days
 
 ## Key files
@@ -249,16 +157,12 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 
 ### Next up (one at a time, test each before committing)
 1. **Begin some type of more advanced archiving of Claude.md updates to maintain context better**
-2. **Git commit + push** — session changes uncommitted; stage all modified files in `lib/` and `components/`
-3. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
-4. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
-5. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
-6. Update `themes.md` — rewrite to reflect new 3-layer architecture, new token names, and canonical T1 path map
-7. Bimini Breeze T1: sample row content (checkboxes, text colors) still shows Default template colors — update
+2. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
+3. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
+4. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
 
 ### Theme system improvements identified
 - [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
-- [ ] Add `iconGradient: string[] | null` token — app falls back to `iconColor` solid if null
 - [ ] Split `checkboxDone` into `checkboxDoneBg` + `checkboxDoneBorder` — currently one token controls both
 
 ### Backlog
