@@ -8,28 +8,21 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-14)
+## Current state (as of 2026-05-15)
 
-**Git HEAD:** `282c42b` — "refactor(themes): 3-layer bg architecture + L/D classification"
+**Git HEAD:** `e4bad16` — "docs: overhaul CLAUDE.md + themes.md for pixel-perfect standards"
 **Active branch:** `main`
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** 8 themes on device, OTA current. No app code changed this session — Figma work only.
+**Device state:** 8 themes on device, OTA current. No app code changed last session — docs and Figma work only.
 
-### What was done this session (2026-05-14)
-- **Figma T1 audit** — verified all 8 pages: `appBgLayer`, `statusBarBg`, `scrollAreaBg` renames landed correctly; no old names remaining; Cape Cod Sunset T1 was missing brackets on frame name (James fixed)
-- **scroll-area restructured on all 8 pages** — `scrollAreaBg` frame renamed to `scroll-area` GROUP; `scrollAreaBg` rect added at bottom of stack carrying the fill; border stroke moved to `scrollAreaBg` rect (reads fill=`scrollAreaBg` token, stroke=`border` token)
-- **[Default] T1 fully reorganized** — all text layers renamed to token names (`textDepth_0/1/2`, `textDone`, `textSub`, `priorityElevated`, `priorityTop`); `text`, `textSub` text nodes added; `checkmarkColor` vector moved in; `listSelectorText` renamed; `theme-meta` hidden group added (`themeClass`, `themeLabel`, `fontFamily`, `backgroundImage`); `token-map` group added for homeless tokens (`accent`, `danger`, `menuBg`) — to be replaced with natural UX elements next session
-- **All frames → groups** — `todo-container`, `scroll-area`, `todo-bottom-toolbar` converted to GROUPs; only `[Default]` outer frame remains as FRAME
-- **`listSelectorBg` stroke** = `listSelectorBorder` token value (same pattern as `scrollAreaBg` carrying `border`)
-- **CLAUDE.md rule updated** — `use_figma` for ALL Figma reads and writes; `get_design_context` deprecated (only returns active page)
-
-### What was done last session (2026-05-13)
-- **Full background layer architecture refactor** — new 3-layer model: `appBgLayer` / `statusBarBg` / `scrollAreaBg`
-- **Theme type refactored** (`lib/theme.tsx`) — discriminated union types; removed `bg`, `surface`, `gradientColors`, `gradientLocations`; added `themeClass`, `themeLabel`
-- **All 8 theme files migrated** to new token structure with L/D classification labels
-- **Figma pages renamed/reordered** to L1-L4/D1-D4 scheme; layer names updated; CLASSIFICATION section added to all 8 T2 frames
-- **2 OTA pushes** — update groups `b69123c6` + `0174367b`
+### What was done last session (2026-05-14–15)
+- **Bimini Breeze T1 icon audit** — 6 icons had wrong blue (`#015F95` variant); fixed to match logo btn color (`#025F96`); T2 `iconColor` swatch updated
+- **Pixel-perfect standards established** — compared Figma PNG export vs. S21 Ultra screenshot; concluded visual inspection is unreliable; math via Figma Plugin API is the only acceptable QA method
+- **themes.md fully rewritten** — pixel-perfect standards section (rule of 4s, density math, audit process, color zero-tolerance, spatial audit pattern, full structural spec table); all tokens updated to 3-layer architecture; T1 layer structure corrected; all `get_design_context` refs replaced with `use_figma`
+- **CLAUDE.md overhauled** — removed ~100 lines duplicating themes.md; theme system condensed to essentials + scoped pointer; Figma section corrected
+- **xhdpi template work begun** — James building 720×1600 Default template in Figma. Key frame math at xhdpi (2×): status bar 54px, header 128px (+2px border), toolbar 92px
+- **Upcoming: two template flavors** — `Default-new-xhdpi-w-header.footer` and `Default-new-xhdpi-no-header.footer` (James will explain the distinction). Claude will remeasure everything from the xhdpi frame and update all T2–T5 frames accordingly.
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -37,6 +30,7 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 - OTA fingerprint is computed from `node_modules` content — leftover packages after rollback cause mismatch
 - `npm ci` before APK build ensures clean fingerprint
 - `eas update` without `--platform android` also builds + uploads iOS bundles unnecessarily — always use `--platform android`
+- **Visual inspection of screenshots is not reliable QA.** Read values from Figma via Plugin API. Math only.
 
 ## Stack
 - Expo SDK 54, Expo Router, TypeScript
@@ -156,10 +150,11 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. **Begin some type of more advanced archiving of Claude.md updates to maintain context better**
-2. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
-3. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
-4. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
+1. **xhdpi template — finish and explain** — James completing 720×1600 Default template in Figma. Two flavors: `Default-new-xhdpi-w-header.footer` and `Default-new-xhdpi-no-header.footer`. James will explain the distinction. Claude to remeasure everything from the xhdpi frame and update all T2–T5 frames.
+2. **Begin some type of more advanced archiving of Claude.md updates to maintain context better**
+3. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
+4. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
+5. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
 
 ### Theme system improvements identified
 - [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
