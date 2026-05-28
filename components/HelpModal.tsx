@@ -232,8 +232,8 @@ function AppInfoRows() {
   return (
     <View style={styles.infoTable}>
       {rows.map(({ label, value }) => (
-        <View key={label} style={[styles.infoRow, { borderBottomColor: t.border }]}>
-          <Text style={[styles.infoLabel, { color: t.textSub ?? t.accent }]}>{label}</Text>
+        <View key={label} style={[styles.infoRow, { borderBottomColor: t.scrollAreaBorder }]}>
+          <Text style={[styles.infoLabel, { color: t.textNote ?? t.accent }]}>{label}</Text>
           <Text style={[styles.infoValue, { color: t.text }]}>{value}</Text>
         </View>
       ))}
@@ -253,7 +253,7 @@ export default function HelpModal({ visible, onClose }: Props) {
       onRequestClose={onClose}
     >
       <View style={[styles.container, { backgroundColor: t.menuBg, paddingTop: insets.top }]}>
-        <View style={[styles.header, { borderBottomColor: t.border }]}>
+        <View style={[styles.header, { borderBottomColor: t.scrollAreaBorder }]}>
           <Text style={[styles.title, { color: t.text }]}>Help</Text>
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
             <IconClose size={22} color={t.text} />

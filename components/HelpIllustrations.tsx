@@ -16,7 +16,7 @@ import {
 function RowBox({ children }: { children: React.ReactNode }) {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.rowBox, { borderColor: t.border }]}>
+    <View style={[styles.rowBox, { borderColor: t.scrollAreaBorder }]}>
       {children}
     </View>
   );
@@ -33,12 +33,12 @@ function TaskRow({
     <View style={{ marginLeft: indent }}>
       <View style={[
         styles.taskRow,
-        { borderTopColor: t.border, borderTopWidth: first ? 0 : StyleSheet.hairlineWidth },
+        { borderTopColor: t.scrollAreaBorder, borderTopWidth: first ? 0 : StyleSheet.hairlineWidth },
       ]}>
         <View style={[
           styles.checkbox,
           done
-            ? { backgroundColor: t.checkboxDone, borderColor: t.checkboxDone }
+            ? { backgroundColor: t.checkboxDoneBg, borderColor: t.checkboxDoneBg }
             : { borderColor: t.accent },
         ]}>
           {done && <Text style={styles.checkmark}>✓</Text>}
@@ -50,8 +50,8 @@ function TaskRow({
         {icon}
       </View>
       {note != null && (
-        <View style={[styles.noteRow, { borderTopColor: t.border }]}>
-          <Text style={[styles.noteText, { color: t.textSub }]} numberOfLines={2}>{note}</Text>
+        <View style={[styles.noteRow, { borderTopColor: t.scrollAreaBorder }]}>
+          <Text style={[styles.noteText, { color: t.textNote }]} numberOfLines={2}>{note}</Text>
         </View>
       )}
     </View>
@@ -85,7 +85,7 @@ export function IllustrationLists() {
 export function IllustrationAddingTasks() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.border }]}>
+    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.scrollAreaBorder }]}>
       <View style={styles.tbLeft}>
         <IconOptions size={24} color={t.iconColor} />
       </View>
@@ -109,13 +109,13 @@ export function IllustrationSubtasks() {
     { label: 'Sub-subtask', indent: 32, hasAdd: false },
   ];
   return (
-    <View style={[styles.subtaskBox, { borderColor: t.border }]}>
+    <View style={[styles.subtaskBox, { borderColor: t.scrollAreaBorder }]}>
       {rows.map((row, i) => (
         <View
           key={i}
           style={[
             styles.subtaskRow,
-            { marginLeft: row.indent, borderTopColor: t.border, borderTopWidth: i === 0 ? 0 : StyleSheet.hairlineWidth },
+            { marginLeft: row.indent, borderTopColor: t.scrollAreaBorder, borderTopWidth: i === 0 ? 0 : StyleSheet.hairlineWidth },
           ]}
         >
           <View style={[styles.checkbox, { borderColor: t.accent }]} />
@@ -188,7 +188,7 @@ export function IllustrationReordering() {
       <View style={[
         styles.taskRow,
         styles.draggingRow,
-        { borderTopColor: t.border, borderTopWidth: StyleSheet.hairlineWidth, borderColor: t.accent },
+        { borderTopColor: t.scrollAreaBorder, borderTopWidth: StyleSheet.hairlineWidth, borderColor: t.accent },
       ]}>
         <View style={[styles.checkbox, { borderColor: t.accent }]} />
         <Text style={[styles.taskLabel, { color: t.text }]}>Long-press to drag</Text>
@@ -227,9 +227,9 @@ export function IllustrationImages() {
         <View style={[styles.checkbox, { borderColor: t.accent }]} />
         <Text style={[styles.taskLabel, { color: t.text }]}>Task with images</Text>
       </View>
-      <View style={[styles.thumbRow, { borderTopColor: t.border }]}>
+      <View style={[styles.thumbRow, { borderTopColor: t.scrollAreaBorder }]}>
         {[0, 1, 2].map(i => (
-          <View key={i} style={[styles.thumb, { backgroundColor: t.listSelectorBg, borderColor: t.border }]}>
+          <View key={i} style={[styles.thumb, { backgroundColor: t.listSelectorBg, borderColor: t.scrollAreaBorder }]}>
             <Text style={styles.thumbEmoji}>🖼</Text>
           </View>
         ))}
@@ -248,7 +248,7 @@ export function IllustrationLinks() {
         <View style={[styles.checkbox, { borderColor: t.accent }]} />
         <Text style={[styles.taskLabel, { color: t.text }]}>Task with a link</Text>
       </View>
-      <View style={[styles.linkRow, { borderTopColor: t.border }]}>
+      <View style={[styles.linkRow, { borderTopColor: t.scrollAreaBorder }]}>
         <Text style={[styles.linkText, { color: t.accent }]}>recipe-site.com →</Text>
       </View>
     </RowBox>
@@ -297,11 +297,11 @@ export function IllustrationDailyList() {
 export function IllustrationSounds() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.optionsCard, { backgroundColor: t.menuBg, borderColor: t.border }]}>
+    <View style={[styles.optionsCard, { backgroundColor: t.menuBg, borderColor: t.scrollAreaBorder }]}>
       <Text style={[styles.optionLabel, { color: t.accent }]}>Sounds:</Text>
       <View style={styles.toggleGroup}>
         <Text style={[styles.toggleActive, { color: t.accent }]}>On</Text>
-        <Text style={[styles.togglePipe, { color: t.border }]}>|</Text>
+        <Text style={[styles.togglePipe, { color: t.scrollAreaBorder }]}>|</Text>
         <Text style={[styles.toggleInactive, { color: t.text }]}>Off</Text>
       </View>
     </View>
@@ -314,13 +314,13 @@ export function IllustrationExportForAI() {
   const { theme: t } = useThemeContext();
   const items = ['Add note', 'Set alarm', 'Export for AI'];
   return (
-    <View style={[styles.menuBox, { backgroundColor: t.menuBg, borderColor: t.border }]}>
+    <View style={[styles.menuBox, { backgroundColor: t.menuBg, borderColor: t.scrollAreaBorder }]}>
       {items.map((item, i) => (
         <View
           key={i}
           style={[
             styles.menuItem,
-            { borderTopColor: t.border, borderTopWidth: i === 0 ? 0 : StyleSheet.hairlineWidth },
+            { borderTopColor: t.scrollAreaBorder, borderTopWidth: i === 0 ? 0 : StyleSheet.hairlineWidth },
             item === 'Export for AI' && { backgroundColor: t.listSelectorBg },
           ]}
         >
@@ -345,13 +345,13 @@ export function IllustrationThemes() {
       <View style={styles.logoWrap}>
         <IconLogo size={32} color={t.iconColor} />
       </View>
-      <View style={[styles.themePicker, { backgroundColor: t.menuBg, borderColor: t.border }]}>
+      <View style={[styles.themePicker, { backgroundColor: t.menuBg, borderColor: t.scrollAreaBorder }]}>
         {themeNames.map((name, i) => (
           <View
             key={i}
             style={[
               styles.themeItem,
-              { borderTopColor: t.border, borderTopWidth: i === 0 ? 0 : StyleSheet.hairlineWidth },
+              { borderTopColor: t.scrollAreaBorder, borderTopWidth: i === 0 ? 0 : StyleSheet.hairlineWidth },
             ]}
           >
             <Text style={[styles.themeItemText, { color: i === 0 ? t.accent : t.text }]}>{name}</Text>
@@ -368,7 +368,7 @@ export function IllustrationThemes() {
 export function IllustrationToolbarOptions() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.border }]}>
+    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.scrollAreaBorder }]}>
       <View style={[styles.tbLeft, { borderWidth: 1.5, borderColor: t.accent, borderRadius: 6 }]}>
         <IconOptions size={24} color={t.accent} />
       </View>
@@ -387,7 +387,7 @@ export function IllustrationToolbarOptions() {
 export function IllustrationExpandCollapse() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.border }]}>
+    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.scrollAreaBorder }]}>
       <View style={styles.tbLeft}>
         <IconOptions size={24} color={t.iconColor} />
       </View>

@@ -54,7 +54,7 @@ export default function AlarmModal({ visible, initialTime, onSave, onRemove, onC
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
       <View style={styles.centered} pointerEvents="box-none">
-        <View style={[styles.card, { backgroundColor: theme.menuBg, borderColor: theme.border }]}>
+        <View style={[styles.card, { backgroundColor: theme.menuBg, borderColor: theme.scrollAreaBorder }]}>
           <Text style={[styles.title, { color: theme.text }]}>Set alarm</Text>
 
           <View style={styles.pickerRow}>
@@ -98,7 +98,7 @@ export default function AlarmModal({ visible, initialTime, onSave, onRemove, onC
 
             <TouchableOpacity
               onPress={() => setAmpm(a => a === 'AM' ? 'PM' : 'AM')}
-              style={[styles.ampmBtn, { borderColor: theme.border }]}
+              style={[styles.ampmBtn, { borderColor: theme.scrollAreaBorder }]}
             >
               <Text style={[styles.ampmText, { color: theme.iconColor }]}>{ampm}</Text>
             </TouchableOpacity>
@@ -112,7 +112,7 @@ export default function AlarmModal({ visible, initialTime, onSave, onRemove, onC
             ) : <View />}
             <View style={styles.rightBtns}>
               <TouchableOpacity onPress={onClose}>
-                <Text style={[styles.btnText, { color: theme.textSub }]}>Cancel</Text>
+                <Text style={[styles.btnText, { color: theme.textNote }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => onSave(to24Hour())}

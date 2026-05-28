@@ -39,11 +39,13 @@ export type Theme = {
   scrollAreaBg: ScrollAreaBg;
 
   // Other backgrounds
-  headerBg: string;            // header bar background (reserved — not yet used in code)
+  headerBg: string | null;     // header bar background — null = no header bg
+  footerBg: string | null;     // toolbar/footer background — null = no footer bg
   menuBg: string;              // bottom sheet / dropdown backgrounds
 
   // Borders
-  border: string;              // general borders, inputs, scroll area
+  scrollAreaBorder: string;    // scroll area, modals, dropdowns, inputs
+  checkboxBorder: string;      // checkbox borders (unchecked and checked)
   headerBorder: string;        // 1px line under header
   footerBorder: string;        // 1px line above toolbar
   separator: string;           // row separator lines
@@ -51,7 +53,7 @@ export type Theme = {
 
   // Text
   text: string;                // primary body text
-  textSub: string;             // secondary / note text
+  textNote: string;            // note / secondary text
   textDone: string;            // struck-through completed item text
   textDepth: [string, string, string]; // task text by depth [d0, d1, d2]
 
@@ -70,7 +72,7 @@ export type Theme = {
 
   // Checkbox
   checkboxBg: string;          // unchecked checkbox fill
-  checkboxDone: string;        // checked checkbox fill + border
+  checkboxDoneBg: string;      // checked checkbox fill
   checkmarkColor: string;      // SVG checkmark color inside done checkbox
 
   // Extended visual tokens (optional — null = not used)

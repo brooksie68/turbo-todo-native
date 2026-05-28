@@ -113,7 +113,7 @@ export default function ItemOptionsMenu({
       />
       <View style={[
         styles.dropdown,
-        { backgroundColor: theme.menuBg, borderColor: theme.border },
+        { backgroundColor: theme.menuBg, borderColor: theme.scrollAreaBorder },
         flipAbove ? { bottom, right } : { top, right },
       ]}>
         {/* Priority row — always shown */}
@@ -122,17 +122,17 @@ export default function ItemOptionsMenu({
             style={styles.priorityBtn}
             onPress={() => handle(() => onSetStatus(todo.status === 'elevated' ? null : 'elevated'))}
           >
-            <IconPriorityMedium size={20} color={todo.status === 'elevated' ? theme.priorityElevated : theme.textSub} />
+            <IconPriorityMedium size={20} color={todo.status === 'elevated' ? theme.priorityElevated : theme.textNote} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.priorityBtn}
             onPress={() => handle(() => onSetStatus(todo.status === 'top-priority' ? null : 'top-priority'))}
           >
-            <IconPriorityHigh size={20} color={todo.status === 'top-priority' ? theme.priorityTop : theme.textSub} />
+            <IconPriorityHigh size={20} color={todo.status === 'top-priority' ? theme.priorityTop : theme.textNote} />
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+        <View style={[styles.divider, { backgroundColor: theme.scrollAreaBorder }]} />
 
         {depth === 0 ? (
           <>
@@ -175,7 +175,7 @@ export default function ItemOptionsMenu({
             <TouchableOpacity style={styles.item} onPress={() => handle(onSendToList)}>
               <Text style={[styles.itemText, { color: theme.text }]}>Send to list</Text>
             </TouchableOpacity>
-            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <View style={[styles.divider, { backgroundColor: theme.scrollAreaBorder }]} />
             <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
               <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>
             </TouchableOpacity>
@@ -213,7 +213,7 @@ export default function ItemOptionsMenu({
             <TouchableOpacity style={styles.item} onPress={() => handle(onSendToList)}>
               <Text style={[styles.itemText, { color: theme.text }]}>Send to list</Text>
             </TouchableOpacity>
-            <View style={[styles.divider, { backgroundColor: theme.border }]} />
+            <View style={[styles.divider, { backgroundColor: theme.scrollAreaBorder }]} />
 
             <TouchableOpacity style={styles.item} onPress={() => handle(onDelete)}>
               <Text style={[styles.itemText, { color: theme.danger }]}>Delete</Text>

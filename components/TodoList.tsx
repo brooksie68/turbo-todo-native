@@ -294,7 +294,7 @@ export default function TodoList() {
       keyExtractor={item => String(item.todo.id)}
       renderItem={renderCompletedItem}
       scrollEnabled={false}
-      style={[styles.section, { backgroundColor: themeCtx.scrollAreaBg.type === 'solid' ? themeCtx.scrollAreaBg.color : themeCtx.scrollAreaBg.colors[0], borderColor: themeCtx.border }, styles.sectionDone]}
+      style={[styles.section, { backgroundColor: themeCtx.scrollAreaBg.type === 'solid' ? themeCtx.scrollAreaBg.color : themeCtx.scrollAreaBg.colors[0], borderColor: themeCtx.scrollAreaBorder }, styles.sectionDone]}
       ListHeaderComponent={<Text style={[styles.sectionLabel, { color: themeCtx.accent }]}>Completed</Text>}
     />
   ) : null;
@@ -306,6 +306,7 @@ export default function TodoList() {
       <StatusBar style={themeCtx.statusBarStyle} backgroundColor={themeCtx.statusBarBg === 'transparent' ? 'transparent' : themeCtx.statusBarBg} translucent={themeCtx.statusBarBg === 'transparent'} />
       <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
 
+        <View style={theme.headerBg ? { backgroundColor: theme.headerBg } : undefined}>
         <TodoListHeader
           lists={data.lists}
           activeListId={data.activeListId}
@@ -317,6 +318,7 @@ export default function TodoList() {
           onDeleteList={data.deleteList}
           onHelp={() => setShowHelp(true)}
         />
+        </View>
 
         {/* Modals */}
         <AddEditModal
@@ -399,11 +401,11 @@ export default function TodoList() {
         {/* Todo list */}
         <View style={styles.scrollWrapper}>
           {data.loading ? (
-            <ScrollAreaBgView borderColor={themeCtx.listSelectorBorder} style={styles.loadingContainer}>
+            <ScrollAreaBgView borderColor={themeCtx.scrollAreaBorder} style={styles.loadingContainer}>
               <ActivityIndicator color={themeCtx.iconColor} />
             </ScrollAreaBgView>
           ) : (
-            <ScrollAreaBgView borderColor={themeCtx.listSelectorBorder}>
+            <ScrollAreaBgView borderColor={themeCtx.scrollAreaBorder}>
             <DraggableFlatList
               key={listKey}
               overScrollMode="always"
@@ -427,7 +429,7 @@ export default function TodoList() {
                 );
               }}
               ListHeaderComponent={data.incompleteFlat.length === 0 ? (
-                <Text style={[styles.emptyState, { color: themeCtx.textSub }]}>No tasks yet.</Text>
+                <Text style={[styles.emptyState, { color: themeCtx.textNote }]}>No tasks yet.</Text>
               ) : null}
               ListFooterComponent={listFooter}
             />
@@ -445,12 +447,14 @@ export default function TodoList() {
           />
         </View>
 
+        <View style={theme.footerBg ? { backgroundColor: theme.footerBg } : undefined}>
         <TodoListToolbar
           onOpenMenu={() => overlay.setShowToolbarMenu(true)}
           onAddNew={() => data.openAdd(null, 'top')}
           onToggleAll={handleToggleAll}
           allExpanded={data.anyDepth0Expanded}
         />
+        </View>
 
         <ImageViewer
           visible={viewerUri !== null}

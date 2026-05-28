@@ -159,14 +159,14 @@ export default function TodoListHeader({
           />
           <View style={[
             styles.listPickerDropdown,
-            { backgroundColor: theme.listSelectorBg, borderColor: theme.border, top: listPickerLayout.top, left: listPickerLayout.left },
+            { backgroundColor: theme.listSelectorBg, borderColor: theme.scrollAreaBorder, top: listPickerLayout.top, left: listPickerLayout.left },
           ]}>
             {lists.map(l => (
               <TouchableOpacity
                 key={l.id}
                 style={[
                   styles.listPickerItem,
-                  { borderBottomColor: theme.border },
+                  { borderBottomColor: theme.scrollAreaBorder },
                   l.id === activeListId && { backgroundColor: theme.menuBg },
                 ]}
                 onPress={() => { onSwitchList(l.id); setListPickerLayout(null); }}
@@ -194,12 +194,12 @@ export default function TodoListHeader({
           />
           <View style={[
             styles.dropdown,
-            { backgroundColor: theme.menuBg, borderColor: theme.border, top: themePickerLayout.top, left: themePickerLayout.left },
+            { backgroundColor: theme.menuBg, borderColor: theme.scrollAreaBorder, top: themePickerLayout.top, left: themePickerLayout.left },
           ]}>
             {Object.values(themes).filter(th => th.enabled !== false).map((th, i, arr) => (
               <TouchableOpacity
                 key={th.id}
-                style={[styles.dropdownItem, i < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.border }]}
+                style={[styles.dropdownItem, i < arr.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.scrollAreaBorder }]}
                 onPress={() => { setThemeId(th.id); setThemePickerLayout(null); }}
               >
                 <Text style={[
@@ -226,17 +226,17 @@ export default function TodoListHeader({
           <View style={[
             styles.dropdown,
             styles.gearDropdown,
-            { backgroundColor: theme.menuBg, borderColor: theme.border, top: gearMenuLayout.top, left: gearMenuLayout.left },
+            { backgroundColor: theme.menuBg, borderColor: theme.scrollAreaBorder, top: gearMenuLayout.top, left: gearMenuLayout.left },
           ]}>
             <TouchableOpacity
-              style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
+              style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.scrollAreaBorder }]}
               onPress={handleNewList}
             >
               <Text style={[styles.dropdownItemText, { color: theme.text, fontFamily: ff }]}>New list</Text>
             </TouchableOpacity>
             {!isDailyList && (
               <TouchableOpacity
-                style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.border }]}
+                style={[styles.dropdownItem, { borderBottomWidth: 1, borderBottomColor: theme.scrollAreaBorder }]}
                 onPress={handleRename}
               >
                 <Text style={[styles.dropdownItemText, { color: theme.text, fontFamily: ff }]}>Rename</Text>
@@ -265,23 +265,23 @@ export default function TodoListHeader({
             activeOpacity={1}
             onPress={() => setListNameModal(null)}
           />
-          <View style={[styles.nameModalBox, { backgroundColor: theme.menuBg, borderColor: theme.border }]}>
+          <View style={[styles.nameModalBox, { backgroundColor: theme.menuBg, borderColor: theme.scrollAreaBorder }]}>
             <Text style={[styles.nameModalTitle, { color: theme.accent, fontFamily: ff }]}>
               {listNameModal === 'new' ? 'New list' : 'Rename list'}
             </Text>
             <TextInput
-              style={[styles.nameModalInput, { color: theme.text, borderColor: theme.border, fontFamily: ff }]}
+              style={[styles.nameModalInput, { color: theme.text, borderColor: theme.scrollAreaBorder, fontFamily: ff }]}
               value={listNameInput}
               onChangeText={setListNameInput}
               placeholder="List name"
-              placeholderTextColor={theme.textSub ?? theme.accent}
+              placeholderTextColor={theme.textNote ?? theme.accent}
               autoFocus
               onSubmitEditing={handleListNameSave}
               returnKeyType="done"
             />
             <View style={styles.nameModalActions}>
               <TouchableOpacity
-                style={[styles.nameModalBtn, { backgroundColor: theme.border }]}
+                style={[styles.nameModalBtn, { backgroundColor: theme.scrollAreaBorder }]}
                 onPress={() => setListNameModal(null)}
               >
                 <Text style={[styles.nameModalBtnText, { color: theme.text, fontFamily: ff }]}>Cancel</Text>

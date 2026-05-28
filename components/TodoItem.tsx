@@ -109,8 +109,8 @@ const TodoItem = memo(function TodoItem({
         <TouchableOpacity
           style={[
             styles.checkbox,
-            { backgroundColor: theme.checkboxBg, borderColor: theme.border },
-            todo.is_complete && { backgroundColor: theme.checkboxDone, borderColor: theme.checkboxDone },
+            { backgroundColor: theme.checkboxBg, borderColor: theme.checkboxBorder },
+            todo.is_complete && { backgroundColor: theme.checkboxDoneBg, borderColor: theme.checkboxBorder },
           ]}
           onPress={() => onToggleComplete(todo.id, todo.is_complete)}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -131,7 +131,7 @@ const TodoItem = memo(function TodoItem({
             {todo.task}
           </Text>
           {hasChildren && isCollapsed && (
-            <Text style={[styles.childCount, { color: theme.textSub, marginLeft: 4 }]}>
+            <Text style={[styles.childCount, { color: theme.textNote, marginLeft: 4 }]}>
               {'('}{todo.children!.length}{')'}
             </Text>
           )}
@@ -141,7 +141,7 @@ const TodoItem = memo(function TodoItem({
           <IconPin size={18} color={theme.accent} />
         )}
         {todo.alarm_time && (
-          <IconBell size={14} color={theme.textSub} />
+          <IconBell size={14} color={theme.textNote} />
         )}
 
         {/* Row actions */}
@@ -183,7 +183,7 @@ const TodoItem = memo(function TodoItem({
           <Text
             style={[
               styles.note,
-              { color: todo.is_complete ? theme.textDone : theme.textSub },
+              { color: todo.is_complete ? theme.textDone : theme.textNote },
               todo.is_complete && styles.noteDone,
             ]}
             numberOfLines={0}
@@ -195,7 +195,7 @@ const TodoItem = memo(function TodoItem({
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={styles.noteDeleteBtn}
           >
-            <IconClose size={14} color={theme.textSub} />
+            <IconClose size={14} color={theme.textNote} />
           </TouchableOpacity>
         </View>
       ) : null}
@@ -207,7 +207,7 @@ const TodoItem = memo(function TodoItem({
             {images.map(img => (
               <View key={img.id} style={styles.thumbWrap}>
                 <TouchableOpacity onPress={() => onViewImage?.(img.localPath)}>
-                  <Image source={{ uri: img.localPath }} style={[styles.thumb, { backgroundColor: theme.border }]} />
+                  <Image source={{ uri: img.localPath }} style={[styles.thumb, { backgroundColor: theme.scrollAreaBorder }]} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.thumbDelete, { backgroundColor: theme.iconColor }]}

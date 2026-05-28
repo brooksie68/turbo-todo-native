@@ -65,13 +65,13 @@ export default function ToolbarOptionsMenu({
     >
       <View style={styles.overlay}>
         <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={handleClose} />
-        <View style={[styles.sheet, { backgroundColor: t.menuBg, borderColor: t.border, paddingBottom: insets.bottom + 8 }]}>
+        <View style={[styles.sheet, { backgroundColor: t.menuBg, borderColor: t.scrollAreaBorder, paddingBottom: insets.bottom + 8 }]}>
         {confirmAction === 'clear' ? (
           <View style={styles.confirmBox}>
             <Text style={[styles.confirmMsg, { color: t.accent }]}>This cannot be undone</Text>
             <View style={styles.confirmActions}>
               <TouchableOpacity
-                style={[styles.confirmBtn, { backgroundColor: t.border }]}
+                style={[styles.confirmBtn, { backgroundColor: t.scrollAreaBorder }]}
                 onPress={() => setConfirmAction(null)}
               >
                 <Text style={[styles.confirmBtnText, { color: t.text }]}>Cancel</Text>
@@ -89,7 +89,7 @@ export default function ToolbarOptionsMenu({
             <Text style={[styles.confirmMsg, { color: t.accent }]}>This will replace all your current data. This cannot be undone.</Text>
             <View style={styles.confirmActions}>
               <TouchableOpacity
-                style={[styles.confirmBtn, { backgroundColor: t.border }]}
+                style={[styles.confirmBtn, { backgroundColor: t.scrollAreaBorder }]}
                 onPress={() => setConfirmAction(null)}
               >
                 <Text style={[styles.confirmBtnText, { color: t.text }]}>Cancel</Text>
@@ -108,13 +108,13 @@ export default function ToolbarOptionsMenu({
               <TouchableOpacity style={styles.splitBtn} onPress={handleBackup}>
                 <Text style={[styles.splitBtnText, { color: t.text }]}>Back up</Text>
               </TouchableOpacity>
-              <View style={[styles.splitDivider, { backgroundColor: t.border }]} />
+              <View style={[styles.splitDivider, { backgroundColor: t.scrollAreaBorder }]} />
               <TouchableOpacity style={styles.splitBtn} onPress={() => setConfirmAction('restore')}>
                 <Text style={[styles.splitBtnText, { color: t.text }]}>Restore</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={[styles.divider, { backgroundColor: t.border }]} />
+            <View style={[styles.divider, { backgroundColor: t.scrollAreaBorder }]} />
 
             <Text style={[styles.sectionLabel, { color: t.accent }]}>Sort by:</Text>
             <View style={styles.sortRow}>
@@ -131,7 +131,7 @@ export default function ToolbarOptionsMenu({
               </TouchableOpacity>
             </View>
 
-            <View style={[styles.divider, { backgroundColor: t.border }]} />
+            <View style={[styles.divider, { backgroundColor: t.scrollAreaBorder }]} />
 
             <View style={styles.textSizeRow}>
               <TouchableOpacity
@@ -139,7 +139,7 @@ export default function ToolbarOptionsMenu({
                 onPress={() => setTextSizeIndex(textSizeIndex - 1)}
                 disabled={textSizeIndex <= 0}
               >
-                <Text style={[styles.textSizeBtnText, { color: textSizeIndex <= 0 ? t.border : t.text }]}>−</Text>
+                <Text style={[styles.textSizeBtnText, { color: textSizeIndex <= 0 ? t.scrollAreaBorder : t.text }]}>−</Text>
               </TouchableOpacity>
               <Text style={[styles.textSizeLabel, { color: t.text }]}>Text size</Text>
               <TouchableOpacity
@@ -147,11 +147,11 @@ export default function ToolbarOptionsMenu({
                 onPress={() => setTextSizeIndex(textSizeIndex + 1)}
                 disabled={textSizeIndex >= TEXT_SIZE_COUNT - 1}
               >
-                <Text style={[styles.textSizeBtnText, { color: textSizeIndex >= TEXT_SIZE_COUNT - 1 ? t.border : t.text }]}>+</Text>
+                <Text style={[styles.textSizeBtnText, { color: textSizeIndex >= TEXT_SIZE_COUNT - 1 ? t.scrollAreaBorder : t.text }]}>+</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={[styles.divider, { backgroundColor: t.border }]} />
+            <View style={[styles.divider, { backgroundColor: t.scrollAreaBorder }]} />
 
             <Text style={[styles.sectionLabel, { color: t.accent }]}>Daily List:</Text>
             <View style={styles.sortRow}>
@@ -164,7 +164,7 @@ export default function ToolbarOptionsMenu({
               </TouchableOpacity>
             </View>
 
-            <View style={[styles.divider, { backgroundColor: t.border }]} />
+            <View style={[styles.divider, { backgroundColor: t.scrollAreaBorder }]} />
 
             <Text style={[styles.sectionLabel, { color: t.accent }]}>Sounds:</Text>
             <View style={styles.sortRow}>
@@ -177,7 +177,7 @@ export default function ToolbarOptionsMenu({
               </TouchableOpacity>
             </View>
 
-            <View style={[styles.divider, { backgroundColor: t.border }]} />
+            <View style={[styles.divider, { backgroundColor: t.scrollAreaBorder }]} />
 
             <TouchableOpacity style={styles.item} onPress={handleClearCompleted}>
               <Text style={[styles.itemText, { color: t.text }]}>Clear all completed</Text>

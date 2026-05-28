@@ -71,9 +71,9 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
 
           <TextInput
             ref={urlInputRef}
-            style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
+            style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.scrollAreaBorder, color: theme.text }]}
             placeholder="URL (required)"
-            placeholderTextColor={theme.textSub}
+            placeholderTextColor={theme.textNote}
             value={url}
             onChangeText={setUrl}
             autoCapitalize="none"
@@ -83,9 +83,9 @@ export default function AddLinkModal({ visible, onClose, onSave }: Props) {
           />
 
           <TextInput
-            style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
+            style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.scrollAreaBorder, color: theme.text }]}
             placeholder="Name (optional)"
-            placeholderTextColor={theme.textSub}
+            placeholderTextColor={theme.textNote}
             value={name}
             onChangeText={setName}
             returnKeyType="done"

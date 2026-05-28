@@ -33,10 +33,10 @@ export default function SendToListModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onClose} />
-      <View style={[styles.container, { backgroundColor: theme.menuBg, borderColor: theme.border }]}>
+      <View style={[styles.container, { backgroundColor: theme.menuBg, borderColor: theme.scrollAreaBorder }]}>
         <Text style={[styles.title, { color: theme.accent }]}>Send to list</Text>
         {eligible.length === 0 ? (
-          <Text style={[styles.empty, { color: theme.textSub }]}>No other lists available.</Text>
+          <Text style={[styles.empty, { color: theme.textNote }]}>No other lists available.</Text>
         ) : (
           <ScrollView bounces={false}>
             {eligible.map((l, i) => (
@@ -44,7 +44,7 @@ export default function SendToListModal({
                 key={l.id}
                 style={[
                   styles.item,
-                  i < eligible.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.border },
+                  i < eligible.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.scrollAreaBorder },
                 ]}
                 onPress={() => onSelect(l.id)}
               >
@@ -54,10 +54,10 @@ export default function SendToListModal({
           </ScrollView>
         )}
         <TouchableOpacity
-          style={[styles.cancelRow, { borderTopColor: theme.border }]}
+          style={[styles.cancelRow, { borderTopColor: theme.scrollAreaBorder }]}
           onPress={onClose}
         >
-          <Text style={[styles.cancelText, { color: theme.textSub }]}>Cancel</Text>
+          <Text style={[styles.cancelText, { color: theme.textNote }]}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </Modal>

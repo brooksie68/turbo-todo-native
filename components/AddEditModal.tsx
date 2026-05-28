@@ -96,9 +96,9 @@ export default function AddEditModal({
           {!noteMode && (
             <TextInput
               ref={inputRef}
-              style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
+              style={[styles.input, { backgroundColor: theme.checkboxBg, borderColor: theme.scrollAreaBorder, color: theme.text }]}
               placeholder="Task"
-              placeholderTextColor={theme.textSub}
+              placeholderTextColor={theme.textNote}
               value={task}
               onChangeText={setTask}
               returnKeyType="next"
@@ -108,9 +108,9 @@ export default function AddEditModal({
 
           <TextInput
             ref={noteInputRef}
-            style={[styles.input, noteMode ? null : styles.noteInput, { backgroundColor: theme.checkboxBg, borderColor: theme.border, color: theme.text }]}
+            style={[styles.input, noteMode ? null : styles.noteInput, { backgroundColor: theme.checkboxBg, borderColor: theme.scrollAreaBorder, color: theme.text }]}
             placeholder={noteMode ? 'Note' : 'Note (optional)'}
-            placeholderTextColor={theme.textSub}
+            placeholderTextColor={theme.textNote}
             value={note}
             onChangeText={setNote}
             returnKeyType="done"
