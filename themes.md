@@ -403,7 +403,7 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 **Pages:**
 | Page name | Theme ID | T1 node | Class | Notes |
 |---|---|---|---|---|
-| L1 - Default xhdpi | `default` | `353:57` | light | **Active template — xhdpi (720×1600)** |
+| L1 - Default xhdpi | `default` | `353:57` (w-hf) / `432:93` (no-hf) | light | **Active template — xhdpi (720×1600); two T1 flavors** |
 | L1 - Default-old | — | `5:2` | light | Legacy mdpi backup — do not edit |
 | L2 - Forest Canopy | `forest-canopy` | — | light | |
 | L3 - Bimini Breeze | `bimini-breeze` | — | light | |
@@ -442,16 +442,29 @@ Frame x positions on each page (mdpi, legacy):
 
 **xhdpi template page (`L1 - Default xhdpi`)** — the active authoring template:
 
-| Frame | Name | x | Width | Height |
-|---|---|---|---|---|
-| T1 (with header/footer) | `Default-new-xhdpi-w-header.footer` | 0 | 720 | 1600 |
-| T1 (no header/footer) | `Default-new-xhdpi-no-header.footer` | 836 | 720 | 1600 |
-| T2 | `theme-values` | 1940 | 680 | auto |
-| T3 | `menus-modals-and-values` | 2720 | 680 | auto |
-| T4 | `icons-and-values` | 3500 | 708 | auto |
-| T5 | `ui-attributes` | 4308 | 900 | auto |
+| Frame | Name | Node ID | x | Width | Height |
+|---|---|---|---|---|---|
+| T1 (with header/footer) | `Default-xhdpi-w-header.footer` | `353:57` | 0 | 720 | 1600 |
+| T1 (no header/footer) | `Default-xhdpi-no-header.footer` | `432:93` | 836 | 720 | 1600 |
+| T2 | `theme-values` | `390:11` | 1940 | 680 | auto |
+| T3 | `menus-modals-and-values` | `390:184` | 2720 | 680 | auto |
+| T4 | `icons-and-values` | `390:317` | 3500 | 708 | auto |
+| T5 | `ui-attributes` | `390:435` | 4308 | 900 | auto |
 
 The xhdpi T1 frame is **720×1600px** (360dp × 2). All values in T1 are physical pixels at xhdpi; divide by 2 to get dp. James designs at xhdpi; Claude reads and converts.
+
+**Two T1 flavors — `w-header.footer` vs `no-header.footer`:**
+
+Each theme page uses exactly one flavor. The two differ in `scrollAreaBg` size and position:
+
+| Flavor | scrollAreaBg y | scrollAreaBg height | bottom edge |
+|---|---|---|---|
+| w-header.footer | 200 | 1192 | 1392 |
+| no-header.footer | 187 | 1221 | 1408 |
+
+Hiding/showing header and footer layers is not enough — the `scrollAreaBg` rect itself changes position and size. `L1 - Default xhdpi` is the only page with both flavors side by side; all other theme pages have exactly one.
+
+**Flavor detection (used by `/drop-themes`):** inside `todo-container`, look for `appBgLayerHeader` — visible = `w-header.footer`; absent or hidden = `no-header.footer`.
 
 T2–T5 auto-resize to content height. Never move or resize them manually.
 
