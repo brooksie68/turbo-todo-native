@@ -9,6 +9,12 @@ import type { TaskImage } from './imageStore';
 
 const IMAGE_DIR = `${FileSystem.documentDirectory}task-images/`;
 
+// Guard against path traversal: todoId / filename come from an untrusted backup
+// file and get used in filesystem paths. Reject anything with a separator or `..`.
+function isSafeSegment(s: unknown): s is string {
+  return typeof s === 'string' && s.length > 0 && !s.includes('/') && !s.includes('\\') && !s.includes('..');
+}
+
 function buildTimestamp(): string {
   const now = new Date();
   const p = (n: number) => String(n).padStart(2, '0');
@@ -132,48 +138,52 @@ export async function importBackup(): Promise<boolean> {
       throw new Error('Invalid backup file');
     }
 
-    // Wipe all existing images from filesystem + AsyncStorage
+    // Wipe + restore SQLite atomically. If any insert fails, the whole thing
+    // rolls back and the user's existing data is left untouched. defer_foreign_keys
+    // holds FK checks until commit so restored subtasks needn't be ordered
+    // parent-before-child. Nothing on the filesystem is touched until this commits.
+    await db.withTransactionAsync(async () => {
+      await db.execAsync('PRAGMA defer_foreign_keys = ON');
+      await db.execAsync('DELETE FROM task_links; DELETE FROM todos; DELETE FROM lists;');
+
+      for (const row of backup.lists) {
+        await db.runAsync(
+          'INSERT INTO lists (id, name, sort_order, inserted_at) VALUES (?, ?, ?, ?)',
+          [row.id, row.name, row.sort_order, row.inserted_at],
+        );
+      }
+
+      for (const row of backup.todos) {
+        await db.runAsync(
+          'INSERT INTO todos (id, list_id, parent_id, task, note, is_complete, status, sort_order, inserted_at, pinned) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [row.id, row.list_id, row.parent_id, row.task, row.note, row.is_complete, row.status, row.sort_order, row.inserted_at, row.pinned ?? 0],
+        );
+      }
+
+      for (const row of backup.task_links ?? []) {
+        await db.runAsync(
+          'INSERT INTO task_links (id, todo_id, url, name, sort_order) VALUES (?, ?, ?, ?, ?)',
+          [row.id, row.todo_id, row.url, row.name, row.sort_order],
+        );
+      }
+    });
+
+    // DB is committed — now safe to swap images. Wipe existing, then restore.
     await FileSystem.deleteAsync(IMAGE_DIR, { idempotent: true }).catch(() => {});
     await FileSystem.makeDirectoryAsync(IMAGE_DIR, { intermediates: true });
     const allKeys = await AsyncStorage.getAllKeys();
     const imageKeys = allKeys.filter(k => k.startsWith('turbotodo-images-'));
     if (imageKeys.length > 0) await AsyncStorage.multiRemove(imageKeys);
 
-    // Wipe SQLite (FK order: links → todos → lists)
-    db.execSync('DELETE FROM task_links; DELETE FROM todos; DELETE FROM lists;');
-
-    // Restore lists
-    for (const row of backup.lists) {
-      await db.runAsync(
-        'INSERT INTO lists (id, name, sort_order, inserted_at) VALUES (?, ?, ?, ?)',
-        [row.id, row.name, row.sort_order, row.inserted_at],
-      );
-    }
-
-    // Restore todos
-    for (const row of backup.todos) {
-      await db.runAsync(
-        'INSERT INTO todos (id, list_id, parent_id, task, note, is_complete, status, sort_order, inserted_at, pinned) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [row.id, row.list_id, row.parent_id, row.task, row.note, row.is_complete, row.status, row.sort_order, row.inserted_at, row.pinned ?? 0],
-      );
-    }
-
-    // Restore task_links
-    for (const row of backup.task_links ?? []) {
-      await db.runAsync(
-        'INSERT INTO task_links (id, todo_id, url, name, sort_order) VALUES (?, ?, ?, ?, ?)',
-        [row.id, row.todo_id, row.url, row.name, row.sort_order],
-      );
-    }
-
-    // Restore images
     if (backup.images && typeof backup.images === 'object') {
       for (const [todoId, images] of Object.entries(backup.images as Record<string, any[]>)) {
+        if (!isSafeSegment(todoId) || !Array.isArray(images)) continue;
         const destDir = `${IMAGE_DIR}${todoId}/`;
         await FileSystem.makeDirectoryAsync(destDir, { intermediates: true });
 
         const restored: TaskImage[] = [];
         for (const img of images) {
+          if (!isSafeSegment(img?.filename)) continue;
           const src = `${jsonDir}images/${todoId}/${img.filename}`;
           const info = await FileSystem.getInfoAsync(src);
           if (info.exists) {
