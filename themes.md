@@ -464,7 +464,7 @@ Each theme page uses exactly one flavor. The two differ in `scrollAreaBg` size a
 
 Hiding/showing header and footer layers is not enough — the `scrollAreaBg` rect itself changes position and size. `L1 - Default xhdpi` is the only page with both flavors side by side; all other theme pages have exactly one.
 
-**Flavor detection (used by `/drop-themes`):** inside `todo-container`, look for `appBgLayerHeader` — visible = `w-header.footer`; absent or hidden = `no-header.footer`.
+**Flavor detection (used by `/drop-themes`):** inside `todo-container`, check for `appBgLayerHeader` — present = `w-header.footer`; absent = `no-header.footer`. The layer does not exist at all in `no-header.footer` themes; there is no visibility to check.
 
 T2–T5 auto-resize to content height. Never move or resize them manually.
 
