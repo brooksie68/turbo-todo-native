@@ -381,7 +381,7 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 
 | ID | File | Label | Class | Notes |
 |---|---|---|---|---|
-| `default` | `default.ts` | L1 | light | Gold/parchment. Production theme. |
+| `default` | `default.ts` | L1 | light | Gold/parchment. Production theme. Flavor: `no-header.footer` (`432:93`) — `headerBg`/`footerBg` null. |
 | `forest-canopy` | `forest-canopy.ts` | L2 | light | |
 | `bimini-breeze` | `bimini-breeze.ts` | L3 | light | |
 | `muir-light` | `muir-light.ts` | L4 | light | ImageBg: `muir-light.png` |
@@ -403,7 +403,7 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 **Pages:**
 | Page name | Theme ID | T1 node | Class | Notes |
 |---|---|---|---|---|
-| L1 - Default | `default` | `353:57` (w-hf) / `432:93` (no-hf) | light | **Active template — xhdpi (720×1600); two T1 flavors** |
+| L1 - Default | `default` | **`432:93` (no-hf — live source)** / `353:57` (w-hf — classifier only) | light | **Active template — xhdpi (720×1600). `/drop-themes` reads the no-header.footer frame for `default`; the w-header.footer frame exists only to classify the bars-visible layout.** |
 | L1 - Default-old | — | `5:2` | light | Legacy mdpi backup — do not edit |
 | L2 - Forest Canopy | `forest-canopy` | — | light | |
 | L3 - Bimini Breeze | `bimini-breeze` | — | light | |
@@ -463,6 +463,8 @@ Each theme page uses exactly one flavor. The two differ in `scrollAreaBg` size a
 | no-header.footer | 187 | 1221 | 1408 |
 
 Hiding/showing header and footer layers is not enough — the `scrollAreaBg` rect itself changes position and size. `L1 - Default` is the only page with both flavors side by side; all other theme pages have exactly one.
+
+**Default's live flavor is always `no-header.footer` (`432:93`).** That is the frame `/drop-themes` reads for the `default` theme. The `w-header.footer` frame (`353:57`) exists only to classify/preview the bars-visible layout — it is never the source of truth for `default`. (In the app, `headerBg`/`footerBg` are `null` for Default; the `scrollAreaBg` size difference is a Figma-template concern only — the app's scroll area auto-fills, there is no height token.)
 
 **Flavor detection (used by `/drop-themes`):** inside `todo-container`, check for `appBgLayerHeader` — present = `w-header.footer`; absent = `no-header.footer`. The layer does not exist at all in `no-header.footer` themes; there is no visibility to check.
 

@@ -63,7 +63,7 @@ function TaskRow({
 export function IllustrationLists() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.header, { backgroundColor: t.headerBg }]}>
+    <View style={[styles.header, { backgroundColor: t.headerBg ?? 'transparent' }]}>
       <View style={styles.logoWrap}>
         <IconLogo size={32} color={t.iconColor} />
       </View>
@@ -85,7 +85,7 @@ export function IllustrationLists() {
 export function IllustrationAddingTasks() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.scrollAreaBorder }]}>
+    <View style={[styles.toolbar, { backgroundColor: t.headerBg ?? 'transparent', borderTopColor: t.scrollAreaBorder }]}>
       <View style={styles.tbLeft}>
         <IconOptions size={24} color={t.iconColor} />
       </View>
@@ -275,7 +275,7 @@ export function IllustrationAlarms() {
 export function IllustrationDailyList() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.header, { backgroundColor: t.headerBg }]}>
+    <View style={[styles.header, { backgroundColor: t.headerBg ?? 'transparent' }]}>
       <View style={styles.logoWrap}>
         <IconLogo size={32} color={t.iconColor} />
       </View>
@@ -341,7 +341,7 @@ export function IllustrationThemes() {
   const { theme: t } = useThemeContext();
   const themeNames = ['Default', 'Bimini Breeze', 'Dark Slate'];
   return (
-    <View style={[styles.header, { backgroundColor: t.headerBg, alignItems: 'center', justifyContent: 'center' }]}>
+    <View style={[styles.header, { backgroundColor: t.headerBg ?? 'transparent', alignItems: 'center', justifyContent: 'center' }]}>
       <View style={styles.logoWrap}>
         <IconLogo size={32} color={t.iconColor} />
       </View>
@@ -368,7 +368,7 @@ export function IllustrationThemes() {
 export function IllustrationToolbarOptions() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.scrollAreaBorder }]}>
+    <View style={[styles.toolbar, { backgroundColor: t.headerBg ?? 'transparent', borderTopColor: t.scrollAreaBorder }]}>
       <View style={[styles.tbLeft, { borderWidth: 1.5, borderColor: t.accent, borderRadius: 6 }]}>
         <IconOptions size={24} color={t.accent} />
       </View>
@@ -387,7 +387,7 @@ export function IllustrationToolbarOptions() {
 export function IllustrationExpandCollapse() {
   const { theme: t } = useThemeContext();
   return (
-    <View style={[styles.toolbar, { backgroundColor: t.headerBg, borderTopColor: t.scrollAreaBorder }]}>
+    <View style={[styles.toolbar, { backgroundColor: t.headerBg ?? 'transparent', borderTopColor: t.scrollAreaBorder }]}>
       <View style={styles.tbLeft}>
         <IconOptions size={24} color={t.iconColor} />
       </View>
