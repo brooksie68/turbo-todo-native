@@ -8,9 +8,9 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-28)
+## Current state (as of 2026-05-29)
 
-**Git HEAD:** `a8f31b9` — "refactor: token surgery — rename textSub→textNote, split border→scrollAreaBorder+checkboxBorder, checkboxDone→checkboxDoneBg; add headerBg/footerBg rendering"
+**Git HEAD:** `8a145ef` — "docs: fix flavor detection — presence not visibility"
 **Active branch:** `main`
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
@@ -21,11 +21,16 @@ OTA command (still pending):
 eas update --branch preview --platform android --message "token surgery: textNote, scrollAreaBorder/checkboxBorder split, checkboxDoneBg, headerBg/footerBg live"
 ```
 
-### What was done last session (2026-05-28)
-- **Phase 1 — Token surgery (code):** renamed `textSub→textNote`, split `border→scrollAreaBorder+checkboxBorder`, renamed `checkboxDone→checkboxDoneBg`, added `headerBg`/`footerBg` nullable rendering. 21 files changed. Committed `a8f31b9`. Git checkpoint: `2446762`.
-- **Phase 2 — T4 icon cards (Figma):** Replaced 13 placeholder squares in xhdpi T4 (`icons-and-values`, 390:317) with actual icon vectors. Source: 14:2 (11 icons) + pin/checkmark from L1-Default-old. Bell left as placeholder — James will add from Affinity Designer.
-- **Phase 3 — T2/T3/T5 token name updates (Figma):** Updated 8 text nodes across `theme-values` (T2), `menus-modals-and-values` (T3), and `ui-attributes` (T5) on the xhdpi page: `border→scrollAreaBorder`, `textSub→textNote`, `checkboxDone→checkboxDoneBg`.
-- **Phase 4 — themes.md update:** Token reference tables, T1→token mapping notes, xhdpi frame position table, authoring workflow rules (headerBg/footerBg null detection, iconGradient detection, listSelectorBorder mixed stroke, textDepth-d0=text, textURL=accent). Date updated to 2026-05-28.
+### What was done last session (2026-05-29)
+- **xhdpi template flavor system:** Confirmed two permanent template frames on `L1 - Default xhdpi`: `Default-xhdpi-w-header.footer` (353:57) and `Default-xhdpi-no-header.footer` (432:93). Analyzed `scrollAreaBg` dimension differences (y/height differ between flavors — not just a visibility toggle).
+- **themes.md update:** Fixed frame names (dropped "new-" prefix), added Node ID column to xhdpi frame table, added flavor section with scrollAreaBg dimension comparison table and flavor detection rule.
+- **drop-themes.md update:** Added flavor detection to Step 1 (check for `appBgLayerHeader` presence in `todo-container` — present = `w-header.footer`, absent = `no-header.footer`); added Flavor line to Step 7 report. Detection is presence-only — the layer does not exist at all in `no-header.footer` themes.
+
+### What was done session before (2026-05-28)
+- **Phase 1 — Token surgery (code):** renamed `textSub→textNote`, split `border→scrollAreaBorder+checkboxBorder`, renamed `checkboxDone→checkboxDoneBg`, added `headerBg`/`footerBg` nullable rendering. 21 files changed. Committed `a8f31b9`.
+- **Phase 2 — T4 icon cards (Figma):** Replaced 13 placeholder squares in xhdpi T4 (`icons-and-values`, 390:317) with actual icon vectors. Bell left as placeholder — James will add from Affinity Designer.
+- **Phase 3 — T2/T3/T5 token name updates (Figma):** Updated 8 text nodes: `border→scrollAreaBorder`, `textSub→textNote`, `checkboxDone→checkboxDoneBg`.
+- **Phase 4 — themes.md update:** Token reference tables, authoring workflow rules, xhdpi frame position table.
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
