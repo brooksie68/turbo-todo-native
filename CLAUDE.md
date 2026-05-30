@@ -198,6 +198,20 @@ eas update --branch preview --platform android --message "token surgery: textNot
 - [ ] Categories
 - [ ] Verify OTA message field appears in App Info (manifest metadata path may not be correct)
 
+#### Code Cleanup (from 2026-05-30 review — no user impact, do anytime)
+Dead code:
+- [ ] Remove `App.tsx` + `index.ts` create-expo-app boilerplate (never runs — `main` = `expo-router/entry`)
+- [ ] Remove orphaned auth/Supabase files: `app/(auth)/`, `lib/supabase/client.ts` (nothing routes to `(auth)`; app redirects to `/(app)`)
+- [ ] Remove dead migration code: `hooks/useImport.ts`, `lib/migration.ts` (never mounted)
+- [ ] Resolve duplicate `migration-data.json` — `lib/` (22KB) vs `scripts/` (27KB), out of sync; keep one or delete both
+Code quality:
+- [ ] Dedupe drag validation — `TodoList.tsx` `isDropValid` vs `useTodoData` `handleDragEnd` are two divergent implementations of the same rule
+- [ ] Move DB writes out of the `setTodos` updater in `handleSort` (side effect inside a state updater)
+- [ ] Add error handling to fire-and-forget DB writes in `useTodoData`
+- [ ] Fix stale "depth 1 only" comments in `TodoItem.tsx` (`showMedia = depth <= 1` covers depth 0 and 1)
+- [ ] `expo-av` is deprecated; reconcile expo-av/expo-font version drift
+- [ ] Guard `Linking.openURL(link.url)` in `TodoItem.tsx` with a `.catch` (bad URL currently fails silently)
+
 #### Paid / Monetization (long-term)
 - [ ] Paid tiers: extra depth levels, online backups, long archive time
 - [ ] Paid feature: shared lists
