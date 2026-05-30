@@ -403,7 +403,7 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 **Pages:**
 | Page name | Theme ID | T1 node | Class | Notes |
 |---|---|---|---|---|
-| L1 - Default xhdpi | `default` | `353:57` (w-hf) / `432:93` (no-hf) | light | **Active template — xhdpi (720×1600); two T1 flavors** |
+| L1 - Default | `default` | `353:57` (w-hf) / `432:93` (no-hf) | light | **Active template — xhdpi (720×1600); two T1 flavors** |
 | L1 - Default-old | — | `5:2` | light | Legacy mdpi backup — do not edit |
 | L2 - Forest Canopy | `forest-canopy` | — | light | |
 | L3 - Bimini Breeze | `bimini-breeze` | — | light | |
@@ -440,7 +440,7 @@ Frame x positions on each page (mdpi, legacy):
 | T4 `icons-and-values` | 1528 | 360 |
 | T5 `ui-attributes` | 1948 | 360 |
 
-**xhdpi template page (`L1 - Default xhdpi`)** — the active authoring template:
+**xhdpi template page (`L1 - Default`)** — the active authoring template:
 
 | Frame | Name | Node ID | x | Width | Height |
 |---|---|---|---|---|---|
@@ -462,7 +462,7 @@ Each theme page uses exactly one flavor. The two differ in `scrollAreaBg` size a
 | w-header.footer | 200 | 1192 | 1392 |
 | no-header.footer | 187 | 1221 | 1408 |
 
-Hiding/showing header and footer layers is not enough — the `scrollAreaBg` rect itself changes position and size. `L1 - Default xhdpi` is the only page with both flavors side by side; all other theme pages have exactly one.
+Hiding/showing header and footer layers is not enough — the `scrollAreaBg` rect itself changes position and size. `L1 - Default` is the only page with both flavors side by side; all other theme pages have exactly one.
 
 **Flavor detection (used by `/drop-themes`):** inside `todo-container`, check for `appBgLayerHeader` — present = `w-header.footer`; absent = `no-header.footer`. The layer does not exist at all in `no-header.footer` themes; there is no visibility to check.
 
