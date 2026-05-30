@@ -10,6 +10,10 @@ import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabaseSync('turbotodo.db');
 
+// Enforce declared ON DELETE CASCADE foreign keys — SQLite defaults this OFF
+// per connection, so deletes would otherwise leave orphaned child rows behind.
+db.execSync('PRAGMA foreign_keys = ON;');
+
 // ── Init — run once at app startup ──────────────────────────────────────────
 
 export function initDB(): void {
@@ -69,6 +73,15 @@ export function initDB(): void {
   try {
     db.execSync('ALTER TABLE todos ADD COLUMN daily_source_sort_order INTEGER');
   } catch { /* already exists */ }
+
+  // One-time sweep of rows orphaned while cascades were disabled. With foreign
+  // keys now ON, deleting a parent row cascades to its descendants and links,
+  // so these three passes fully clear any pre-existing orphan trees. Idempotent.
+  db.execSync(`
+    DELETE FROM todos      WHERE list_id   NOT IN (SELECT id FROM lists);
+    DELETE FROM todos      WHERE parent_id IS NOT NULL AND parent_id NOT IN (SELECT id FROM todos);
+    DELETE FROM task_links WHERE todo_id   NOT IN (SELECT id FROM todos);
+  `);
 }
 
 export default db;
