@@ -8,18 +8,19 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-29)
+## Current state (as of 2026-05-30)
 
-**Git HEAD:** `8a145ef` — "docs: fix flavor detection — presence not visibility"
+**Git HEAD:** `688d619` — "feat(themes): Default uses no-header.footer flavor (no bars)" — pushed
 **Active branch:** `main`
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** OTA `a8f31b9` built but NOT YET CONFIRMED on device. Run and verify before next feature work.
+**Device state:** Default no-header.footer OTA confirmed working on device (James verified 2026-05-30). All prior OTAs also live.
 
-OTA command (still pending):
-```
-eas update --branch preview --platform android --message "token surgery: textNote, scrollAreaBorder/checkboxBorder split, checkboxDoneBg, headerBg/footerBg live"
-```
+### What was done last session (2026-05-30)
+- **Code review fixes (merged to main):** A1 — enabled `PRAGMA foreign_keys = ON` + one-time orphan sweep in `lib/db.ts`. A2 — atomic restore in `lib/backup.ts` (wrapped wipe+restore in a transaction with `defer_foreign_keys`, moved image FS wipe to after DB commit, added `isSafeSegment` path-traversal guards). Proven against real SQLite via node:sqlite.
+- **drop-themes skill rewrite:** input now theme labels (`/drop-themes L2 D3`); uses `use_figma`+`setCurrentPageAsync` (not deprecated `get_design_context`); token mapping deferred to themes.md; outputs OTA string without auto-running; commits without auto-pushing. Synced across ai-projects/.claude/commands, worktree, and ~/.claude/commands.
+- **themes.md cleanup:** removed stale `L1 - Default xhdpi` refs; added "Code Cleanup" backlog subsection.
+- **Default theme → no-header.footer flavor:** set `headerBg`/`footerBg` to `null` (bars gone, gradient shows through); help illustrations fall back to transparent. Pinned Default's live Figma source frame to `no-header.footer` (`432:93`) in themes.md — `/drop-themes` resolves `default` to it; `w-header.footer` (`353:57`) is classifier-only. Committed `688d619`, pushed, OTA confirmed.
 
 ### What was done last session (2026-05-29)
 - **xhdpi template flavor system:** Confirmed two permanent template frames on `L1 - Default xhdpi`: `Default-xhdpi-w-header.footer` (353:57) and `Default-xhdpi-no-header.footer` (432:93). Analyzed `scrollAreaBg` dimension differences (y/height differ between flavors — not just a visibility toggle).
