@@ -8,21 +8,24 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 **JS-only changes:** `eas update --branch preview --platform android --message "..."` — no build needed, OTA to device
 **New native package:** `eas build --profile preview --platform android` — required when adding native packages or changing app.json plugins
 
-## Current state (as of 2026-05-15)
+## Current state (as of 2026-05-28)
 
-**Git HEAD:** `e4bad16` — "docs: overhaul CLAUDE.md + themes.md for pixel-perfect standards"
+**Git HEAD:** `a8f31b9` — "refactor: token surgery — rename textSub→textNote, split border→scrollAreaBorder+checkboxBorder, checkboxDone→checkboxDoneBg; add headerBg/footerBg rendering"
 **Active branch:** `main`
 **Base APK:** build 10 (versionCode 10), built from `6de6e5e`, still installed on device
 
-**Device state:** 8 themes on device, OTA current. No app code changed last session — docs and Figma work only.
+**Device state:** OTA `a8f31b9` built but NOT YET CONFIRMED on device. Run and verify before next feature work.
 
-### What was done last session (2026-05-14–15)
-- **Bimini Breeze T1 icon audit** — 6 icons had wrong blue (`#015F95` variant); fixed to match logo btn color (`#025F96`); T2 `iconColor` swatch updated
-- **Pixel-perfect standards established** — compared Figma PNG export vs. S21 Ultra screenshot; concluded visual inspection is unreliable; math via Figma Plugin API is the only acceptable QA method
-- **themes.md fully rewritten** — pixel-perfect standards section (rule of 4s, density math, audit process, color zero-tolerance, spatial audit pattern, full structural spec table); all tokens updated to 3-layer architecture; T1 layer structure corrected; all `get_design_context` refs replaced with `use_figma`
-- **CLAUDE.md overhauled** — removed ~100 lines duplicating themes.md; theme system condensed to essentials + scoped pointer; Figma section corrected
-- **xhdpi template work begun** — James building 720×1600 Default template in Figma. Key frame math at xhdpi (2×): status bar 54px, header 128px (+2px border), toolbar 92px
-- **Upcoming: two template flavors** — `Default-new-xhdpi-w-header.footer` and `Default-new-xhdpi-no-header.footer` (James will explain the distinction). Claude will remeasure everything from the xhdpi frame and update all T2–T5 frames accordingly.
+OTA command (still pending):
+```
+eas update --branch preview --platform android --message "token surgery: textNote, scrollAreaBorder/checkboxBorder split, checkboxDoneBg, headerBg/footerBg live"
+```
+
+### What was done last session (2026-05-28)
+- **Phase 1 — Token surgery (code):** renamed `textSub→textNote`, split `border→scrollAreaBorder+checkboxBorder`, renamed `checkboxDone→checkboxDoneBg`, added `headerBg`/`footerBg` nullable rendering. 21 files changed. Committed `a8f31b9`. Git checkpoint: `2446762`.
+- **Phase 2 — T4 icon cards (Figma):** Replaced 13 placeholder squares in xhdpi T4 (`icons-and-values`, 390:317) with actual icon vectors. Source: 14:2 (11 icons) + pin/checkmark from L1-Default-old. Bell left as placeholder — James will add from Affinity Designer.
+- **Phase 3 — T2/T3/T5 token name updates (Figma):** Updated 8 text nodes across `theme-values` (T2), `menus-modals-and-values` (T3), and `ui-attributes` (T5) on the xhdpi page: `border→scrollAreaBorder`, `textSub→textNote`, `checkboxDone→checkboxDoneBg`.
+- **Phase 4 — themes.md update:** Token reference tables, T1→token mapping notes, xhdpi frame position table, authoring workflow rules (headerBg/footerBg null detection, iconGradient detection, listSelectorBorder mixed stroke, textDepth-d0=text, textURL=accent). Date updated to 2026-05-28.
 
 ### Lessons learned (locked in)
 - `2ce078c` committed 7 features in one batch without on-device testing → cascading crashes
@@ -150,15 +153,16 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. **xhdpi template — finish and explain** — James completing 720×1600 Default template in Figma. Two flavors: `Default-new-xhdpi-w-header.footer` and `Default-new-xhdpi-no-header.footer`. James will explain the distinction. Claude to remeasure everything from the xhdpi frame and update all T2–T5 frames.
-2. **Begin some type of more advanced archiving of Claude.md updates to maintain context better**
-3. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
-4. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
-5. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
+1. **Confirm OTA `a8f31b9` on device** — run the pending OTA command, kill + relaunch app, verify no regressions
+2. **Add bell icon vector to T4 Figma card** — James creates in Affinity Designer, places into T4 card slot 412:98 (currently still a blue placeholder square)
+3. **Begin some type of more advanced archiving of Claude.md updates to maintain context better**
+4. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
+5. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
+6. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
 
 ### Theme system improvements identified
-- [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textSub`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
-- [ ] Split `checkboxDone` into `checkboxDoneBg` + `checkboxDoneBorder` — currently one token controls both
+- [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textNote`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
+- [x] Split `checkboxDone` into `checkboxDoneBg` + `checkboxDoneBorder` — done (`checkboxDoneBg` renamed in code + Figma; border uses `checkboxBorder`)
 
 ### Backlog
 

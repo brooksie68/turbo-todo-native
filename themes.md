@@ -1,6 +1,6 @@
 # TurboTodo Native — Theme System & Figma Workflow
 
-> Last updated: 2026-05-14
+> Last updated: 2026-05-28
 
 ---
 
@@ -275,7 +275,8 @@ Every token is required unless noted as optional. See the `Theme` type in `lib/t
 | `appBgLayer` | `SolidBg \| GradientBg \| ImageBg` | Layer 1: full-screen base. Raw — no overlay. |
 | `statusBarBg` | `string \| 'transparent'` | Android status bar fill. `'transparent'` = appBgLayer bleeds behind status bar. |
 | `scrollAreaBg` | `SolidBg \| GradientBg` | Layer 3: scroll area rectangle. Any opacity. Sits above appBgLayer. |
-| `headerBg` | `string` | Header bar background — **reserved, not yet consumed in code** |
+| `headerBg` | `string \| null` | Header bar background color. `null` = transparent (appBgLayer shows through). |
+| `footerBg` | `string \| null` | Toolbar bar background color. `null` = transparent (appBgLayer shows through). |
 | `menuBg` | `string` | Bottom sheet, dropdowns, modals, card backgrounds |
 
 **Layer 2** (between appBgLayer and scrollAreaBg) is reserved for a future optional semi-opaque tint. Not yet implemented.
@@ -292,7 +293,8 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 ### Borders
 | Token | Type | What it controls |
 |---|---|---|
-| `border` | `string` | Scroll area border, checkbox border, modal outlines |
+| `scrollAreaBorder` | `string` | Scroll area border, modal / dropdown outlines |
+| `checkboxBorder` | `string` | Checkbox border — both checked and unchecked states |
 | `headerBorder` | `string` | 1px line at bottom of header |
 | `footerBorder` | `string` | 1px line at top of toolbar |
 | `separator` | `string` | Row separator lines |
@@ -302,7 +304,7 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 | Token | Type | What it controls |
 |---|---|---|
 | `text` | `string` | Primary body text, modal titles, menu items |
-| `textSub` | `string` | Notes, badges, secondary info |
+| `textNote` | `string` | Notes, badges, secondary info |
 | `textDone` | `string` | Struck-through completed item text |
 | `textDepth` | `[string, string, string]` | Task label color by depth: [d0, d1, d2] |
 
@@ -329,7 +331,7 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 | Token | Type | What it controls |
 |---|---|---|
 | `checkboxBg` | `string` | Unchecked checkbox fill |
-| `checkboxDone` | `string` | Checked checkbox fill + border |
+| `checkboxDoneBg` | `string` | Checked checkbox fill only (border uses `checkboxBorder`) |
 | `checkmarkColor` | `string` | SVG checkmark inside done checkbox |
 
 ### Extended / Optional
@@ -347,15 +349,17 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 | `appBgLayer` | `TodoList.tsx` | ThemeBg — solid, gradient, or image fill behind everything |
 | `statusBarBg` | `TodoList.tsx` | StatusBar background color; `'transparent'` = image shows through |
 | `scrollAreaBg` | `TodoList.tsx` | Scroll area background rect above appBgLayer |
-| `headerBg` | — | Reserved, not yet used |
+| `headerBg` | `TodoList.tsx` | Wrapper View behind `TodoListHeader` — color when set, transparent when null |
+| `footerBg` | `TodoList.tsx` | Wrapper View behind `TodoListToolbar` — color when set, transparent when null |
 | `menuBg` | `ItemOptionsMenu`, `AddChildMenu`, `ToolbarOptionsMenu`, modals | Bottom sheet + dropdown backgrounds |
-| `border` | Multiple | Scroll area border, checkboxes, modal outlines |
+| `scrollAreaBorder` | Multiple | Scroll area border, modal / dropdown outlines |
+| `checkboxBorder` | `TodoItem.tsx` | Checkbox border — both checked and unchecked states |
 | `headerBorder` | `TodoListHeader.tsx` | 1px line at bottom of header |
 | `footerBorder` | `TodoListToolbar.tsx` | 1px line at top of toolbar |
 | `separator` | `TodoItem.tsx` | Row separator |
 | `listSelectorBorder` | `TodoListHeader.tsx` | List selector underline |
 | `text` | Multiple | Modal and menu body text |
-| `textSub` | Multiple | Notes, badges |
+| `textNote` | Multiple | Notes, badges |
 | `textDone` | `TodoItem.tsx` | Done item text color |
 | `textDepth` | `TodoItem.tsx` | `getLabelColor()` — indexed by depth 0/1/2 |
 | `accent` | Multiple | Active states, Save buttons, selected list item |
@@ -366,7 +370,7 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 | `listSelectorBg` | `TodoListHeader.tsx` | Selector background |
 | `listSelectorText` | `TodoListHeader.tsx` | Selector text + arrow |
 | `checkboxBg` | `TodoItem.tsx` | Unchecked fill |
-| `checkboxDone` | `TodoItem.tsx` | Checked fill + border |
+| `checkboxDoneBg` | `TodoItem.tsx` | Checked fill only |
 | `checkmarkColor` | `TodoItem.tsx` | SVG checkmark prop |
 | `iconGradient` | `Icons.tsx` | Gradient override on all icons; falls back to `iconColor` when null |
 | `fontFamily` | Multiple | Custom font; null = system default |
@@ -397,17 +401,18 @@ ImageBg    = { type: 'image';    source: number }  // source = require()'d asset
 **File key:** `wUMtjlawjc3wFuROGfYuO6`
 
 **Pages:**
-| Page name | Theme ID | T1 node | Class |
-|---|---|---|---|
-| L1 - Default | `default` | `5:2` | light |
-| L2 - Forest Canopy | `forest-canopy` | — | light |
-| L3 - Bimini Breeze | `bimini-breeze` | — | light |
-| L4 - Muir Light | `muir-light` | — | light |
-| D1 - Dark Slate | `dark-slate` | — | dark |
-| D2 - Deep Blue | `deep-blue` | — | dark |
-| D3 - Biomech | `biomech` | — | dark |
-| D4 - Cape Cod Sunset | `cape-cod-sunset` | — | dark |
-| ARCHIVE - DO NOT TOUCH | — | — | — |
+| Page name | Theme ID | T1 node | Class | Notes |
+|---|---|---|---|---|
+| L1 - Default xhdpi | `default` | `353:57` | light | **Active template — xhdpi (720×1600)** |
+| L1 - Default-old | — | `5:2` | light | Legacy mdpi backup — do not edit |
+| L2 - Forest Canopy | `forest-canopy` | — | light | |
+| L3 - Bimini Breeze | `bimini-breeze` | — | light | |
+| L4 - Muir Light | `muir-light` | — | light | |
+| D1 - Dark Slate | `dark-slate` | — | dark | |
+| D2 - Deep Blue | `deep-blue` | — | dark | |
+| D3 - Biomech | `biomech` | — | dark | |
+| D4 - Cape Cod Sunset | `cape-cod-sunset` | — | dark | |
+| ARCHIVE - DO NOT TOUCH | — | — | — | |
 
 Add new light themes after L4, dark themes after D4. Update `themeLabel` accordingly.
 
@@ -425,7 +430,7 @@ Add new light themes after L4, dark themes after D4. Update `themeLabel` accordi
 | T4 | `icons-and-values` | Icon grid — real icon shapes + token name + hex. Claude writes this. |
 | T5 | `ui-attributes` | Structural attributes — sizes, positions, padding. Claude writes this. |
 
-Frame x positions on each page:
+Frame x positions on each page (mdpi, legacy):
 
 | Frame | x | Width |
 |---|---|---|
@@ -434,6 +439,19 @@ Frame x positions on each page:
 | T3 `menus-modals-and-values` | 1068 | 400 |
 | T4 `icons-and-values` | 1528 | 360 |
 | T5 `ui-attributes` | 1948 | 360 |
+
+**xhdpi template page (`L1 - Default xhdpi`)** — the active authoring template:
+
+| Frame | Name | x | Width | Height |
+|---|---|---|---|---|
+| T1 (with header/footer) | `Default-new-xhdpi-w-header.footer` | 0 | 720 | 1600 |
+| T1 (no header/footer) | `Default-new-xhdpi-no-header.footer` | 836 | 720 | 1600 |
+| T2 | `theme-values` | 1940 | 680 | auto |
+| T3 | `menus-modals-and-values` | 2720 | 680 | auto |
+| T4 | `icons-and-values` | 3500 | 708 | auto |
+| T5 | `ui-attributes` | 4308 | 900 | auto |
+
+The xhdpi T1 frame is **720×1600px** (360dp × 2). All values in T1 are physical pixels at xhdpi; divide by 2 to get dp. James designs at xhdpi; Claude reads and converts.
 
 T2–T5 auto-resize to content height. Never move or resize them manually.
 
@@ -455,8 +473,8 @@ T1 is a **360×800 FRAME** (the only FRAME on the canvas — all inner container
     list-gear-btn      VECTOR  24×24    fill = iconColor token
     help-icon          VECTOR  24×24    fill = iconColor token
     scroll-area        GROUP
-      scrollAreaBg     RECT    344×h    fill = scrollAreaBg token, stroke = border token
-      [sample rows]             checkboxBg, checkboxDone, checkmarkColor, separator,
+      scrollAreaBg     RECT    344×h    fill = scrollAreaBg token, stroke = scrollAreaBorder token
+      [sample rows]             checkboxBg, checkboxDoneBg, checkmarkColor, separator,
                                 textDepth[0/1/2], textDone, priorityElevated, priorityTop,
                                 row icons (IconCreateNew + IconOptions at 18px — iconColor)
       [inset shadow]            gradient rect — visual only, not a token
@@ -478,8 +496,12 @@ T1 is a **360×800 FRAME** (the only FRAME on the canvas — all inner container
 
 **Design rules:**
 - Only the outer `[Theme Name]` is a FRAME. Everything inside is a GROUP.
-- `headerBg` is reserved — the header area is transparent and shows `appBgLayer` through it.
-- `listSelectorBorder` is the list selector bottom underline only. Scroll area uses `border`.
+- `headerBg` / `footerBg`: if the `appBgLayerHeader` / `appBgLayerFooter` layer in T1 is **visible** → read its fill color. If **hidden** → `null` (transparent).
+- `listSelectorBorder` is the list selector bottom underline only. Scroll area uses `scrollAreaBorder`.
+- `listSelectorBorder` strokeWeight returns `figma.mixed` (bottom-only border) — **read color only** from `strokes[0].color`. Never read `strokeWeight`.
+- `textDepth[0]` (`textDepth-d0` layer) doubles as the primary `text` token — same value.
+- `textURL` layer → maps to `accent` token.
+- Logo fill type detection: if `turbo-todo-logo-btn` fill is `GRADIENT_LINEAR` → extract the two stop colors as `[stop0.color, stop1.color]` for `iconGradient`. If `SOLID` → `iconGradient: null`.
 - Priority indicators are shown via text color and icon color on sample rows — not side bars.
 - Never edit or resize T2–T5 frames manually.
 - All icons in T1 must use the same color — the `iconColor` token value. No exceptions.
