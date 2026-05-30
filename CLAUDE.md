@@ -159,15 +159,10 @@ React Native + Expo conversion of TurboTodo web app. Target: native Android. **L
 ## Todo
 
 ### Next up (one at a time, test each before committing)
-1. **Confirm OTA `a8f31b9` on device** — run the pending OTA command, kill + relaunch app, verify no regressions
-2. **Add bell icon vector to T4 Figma card** — James creates in Affinity Designer, places into T4 card slot 412:98 (currently still a blue placeholder square)
-3. **Begin some type of more advanced archiving of Claude.md updates to maintain context better**
-4. **Finish T1 restructure on [Default]** — add natural UX elements for `accent`, `danger`, `menuBg` (no artificial swatch strip); propagate full T1 structure to all 7 remaining theme pages
-5. **Add missing T1 named layers for Cape Cod Sunset** — `menuBg`, `text`, `textSub`, `accent` still inferred; need proper swatches in Figma T1 (note: `surface` token is gone — remove any `surface` swatch layer if present)
-6. Run /drop-themes on all pages to sync T2–T5 info frames with actual token values under new naming scheme
+1. **Add bell icon vector to T4 Figma card** — James creates in Affinity Designer, places into T4 card slot 412:98 (currently still a blue placeholder square)
+2. **Default Theme: natural UX elements for `accent`, `danger`, `menuBg`** — then make sure they're all represented on the theme cards
 
 ### Theme system improvements identified
-- [ ] Add swatch layers for invisible tokens to T2 template: `text`, `textNote`, `accent`, `danger`, `priorityElevated`, `priorityTop`, `menuBg`, `footerBorder` — currently unreadable from Figma
 - [x] Split `checkboxDone` into `checkboxDoneBg` + `checkboxDoneBorder` — done (`checkboxDoneBg` renamed in code + Figma; border uses `checkboxBorder`)
 
 ### Backlog
@@ -217,6 +212,9 @@ Code quality:
 - [ ] Paid tiers: extra depth levels, online backups, long archive time
 - [ ] Paid feature: shared lists
 - [ ] Supabase sync as optional paid backup feature
+
+#### Someday / Meta
+- [ ] Begin some type of more advanced archiving of CLAUDE.md updates to maintain context better
 
 ### App Name Shortlist
 TaskBlast, TaskBlaster, TaskSaw, TaskTree, Stacked, Momentum, StackFlow, TaskMaster, Getterdunn, Giterdone, Buzzsaw, Mobile Mind, Don't Forget!
